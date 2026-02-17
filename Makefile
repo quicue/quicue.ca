@@ -66,5 +66,17 @@ check-downstream:
 	@cd ~/grdn && cue vet .
 	@echo "=== grdn .kg/ ==="
 	@cd ~/grdn/.kg && cue vet .
+	@echo "=== cjlq (nhcf) ==="
+	@cd ~/cjlq/nhcf && cue vet .
+	@echo "=== cjlq (greener-homes) ==="
+	@cd ~/cjlq/greener-homes && cue vet .
+	@echo "=== cjlq .kg/ ==="
+	@cd ~/cjlq/.kg && cue vet .
+	@echo "=== maison-613 (transaction) ==="
+	@cd ~/maison-613/transaction && cue vet .
+	@echo "=== maison-613 (compliance) ==="
+	@cd ~/maison-613/compliance && cue vet .
+	@echo "=== maison-613 .kg/ ==="
+	@cd ~/maison-613/.kg && cue vet .
 	@echo ""
 	@echo "All downstream consumers validated."
