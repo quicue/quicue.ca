@@ -1,4 +1,4 @@
-.PHONY: test validate examples providers datacenter homelab summary impact clean
+.PHONY: test validate examples providers check-downstream datacenter homelab summary impact clean
 
 # Full test suite — run this before committing
 test: validate examples providers
@@ -55,3 +55,12 @@ export:
 # JSON-LD graph
 jsonld:
 	cue export ./examples/datacenter/ -e jsonld --out json
+
+# Validate known downstream consumers still unify with current patterns
+check-downstream:
+	@echo "=== homelab ==="
+	@cd ~/homelab && cue vet .
+	@echo "=== homelab .kg/ ==="
+	@cd ~/homelab/.kg && cue vet .
+	@echo ""
+	@echo "All downstream consumers validated."
