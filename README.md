@@ -2,15 +2,15 @@
 
 [![Validate](https://github.com/quicue/quicue.ca/actions/workflows/validate.yml/badge.svg)](https://github.com/quicue/quicue.ca/actions/workflows/validate.yml)
 
-A [CUE](https://cuelang.org/) vocabulary for modeling infrastructure as typed, queryable dependency graphs.
+A [CUE](https://cuelang.org/) framework for modeling any domain as typed, queryable dependency graphs.
 
 ## Why
 
-Infrastructure tools define *what* to deploy but not *how things relate*. When something breaks, you're left grepping configs to figure out what depends on what. Blast radius is tribal knowledge. Deployment ordering is a wiki page that's always out of date.
+Any domain with typed nodes and dependency edges — infrastructure, construction, research, operations — has the same problems: What depends on what? What breaks if X goes down? What's the right deployment order? The answers are usually tribal knowledge or an out-of-date wiki.
 
-quicue.ca models infrastructure as a graph of typed resources with explicit dependencies. CUE's type system validates the graph at compile time — before anything runs. The graph drives deployment ordering, impact analysis, rollback plans, and documentation, all computed from one source of truth.
+quicue.ca models these domains as graphs of typed resources with explicit dependencies. CUE's type system validates the graph at compile time — before anything runs. The graph drives impact analysis, deployment ordering, rollback plans, and documentation, all computed from one source of truth.
 
-**Who this is for:** Platform engineers and infrastructure teams who manage enough resources that dependency relationships matter. Works for homelabs and datacenters alike.
+**Who this is for:** Anyone managing enough interconnected things that dependency relationships matter — platform engineers, project managers, research analysts, operations teams.
 
 ## What it does
 
@@ -136,6 +136,18 @@ template/<name>/
 - `docker-bootstrap/` — Generate docker run commands from CUE
 - `wiki-projection/` — Generate MkDocs from resource graphs
 - `toon-export/` — Token-optimized compact notation (~55% smaller than JSON)
+
+## Live projects
+
+The same graph patterns power projects across different domains:
+
+| Domain | Project | What it models |
+|--------|---------|---------------|
+| IT infrastructure | [datacenter example](examples/datacenter/) | 30 resources, 29 providers, 654 resolved commands |
+| Construction | [CJLQ explorer](https://rfam.cc/cjlq/) | Deep retrofit work packages for 270-unit Ottawa Community Housing |
+| Energy efficiency | [Greener Homes](https://rfam.cc/cjlq/#greener-homes) | 17-service processing platform for Ontario Greener Homes |
+| Real estate | [maison-613](https://maison613.quicue.ca/) | Transaction, referral, compliance, and onboarding workflows |
+| Biomedical research | [lacuene](https://lacuene.apercue.ca/) | 95 genes × 16 databases — funding gap analysis for NIDCR |
 
 ## Additional modules
 

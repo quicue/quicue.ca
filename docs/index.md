@@ -1,10 +1,10 @@
 # quicue.ca
 
-Model infrastructure as a dependency graph. Get deployment plans, blast radius, executable commands, and documentation — all computed from one `cue export`.
+Model any domain as a typed dependency graph. Get impact analysis, blast radius, deployment plans, and documentation — all computed from one `cue export`.
 
 ## The idea
 
-You declare resources with types and dependencies:
+You declare resources — nodes in a graph — with types and dependencies:
 
 ```cue
 dns: #Resource & {
@@ -32,6 +32,20 @@ quicue.ca does the rest at compile time:
 - **Export**: JSON, Jupyter notebooks, Rundeck jobs, Bash scripts, MkDocs wiki, JSON-LD — all from one evaluation.
 
 No runtime. No state file. No plugins. CUE validates everything simultaneously, and the output is plain JSON.
+
+## Not just infrastructure
+
+The graph patterns are domain-agnostic. Anything with typed nodes and dependency edges works — `#BlastRadius`, `#ImpactQuery`, `#SinglePointsOfFailure`, and `#DeploymentPlan` don't know what domain they're in. "What breaks if X goes down?" works whether X is a DNS server, a construction phase, or a research gene.
+
+| Domain | What the graph models | Live |
+|--------|----------------------|------|
+| IT infrastructure | 30 servers, containers, and services across 7 dependency layers | [datacenter example](example/index.md) |
+| Construction management | Deep retrofit work packages for 270-unit Ottawa Community Housing | [CJLQ explorer](https://rfam.cc/cjlq/) |
+| Energy efficiency | 17-service processing platform for Ontario Greener Homes | [Greener Homes](https://rfam.cc/cjlq/#greener-homes) |
+| Real estate operations | Transaction pipelines, referral networks, compliance workflows | [maison-613](https://maison613.quicue.ca/) |
+| Biomedical research | 95 genes across 16 databases — funding gap analysis for NIDCR | [lacuene](https://lacuene.apercue.ca/) |
+
+The infrastructure use case has the deepest tooling (29 provider templates, execution gateway, deployment planning), but the core patterns work on any graph.
 
 ## Prerequisites
 
