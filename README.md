@@ -157,6 +157,17 @@ template/<name>/
 cd .kg && cue export . -e _index.summary --out json
 ```
 
+### Downstream tracking
+
+`.kg/downstream.cue` registers known consumers of quicue.ca patterns. Each downstream project maintains its own `.kg/deps.cue` cataloging which definitions it imports and where they're used.
+
+```bash
+# Validate that downstream consumers still unify with current patterns
+make check-downstream
+```
+
+This catches breakage early — if you rename a field in `#InfraGraph`, `check-downstream` fails on any consumer that references it.
+
 ## Requirements
 
 - [CUE](https://cuelang.org/) v0.15.4+

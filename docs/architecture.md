@@ -384,6 +384,12 @@ HTTP API for executing resolved commands. Reads the CUE-generated OpenAPI spec a
 
 Vendored copy of the [quicue-kg](https://github.com/quicue/quicue-kg) framework. The `.kg/` directory at the repo root tracks project decisions, patterns, insights, and rejected approaches as validated CUE data.
 
+#### Downstream validation
+
+`.kg/downstream.cue` registers known consumers (grdn, cjlq, apercue). Each consumer maintains its own `.kg/deps.cue` cataloging which vocab and pattern definitions it imports and where they're used — for example, grdn's deps.cue records 14 pattern and 2 vocab definitions with source, purpose, and consuming files.
+
+The `make check-downstream` target runs `cue vet` on all registered consumers. This is the real self-insert detector: renaming a field in `#InfraGraph` produces a unification error in grdn's `graph.cue`, caught at build time rather than discovered in production. The deps.cue files are documentation; the Makefile target is enforcement.
+
 ## Data flow summary
 
 ```

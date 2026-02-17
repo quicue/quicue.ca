@@ -29,7 +29,7 @@ modules: {
 		layer:       "template"
 		description: "28 platform-specific providers, each a self-contained CUE module"
 		status:      "active"
-		count:       28
+		count:       29
 		categories: {
 			compute:        ["proxmox", "govc", "powercli", "kubevirt"]
 			container:      ["docker", "incus", "k3d", "kubectl", "argocd"]
