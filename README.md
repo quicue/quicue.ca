@@ -127,6 +127,9 @@ template/<name>/
 ### `examples/homelab/` — Reference homelab
 14 resources on a 3-node cluster. Edit `_site` config, swap `providers.cue` for your stack (Proxmox, Docker, K8s, Incus), run `cue export`.
 
+### `examples/devbox/` — Single-machine developer tooling
+11 resources (Docker, Postgres, Redis, Gitea, Traefik, k3d, Grafana, and more) on one host. Exercises graph analysis, provider binding, and deployment planning without any hypervisor — the whole stack is Docker Compose.
+
 ### Focused examples
 - `graph-patterns/` — Dependency analysis patterns
 - `drift-detection/` — Declared vs live state reconciliation

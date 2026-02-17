@@ -101,11 +101,12 @@ modules: {
 	examples: {
 		path:  "examples/"
 		layer: "value"
-		description: "10 working examples from minimal 3-layer to full 30-resource datacenter"
+		description: "11 working examples from minimal 3-layer to full 30-resource datacenter"
 		status: "active"
 		entries: [
 			"datacenter",
 			"homelab",
+			"devbox",
 			"graph-patterns",
 			"drift-detection",
 			"federation",
