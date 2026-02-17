@@ -1,0 +1,2532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>quicue-kg: CUE-Native Knowledge Graph Specification</title>
+  <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+  <script class="remove">
+    var respecConfig = {
+      specStatus: "unofficial",
+      shortName: "quicue-kg",
+      editors: [{ name: "quicue.ca contributors" }],
+      edDraftURI: "https://quicue.ca/kg/spec/",
+      noRecTrack: true,
+      license: "cc-by",
+      latestVersion: "https://quicue.ca/kg/spec/",
+      github: "https://github.com/quicue/quicue-kg",
+      logos: [],
+      otherLinks: [
+        {
+          key: "Repository",
+          data: [{ value: "quicue-kg on GitHub", href: "https://github.com/quicue/quicue-kg" }]
+        },
+        {
+          key: "JSON-LD Context",
+          data: [{ value: "https://quicue.ca/kg", href: "https://quicue.ca/kg" }]
+        }
+      ],
+      localBiblio: {
+        "CUE": {
+          title: "The CUE Data Constraint Language",
+          href: "https://cuelang.org/docs/references/spec/",
+          publisher: "CUE Project"
+        },
+        "PROV-O": {
+          title: "PROV-O: The PROV Ontology",
+          href: "https://www.w3.org/TR/prov-o/",
+          publisher: "W3C",
+          date: "2013-04-30"
+        },
+        "DCAT": {
+          title: "Data Catalog Vocabulary (DCAT) - Version 3",
+          href: "https://www.w3.org/TR/vocab-dcat-3/",
+          publisher: "W3C",
+          date: "2024-01-18"
+        },
+        "WEB-ANNOTATION": {
+          title: "Web Annotation Data Model",
+          href: "https://www.w3.org/TR/annotation-model/",
+          publisher: "W3C",
+          date: "2017-02-23"
+        },
+        "JSON-LD": {
+          title: "JSON-LD 1.1",
+          href: "https://www.w3.org/TR/json-ld11/",
+          publisher: "W3C",
+          date: "2020-07-16"
+        },
+        "RFC2119": {
+          title: "Key words for use in RFCs to Indicate Requirement Levels",
+          href: "https://www.rfc-editor.org/rfc/rfc2119",
+          authors: ["S. Bradner"],
+          publisher: "IETF",
+          date: "1997-03"
+        },
+        "ADR": {
+          title: "Architecture Decision Records",
+          href: "https://adr.github.io/",
+          publisher: "ADR GitHub Organization"
+        }
+      },
+      xref: "web-platform"
+    };
+  </script>
+  <style>
+    table.def { border-collapse: collapse; width: 100%; }
+    table.def th, table.def td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+    table.def th { background: #f0f0f0; }
+    .field-required { color: #c00; font-weight: bold; }
+    .field-optional { color: #666; }
+    pre.cue { background: #f8f8f8; border-left: 3px solid #4a90d9; }
+    code.type-ref { color: #4a90d9; font-weight: bold; }
+    .conformance-class { background: #e8f4e8; border: 1px solid #4a4; padding: 12px; margin: 12px 0; }
+    .note-box { background: #fef9e7; border-left: 4px solid #f0ad4e; padding: 10px 14px; margin: 12px 0; }
+    dfn { font-style: italic; }
+    .mapping-arrow { color: #999; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <section id="abstract">
+    <p>
+      <strong>quicue-kg</strong> is a <a href="https://cuelang.org">CUE</a>-native knowledge graph
+      framework for tracking architectural decisions, validated discoveries, reusable patterns, and
+      rejected approaches within software projects. It uses the CUE language's type system and
+      lattice-based unification to provide compile-time validation, conflict detection, and
+      zero-infrastructure federation of knowledge across project boundaries.
+    </p>
+    <p>
+      This specification defines the data model, directory layout, type constraints, aggregation
+      semantics, W3C vocabulary projections, and federation protocol for conforming
+      <code>.kg/</code> knowledge graphs.
+    </p>
+  </section>
+
+  <section id="sotd">
+    <p>
+      This is an unofficial specification published by the quicue project. It is not a W3C
+      Standard nor is it on the W3C Standards Track. It documents the quicue-kg framework
+      as implemented in the <code>quicue.ca/kg@v0</code> CUE module. Feedback is welcome
+      via the project's issue tracker.
+    </p>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- 1. INTRODUCTION                                                     -->
+  <!-- ================================================================== -->
+  <section id="introduction">
+    <h2>Introduction</h2>
+
+    <p>
+      Software projects accumulate knowledge that is broader than source code: <em>why</em> a
+      technology was chosen, <em>what</em> approaches were tried and abandoned, <em>which</em>
+      patterns recur across repositories, and <em>what</em> discoveries emerged during development.
+      This knowledge is typically scattered across wiki pages, chat logs, commit messages, and
+      individual memory. When it is lost, teams re-explore failed paths, re-derive known insights,
+      and make decisions without context.
+    </p>
+
+    <p>
+      <strong>quicue-kg</strong> addresses this by defining a typed, validated, machine-readable
+      knowledge graph that lives alongside source code in a <code>.kg/</code> directory.
+      The framework leverages the [[CUE]] language's properties:
+    </p>
+
+    <ul>
+      <li><strong>Lattice-based types</strong> &mdash; constraints only narrow, never broaden,
+        ensuring progressive refinement.</li>
+      <li><strong>Unification</strong> &mdash; merging two knowledge graphs is a type-check:
+        contradictions are compile errors.</li>
+      <li><strong>Comprehensions</strong> &mdash; aggregation views are computed from data,
+        never maintained by hand.</li>
+      <li><strong>Zero infrastructure</strong> &mdash; validation requires only the
+        <code>cue</code> CLI. No database, no server, no runtime dependency.</li>
+    </ul>
+
+    <section id="goals">
+      <h3>Design Goals</h3>
+      <ol>
+        <li>Knowledge conflicts are type errors, detected at build time.</li>
+        <li>Federation across projects is CUE unification, not a service call.</li>
+        <li>Every rejected approach MUST record a constructive alternative, preventing re-exploration of known dead ends.</li>
+        <li>Schema evolution is a quality ratchet: adding a required field makes every
+          existing entry without it a validation error.</li>
+        <li>W3C vocabulary projections enable interoperability without replacing CUE as
+          the source of truth.</li>
+      </ol>
+    </section>
+
+    <section id="audience">
+      <h3>Intended Audience</h3>
+      <p>
+        This specification is intended for:
+      </p>
+      <ul>
+        <li>Developers implementing <code>.kg/</code> knowledge graphs in their projects.</li>
+        <li>Tool authors building editors, linters, or query interfaces for quicue-kg data.</li>
+        <li>Platform engineers integrating knowledge graph data into autonomous software agents
+          or development workflows.</li>
+      </ul>
+    </section>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- 2. CONFORMANCE                                                      -->
+  <!-- ================================================================== -->
+  <section id="conformance">
+    <h2>Conformance</h2>
+
+    <p>
+      As well as sections marked as non-normative, all authoring guidelines, diagrams,
+      examples, and notes in this specification are non-normative. Everything else in this
+      specification is normative.
+    </p>
+
+    <p>
+      The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
+      "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
+      interpreted as described in [[RFC2119]].
+    </p>
+
+    <section id="conformance-classes">
+      <h3>Conformance Classes</h3>
+
+      <div class="conformance-class">
+        <h4>Conforming Knowledge Graph</h4>
+        <p>A <dfn>conforming knowledge graph</dfn> is a <code>.kg/</code> directory that:</p>
+        <ol>
+          <li>MUST contain a valid CUE module declaration.</li>
+          <li>MUST declare <code>package kg</code> in all <code>.cue</code> files at the directory root.</li>
+          <li>MUST contain at least one entry conforming to a <a href="#core-types">core type</a>.</li>
+          <li>MUST pass <code>cue vet</code> without errors when evaluated against the
+            <code>quicue.ca/kg</code> schemas.</li>
+          <li>MUST NOT contain <code>.cue</code> files in subdirectories (CUE packages
+            are directory-scoped; see <a href="#directory-layout"></a>).</li>
+        </ol>
+      </div>
+
+      <div class="conformance-class">
+        <h4>Conforming Processor</h4>
+        <p>A <dfn>conforming processor</dfn> is a tool that:</p>
+        <ol>
+          <li>MUST validate input against the quicue-kg CUE schemas before processing.</li>
+          <li>MUST reject entries with missing required fields as validation errors.</li>
+          <li>MUST preserve the <code>@type</code> field in all serialization formats.</li>
+          <li>SHOULD produce valid [[JSON-LD]] when exporting to W3C projection formats.</li>
+        </ol>
+      </div>
+    </section>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- 3. TERMINOLOGY                                                      -->
+  <!-- ================================================================== -->
+  <section id="terminology">
+    <h2>Terminology</h2>
+
+    <dl>
+      <dt><dfn>Knowledge Graph</dfn></dt>
+      <dd>A typed, validated collection of interconnected knowledge entries stored in a
+        <code>.kg/</code> directory. Abbreviated as <em>KG</em>.</dd>
+
+      <dt><dfn>Entry</dfn></dt>
+      <dd>A single record in the knowledge graph, conforming to one of the defined types
+        (Decision, Insight, Rejected, Pattern, Derivation, Context, or Workspace).</dd>
+
+      <dt><dfn>Core Type</dfn></dt>
+      <dd>One of the four fundamental entry types that every conforming knowledge graph
+        MUST support: <a href="#decision">Decision</a>, <a href="#insight">Insight</a>,
+        <a href="#rejected">Rejected</a>, and <a href="#pattern">Pattern</a>.</dd>
+
+      <dt><dfn>Extension Type</dfn></dt>
+      <dd>An optional entry type that a knowledge graph MAY support for domain-specific
+        use cases: <a href="#derivation">Derivation</a>, <a href="#context-type">Context</a>,
+        and <a href="#workspace">Workspace</a>.</dd>
+
+      <dt><dfn>Struct-as-Set</dfn></dt>
+      <dd>The CUE idiom <code>{[string]: true}</code> used to represent set membership.
+        Provides O(1) lookup, deduplication, and clean unification across projects.
+        Used for <code>related</code>, <code>used_in</code>, and similar fields.</dd>
+
+      <dt><dfn>Unification</dfn></dt>
+      <dd>The CUE operation that merges two values. If the values are compatible, the result
+        is the most specific value satisfying both constraints. If they conflict, unification
+        produces a type error. This property is the foundation for <a href="#federation">federation</a>.</dd>
+
+      <dt><dfn>Projection</dfn></dt>
+      <dd>A computed transformation from CUE-native knowledge graph data to a W3C vocabulary
+        format (e.g., [[PROV-O]], [[DCAT]], [[WEB-ANNOTATION]]). Projections are export-only;
+        CUE remains the source of truth.</dd>
+
+      <dt><dfn>Federation</dfn></dt>
+      <dd>The process of discovering, merging, and querying multiple knowledge graphs
+        across project boundaries using CUE unification.</dd>
+
+      <dt><dfn>Canon Purity</dfn></dt>
+      <dd>A classification of data provenance used in <a href="#derivation">Derivation</a>
+        entries: <code>pure</code> (original source data), <code>mixed</code> (partially
+        derived), or <code>derived</code> (fully computed).</dd>
+    </dl>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- 4. DIRECTORY LAYOUT                                                 -->
+  <!-- ================================================================== -->
+  <section id="directory-layout">
+    <h2>Directory Layout</h2>
+
+    <p>
+      A <a>conforming knowledge graph</a> resides in a <code>.kg/</code> directory at the root
+      of a project. All CUE files MUST be at the directory root level &mdash; CUE packages are
+      directory-scoped, meaning files in subdirectories constitute separate package instances
+      even if they declare the same package name.
+    </p>
+
+    <pre class="example" title="Required directory structure">
+project/
+  .kg/
+    cue.mod/
+      module.cue          # Module declaration
+      pkg/
+        quicue.ca/
+          kg/             # Schema dependency (symlink or registry)
+            core/
+            ext/
+            aggregate/
+            vocab/
+    decisions.cue         # Entry files (package kg)
+    insights.cue
+    rejected.cue
+    patterns.cue
+    project.cue           # ext.#Context (optional)
+    index.cue             # aggregate.#KGIndex (recommended)
+    </pre>
+
+    <section id="module-declaration">
+      <h3>Module Declaration</h3>
+      <p>
+        The <code>.kg/cue.mod/module.cue</code> file MUST declare a CUE module. The module
+        name SHOULD follow the pattern <code>{project-domain}/.kg</code> but MAY use any
+        valid CUE module identifier.
+      </p>
+      <pre class="example" title="Module declaration">
+// .kg/cue.mod/module.cue
+module: ""
+language: version: "v0.11.0"</pre>
+    </section>
+
+    <section id="schema-dependency">
+      <h3>Schema Dependency</h3>
+      <p>
+        The quicue-kg schemas MUST be available to the CUE evaluator. This MAY be achieved
+        through any of the following mechanisms, in order of preference:
+      </p>
+      <ol>
+        <li><strong>CUE Central Registry</strong> &mdash; <code>cue mod tidy</code> resolves
+          the <code>quicue.ca/kg@v0</code> dependency automatically.</li>
+        <li><strong>OCI Registry (GHCR)</strong> &mdash; set
+          <code>CUE_REGISTRY='quicue.ca=ghcr.io/quicue/cue-modules,registry.cue.works'</code>
+          and run <code>cue mod tidy</code>.</li>
+        <li><strong>Local symlink</strong> &mdash; create a symlink at
+          <code>.kg/cue.mod/pkg/quicue.ca/kg/</code> pointing to a local checkout of the
+          quicue-kg repository.</li>
+      </ol>
+    </section>
+
+    <section id="package-declaration">
+      <h3>Package Declaration</h3>
+      <p>
+        Every <code>.cue</code> file at the root of the <code>.kg/</code> directory MUST
+        declare <code>package kg</code>. Files MUST NOT be placed in subdirectories, as CUE
+        treats each directory as a separate package scope.
+      </p>
+      <pre class="example" title="Package declaration">
+package kg
+
+import "quicue.ca/kg/core@v0"
+
+decisions: {
+    "ADR-001": core.#Decision & {
+        // ...
+    }
+}</pre>
+    </section>
+
+    <section id="file-organization">
+      <h3>File Organization</h3>
+      <p>
+        Within the flat <code>.kg/</code> directory, entries SHOULD be organized by type into
+        separate files for readability. The RECOMMENDED file organization is:
+      </p>
+      <table class="def">
+        <thead>
+          <tr><th>File</th><th>Contents</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>decisions.cue</code></td><td>All <code>#Decision</code> entries</td><td>RECOMMENDED</td></tr>
+          <tr><td><code>insights.cue</code></td><td>All <code>#Insight</code> entries</td><td>RECOMMENDED</td></tr>
+          <tr><td><code>rejected.cue</code></td><td>All <code>#Rejected</code> entries</td><td>RECOMMENDED</td></tr>
+          <tr><td><code>patterns.cue</code></td><td>All <code>#Pattern</code> entries</td><td>RECOMMENDED</td></tr>
+          <tr><td><code>project.cue</code></td><td><code>ext.#Context</code> identity</td><td>OPTIONAL</td></tr>
+          <tr><td><code>index.cue</code></td><td><code>aggregate.#KGIndex</code></td><td>RECOMMENDED</td></tr>
+        </tbody>
+      </table>
+      <p>
+        A conforming knowledge graph MAY combine all entries into a single file. The file
+        boundaries are not semantically significant &mdash; CUE evaluates all files in a
+        package as a single logical unit.
+      </p>
+    </section>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- 5. CORE TYPES                                                       -->
+  <!-- ================================================================== -->
+  <section id="core-types">
+    <h2>Core Types</h2>
+
+    <p>
+      Core types define the four fundamental categories of knowledge that every <a>conforming
+      knowledge graph</a> MUST support. They are defined in the <code>quicue.ca/kg/core@v0</code>
+      package and have no external dependencies.
+    </p>
+
+    <p>
+      All core types share the following conventions:
+    </p>
+    <ul>
+      <li>An <code>@type</code> field with a fixed <code>kg:</code>-prefixed value for
+        JSON-LD compatibility.</li>
+      <li>An <code>id</code> field matching a type-specific pattern.</li>
+      <li>A <code>related</code> field using the <a>struct-as-set</a> idiom for
+        cross-referencing other entries.</li>
+    </ul>
+
+    <!-- 5.1 Decision -->
+    <section id="decision">
+      <h3>Decision (<code>#Decision</code>)</h3>
+
+      <p>
+        A <dfn>Decision</dfn> records an architecture decision with mandatory rationale,
+        following the Architecture Decision Record ([[ADR]]) methodology. Status transitions
+        follow a defined lifecycle: <code>proposed</code> &rarr; <code>accepted</code> &rarr;
+        <code>deprecated</code> | <code>superseded</code>.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Constraint</th><th>Required</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>@type</code></td>
+            <td><code>string</code></td>
+            <td>Fixed: <code>"kg:Decision"</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>JSON-LD type discriminator.</td>
+          </tr>
+          <tr>
+            <td><code>id</code></td>
+            <td><code>string</code></td>
+            <td>Pattern: <code>^ADR-\d{3}$</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>Unique identifier. Three-digit zero-padded number (e.g., <code>ADR-001</code>).</td>
+          </tr>
+          <tr>
+            <td><code>title</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Human-readable title of the decision.</td>
+          </tr>
+          <tr>
+            <td><code>status</code></td>
+            <td><code>string</code></td>
+            <td>Enum: <code>"proposed"</code> | <code>"accepted"</code> | <code>"deprecated"</code> | <code>"superseded"</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>Current lifecycle state.</td>
+          </tr>
+          <tr>
+            <td><code>date</code></td>
+            <td><code>string</code></td>
+            <td>Pattern: <code>^\d{4}-\d{2}-\d{2}$</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>Date the decision was recorded (ISO 8601 date).</td>
+          </tr>
+          <tr>
+            <td><code>context</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>The situation or problem that motivates this decision.</td>
+          </tr>
+          <tr>
+            <td><code>decision</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>The decision that was made.</td>
+          </tr>
+          <tr>
+            <td><code>rationale</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Why this decision was chosen over alternatives.</td>
+          </tr>
+          <tr>
+            <td><code>consequences</code></td>
+            <td><code>[...string]</code></td>
+            <td>At least one element</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Known consequences of the decision (positive or negative).</td>
+          </tr>
+          <tr>
+            <td><code>supersedes</code></td>
+            <td><code>string</code></td>
+            <td>Pattern: <code>^ADR-\d{3}$</code></td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>The ID of a previous decision this one replaces.</td>
+          </tr>
+          <tr>
+            <td><code>appliesTo</code></td>
+            <td><code>[...{...}]</code></td>
+            <td>List of open structs</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Domain objects this decision applies to.</td>
+          </tr>
+          <tr>
+            <td><code>related</code></td>
+            <td><code>{[string]: true}</code></td>
+            <td><a>Struct-as-set</a></td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Cross-references to other entries by ID.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <pre class="example cue" title="Decision entry">
+import "quicue.ca/kg/core@v0"
+
+decisions: {
+    "ADR-001": core.#Decision & {
+        id:     "ADR-001"
+        title:  "Use CUE for configuration"
+        status: "accepted"
+        date:   "2026-02-15"
+
+        context:   "Need a type-safe configuration language."
+        decision:  "Use CUE for all configuration and schema definitions."
+        rationale: "CUE provides compile-time validation, unification, and a lattice-based type system."
+        consequences: [
+            "All config files are .cue, validated with cue vet",
+        ]
+    }
+}</pre>
+    </section>
+
+    <!-- 5.2 Insight -->
+    <section id="insight">
+      <h3>Insight (<code>#Insight</code>)</h3>
+
+      <p>
+        An <dfn>Insight</dfn> records a validated discovery worth preserving. Every insight
+        MUST include at least one piece of evidence and an explicit confidence level, ensuring
+        that knowledge is grounded in observable facts rather than assumption.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Constraint</th><th>Required</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>@type</code></td>
+            <td><code>string</code></td>
+            <td>Fixed: <code>"kg:Insight"</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>JSON-LD type discriminator.</td>
+          </tr>
+          <tr>
+            <td><code>id</code></td>
+            <td><code>string</code></td>
+            <td>Pattern: <code>^INSIGHT-\d{3}$</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>Unique identifier (e.g., <code>INSIGHT-001</code>).</td>
+          </tr>
+          <tr>
+            <td><code>statement</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>The insight expressed as a declarative statement.</td>
+          </tr>
+          <tr>
+            <td><code>evidence</code></td>
+            <td><code>[...string]</code></td>
+            <td>At least one element</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Observable facts supporting the insight.</td>
+          </tr>
+          <tr>
+            <td><code>method</code></td>
+            <td><code>string</code></td>
+            <td>Enum: <code>"cross_reference"</code> | <code>"gap_analysis"</code> | <code>"statistics"</code> | <code>"experiment"</code> | <code>"observation"</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>How the insight was discovered (for reproducibility).</td>
+          </tr>
+          <tr>
+            <td><code>confidence</code></td>
+            <td><code>string</code></td>
+            <td>Enum: <code>"high"</code> | <code>"medium"</code> | <code>"low"</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>Current confidence level in the insight's validity.</td>
+          </tr>
+          <tr>
+            <td><code>discovered</code></td>
+            <td><code>string</code></td>
+            <td>Pattern: <code>^\d{4}-\d{2}-\d{2}$</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>Date the insight was first identified (ISO 8601 date).</td>
+          </tr>
+          <tr>
+            <td><code>implication</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>What this insight means for the project or domain.</td>
+          </tr>
+          <tr>
+            <td><code>action_items</code></td>
+            <td><code>[...string]</code></td>
+            <td>&mdash;</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Concrete next steps prompted by this insight.</td>
+          </tr>
+          <tr>
+            <td><code>related</code></td>
+            <td><code>{[string]: true}</code></td>
+            <td><a>Struct-as-set</a></td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Cross-references to other entries by ID.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <pre class="example cue" title="Insight entry">
+import "quicue.ca/kg/core@v0"
+
+insights: {
+    "INSIGHT-001": core.#Insight & {
+        id:        "INSIGHT-001"
+        statement: "CUE graph validation performance depends on topology, not node count"
+        evidence: [
+            "18-node/27-edge NHCF graph validates in 3.8 seconds",
+            "17-node/25-edge greener-homes graph validates without issues",
+            "Wide fan-in (high edge density) is the bottleneck, not node count",
+        ]
+        method:     "experiment"
+        confidence: "high"
+        discovered: "2026-02-10"
+
+        implication: "Graph complexity should be managed by reducing fan-in, not by capping node count."
+        action_items: [
+            "Profile edge density before optimizing graph size",
+        ]
+    }
+}</pre>
+
+      <p>
+        The <code>confidence</code> field is subject to the CUE lattice property: it can
+        only be narrowed over time. An insight at <code>"low"</code> confidence MAY be
+        updated to <code>"medium"</code> or <code>"high"</code> as evidence accumulates,
+        but the type system prevents broadening a specific confidence back to a less
+        specific value.
+      </p>
+    </section>
+
+    <!-- 5.3 Rejected -->
+    <section id="rejected">
+      <h3>Rejected (<code>#Rejected</code>)</h3>
+
+      <p>
+        A <dfn>Rejected</dfn> entry documents an approach that was tried and failed, or
+        was evaluated and dismissed. The <code>alternative</code> field is REQUIRED &mdash;
+        every rejection MUST be constructive, pointing toward what to do instead. This
+        design prevents the "we tried that and it didn't work" conversation loop by
+        ensuring that dead ends always include a signpost to viable paths.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Constraint</th><th>Required</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>@type</code></td>
+            <td><code>string</code></td>
+            <td>Fixed: <code>"kg:Rejected"</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>JSON-LD type discriminator.</td>
+          </tr>
+          <tr>
+            <td><code>id</code></td>
+            <td><code>string</code></td>
+            <td>Pattern: <code>^REJ-\d{3}$</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>Unique identifier (e.g., <code>REJ-001</code>).</td>
+          </tr>
+          <tr>
+            <td><code>approach</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Description of the approach that was rejected.</td>
+          </tr>
+          <tr>
+            <td><code>reason</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Why the approach was rejected.</td>
+          </tr>
+          <tr>
+            <td><code>date</code></td>
+            <td><code>string</code></td>
+            <td>Pattern: <code>^\d{4}-\d{2}-\d{2}$</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>Date the rejection was recorded (ISO 8601 date).</td>
+          </tr>
+          <tr>
+            <td><code>alternative</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>What to do instead. MUST be non-empty &mdash; forces constructive rejection.</td>
+          </tr>
+          <tr>
+            <td><code>related</code></td>
+            <td><code>{[string]: true}</code></td>
+            <td><a>Struct-as-set</a></td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Cross-references to other entries by ID.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <pre class="example cue" title="Rejected entry">
+import "quicue.ca/kg/core@v0"
+
+rejected: {
+    "REJ-001": core.#Rejected & {
+        id:          "REJ-001"
+        approach:    "Use SPARQL for cross-project knowledge querying"
+        reason:      "Requires external infrastructure (triple store, query engine). Adds deployment complexity."
+        date:        "2026-02-15"
+        alternative: "Use CUE unification for federation. Zero infrastructure, conflict detection is free."
+        related: {"ADR-002": true}
+    }
+}</pre>
+    </section>
+
+    <!-- 5.4 Pattern -->
+    <section id="pattern">
+      <h3>Pattern (<code>#Pattern</code>)</h3>
+
+      <p>
+        A <dfn>Pattern</dfn> captures a reusable problem/solution pair in the tradition
+        of Christopher Alexander's pattern language. The <code>used_in</code> field tracks
+        which projects employ the pattern, using the <a>struct-as-set</a> idiom for O(1)
+        membership testing and clean unification when federating across project boundaries.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Constraint</th><th>Required</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>@type</code></td>
+            <td><code>string</code></td>
+            <td>Fixed: <code>"kg:Pattern"</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>JSON-LD type discriminator.</td>
+          </tr>
+          <tr>
+            <td><code>name</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Human-readable name of the pattern.</td>
+          </tr>
+          <tr>
+            <td><code>category</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Classification category (e.g., "architecture", "data", "operations").</td>
+          </tr>
+          <tr>
+            <td><code>problem</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>The problem this pattern addresses.</td>
+          </tr>
+          <tr>
+            <td><code>solution</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>The solution approach.</td>
+          </tr>
+          <tr>
+            <td><code>context</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>When and where this pattern applies.</td>
+          </tr>
+          <tr>
+            <td><code>example</code></td>
+            <td><code>string</code></td>
+            <td>&mdash;</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>A concrete example of the pattern in use.</td>
+          </tr>
+          <tr>
+            <td><code>used_in</code></td>
+            <td><code>{[string]: true}</code></td>
+            <td><a>Struct-as-set</a></td>
+            <td class="field-required">REQUIRED</td>
+            <td>Projects using this pattern. MUST contain at least the declaring project.</td>
+          </tr>
+          <tr>
+            <td><code>related</code></td>
+            <td><code>{[string]: true}</code></td>
+            <td><a>Struct-as-set</a></td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Cross-references to related patterns or entries.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <pre class="example cue" title="Pattern entry">
+import "quicue.ca/kg/core@v0"
+
+patterns: {
+    "struct-as-set": core.#Pattern & {
+        name:     "Struct-as-Set"
+        category: "data-modeling"
+        problem:  "CUE arrays allow duplicates and lack O(1) membership testing."
+        solution: "Use {[string]: true} for set-valued fields."
+        context:  "Any field representing set membership (related, used_in, depends_on)."
+        used_in: {
+            "quicue-kg":       true
+            "quicue-proxmox":  true
+            "energy-retrofit": true
+        }
+    }
+}</pre>
+    </section>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- 6. EXTENSION TYPES                                                  -->
+  <!-- ================================================================== -->
+  <section id="extension-types">
+    <h2>Extension Types</h2>
+
+    <p>
+      Extension types address domain-specific concerns that not all projects require.
+      A <a>conforming knowledge graph</a> MAY include entries of extension types. Extension
+      types are defined in the <code>quicue.ca/kg/ext@v0</code> package and MAY import from
+      <code>core</code> but core types MUST NOT import from extensions.
+    </p>
+
+    <!-- 6.1 Derivation -->
+    <section id="derivation">
+      <h3>Derivation (<code>#Derivation</code>)</h3>
+
+      <p>
+        A <dfn>Derivation</dfn> records the provenance of a data pipeline output: what worker
+        produced it, from what inputs, and how trustworthy the output is relative to canonical
+        source data. This type supports audit trails for data engineering workflows where the
+        distinction between original and computed data is significant.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Constraint</th><th>Required</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>@type</code></td>
+            <td><code>string</code></td>
+            <td>Fixed: <code>"kg:Derivation"</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>JSON-LD type discriminator.</td>
+          </tr>
+          <tr>
+            <td><code>id</code></td>
+            <td><code>string</code></td>
+            <td>Pattern: <code>^DERIV-\d{3}$</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>Unique identifier (e.g., <code>DERIV-001</code>).</td>
+          </tr>
+          <tr>
+            <td><code>worker</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>The pipeline worker or process that produced the output.</td>
+          </tr>
+          <tr>
+            <td><code>output_file</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Path to the output file produced.</td>
+          </tr>
+          <tr>
+            <td><code>date</code></td>
+            <td><code>string</code></td>
+            <td>Pattern: <code>^\d{4}-\d{2}-\d{2}$</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>Date the derivation was performed (ISO 8601 date).</td>
+          </tr>
+          <tr>
+            <td><code>description</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>What the derivation produced and why.</td>
+          </tr>
+          <tr>
+            <td><code>canon_purity</code></td>
+            <td><code>string</code></td>
+            <td>Enum: <code>"pure"</code> | <code>"mixed"</code> | <code>"derived"</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>
+              <a>Canon purity</a> classification:
+              <code>pure</code> = original source data;
+              <code>mixed</code> = combination of source and computed;
+              <code>derived</code> = fully computed from other data.
+            </td>
+          </tr>
+          <tr>
+            <td><code>canon_sources</code></td>
+            <td><code>[...string]</code></td>
+            <td>At least one element</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Canonical data sources used as input.</td>
+          </tr>
+          <tr>
+            <td><code>non_canon_elements</code></td>
+            <td><code>[...string]</code></td>
+            <td>&mdash;</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Elements in the output that are not from canonical sources (MAY be empty list).</td>
+          </tr>
+          <tr>
+            <td><code>action_required</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>What action is needed regarding the derivation output.</td>
+          </tr>
+          <tr>
+            <td><code>input_files</code></td>
+            <td><code>[...string]</code></td>
+            <td>&mdash;</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Files consumed as input (MAY be empty list).</td>
+          </tr>
+          <tr>
+            <td><code>record_count</code></td>
+            <td><code>int</code></td>
+            <td>&ge; 0</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Number of records in the output.</td>
+          </tr>
+          <tr>
+            <td><code>related</code></td>
+            <td><code>{[string]: true}</code></td>
+            <td><a>Struct-as-set</a></td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Cross-references to other entries by ID.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 6.2 Context -->
+    <section id="context-type">
+      <h3>Context (<code>#Context</code>)</h3>
+
+      <p>
+        A <dfn data-dfn-type="dfn">Context entry</dfn> is a project's identity card. It declares what the project is,
+        what CUE module it belongs to, what patterns it uses, and what concepts it knows
+        about. When projected to W3C vocabularies, a Context maps to a <code>dcat:Dataset</code>
+        (see <a href="#dcat-projection"></a>).
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Constraint</th><th>Required</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>@type</code></td>
+            <td><code>string</code></td>
+            <td>Fixed: <code>"kg:Context"</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>JSON-LD type discriminator.</td>
+          </tr>
+          <tr>
+            <td><code>@id</code></td>
+            <td><code>string</code></td>
+            <td>&mdash;</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>IRI identifier for the project (used in JSON-LD exports).</td>
+          </tr>
+          <tr>
+            <td><code>name</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Human-readable project name.</td>
+          </tr>
+          <tr>
+            <td><code>description</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>What the project does.</td>
+          </tr>
+          <tr>
+            <td><code>module</code></td>
+            <td><code>string</code></td>
+            <td>&mdash;</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>CUE module path (e.g., <code>quicue.ca/kg@v0</code>).</td>
+          </tr>
+          <tr>
+            <td><code>repo</code></td>
+            <td><code>string</code></td>
+            <td>&mdash;</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Repository URL.</td>
+          </tr>
+          <tr>
+            <td><code>status</code></td>
+            <td><code>string</code></td>
+            <td>Enum: <code>"active"</code> | <code>"experimental"</code> | <code>"archived"</code> | <code>"planned"</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>Current project lifecycle state.</td>
+          </tr>
+          <tr>
+            <td><code>license</code></td>
+            <td><code>string</code></td>
+            <td>&mdash;</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>SPDX license identifier.</td>
+          </tr>
+          <tr>
+            <td><code>cue_version</code></td>
+            <td><code>string</code></td>
+            <td>&mdash;</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Minimum CUE version required.</td>
+          </tr>
+          <tr>
+            <td><code>uses</code></td>
+            <td><code>[...{...}]</code></td>
+            <td>List of open structs</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Patterns, frameworks, or libraries used by this project.</td>
+          </tr>
+          <tr>
+            <td><code>knows</code></td>
+            <td><code>[...{...}]</code></td>
+            <td>List of open structs</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Concepts, domains, or vocabularies this project has knowledge of.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <pre class="example cue" title="Context entry">
+import "quicue.ca/kg/ext@v0"
+
+project: ext.#Context & {
+    "@id":        "https://quicue.ca/project/quicue-kg"
+    name:         "quicue-kg"
+    description:  "CUE-native knowledge graph framework"
+    module:       "quicue.ca/kg@v0"
+    status:       "active"
+    license:      "Apache-2.0"
+    cue_version:  "v0.15.3"
+}</pre>
+    </section>
+
+    <!-- 6.3 Workspace -->
+    <section id="workspace">
+      <h3>Workspace (<code>#Workspace</code>)</h3>
+
+      <p>
+        A <dfn>Workspace</dfn> maps the physical layout of a multi-repository project.
+        Components describe each repository or directory with filesystem paths, symlinks,
+        git remotes, and branch information. This type enables tooling to understand the
+        topology of projects that span multiple repositories.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Constraint</th><th>Required</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>@type</code></td>
+            <td><code>string</code></td>
+            <td>Fixed: <code>"kg:Workspace"</code></td>
+            <td class="field-required">REQUIRED</td>
+            <td>JSON-LD type discriminator.</td>
+          </tr>
+          <tr>
+            <td><code>name</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Workspace name.</td>
+          </tr>
+          <tr>
+            <td><code>description</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>What this workspace represents.</td>
+          </tr>
+          <tr>
+            <td><code>components</code></td>
+            <td><code>{[string]: Component}</code></td>
+            <td>Struct of named components</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Map of component name to component definition.</td>
+          </tr>
+          <tr>
+            <td><code>deploy</code></td>
+            <td><code>struct</code></td>
+            <td>Open struct</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Deployment information (domain, container, host, path).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Each component within <code>components</code> has the following fields:</p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Constraint</th><th>Required</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>path</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>Filesystem path to the component.</td>
+          </tr>
+          <tr>
+            <td><code>description</code></td>
+            <td><code>string</code></td>
+            <td>Non-empty</td>
+            <td class="field-required">REQUIRED</td>
+            <td>What this component does.</td>
+          </tr>
+          <tr>
+            <td><code>symlink</code></td>
+            <td><code>string</code></td>
+            <td>&mdash;</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>If this component is available via symlink, the target path.</td>
+          </tr>
+          <tr>
+            <td><code>module</code></td>
+            <td><code>string</code></td>
+            <td>&mdash;</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>CUE module identifier.</td>
+          </tr>
+          <tr>
+            <td><code>git_remotes</code></td>
+            <td><code>{[string]: string}</code></td>
+            <td>&mdash;</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Map of remote name to URL.</td>
+          </tr>
+          <tr>
+            <td><code>branch</code></td>
+            <td><code>string</code></td>
+            <td>&mdash;</td>
+            <td class="field-optional">OPTIONAL</td>
+            <td>Active git branch.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        Components are open structs &mdash; additional domain-specific fields are permitted.
+      </p>
+    </section>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- 7. AGGREGATION                                                      -->
+  <!-- ================================================================== -->
+  <section id="aggregation">
+    <h2>Aggregation</h2>
+
+    <p>
+      Aggregation types compute summary views and quality checks from raw knowledge graph
+      entries. They are defined in the <code>quicue.ca/kg/aggregate@v0</code> package and
+      use CUE comprehensions to derive all computed fields. Aggregation views are never
+      hand-maintained &mdash; they are recomputed on every <code>cue eval</code> invocation.
+    </p>
+
+    <!-- 7.1 KGIndex -->
+    <section id="kgindex">
+      <h3>KGIndex (<code>#KGIndex</code>)</h3>
+
+      <p>
+        The <dfn>KGIndex</dfn> is the primary aggregation type. It collects all entries by type,
+        computes summary counts, and derives cross-cutting views such as decisions grouped by
+        status and insights grouped by confidence level.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Computed</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>project</code></td>
+            <td><code>string</code></td>
+            <td>No (user-supplied)</td>
+            <td>Project name. MUST be non-empty.</td>
+          </tr>
+          <tr>
+            <td><code>decisions</code></td>
+            <td><code>{[string]: #Decision}</code></td>
+            <td>No (user-supplied)</td>
+            <td>Map of decision ID to Decision entry.</td>
+          </tr>
+          <tr>
+            <td><code>insights</code></td>
+            <td><code>{[string]: #Insight}</code></td>
+            <td>No (user-supplied)</td>
+            <td>Map of insight ID to Insight entry.</td>
+          </tr>
+          <tr>
+            <td><code>rejected</code></td>
+            <td><code>{[string]: #Rejected}</code></td>
+            <td>No (user-supplied)</td>
+            <td>Map of rejected ID to Rejected entry.</td>
+          </tr>
+          <tr>
+            <td><code>patterns</code></td>
+            <td><code>{[string]: #Pattern}</code></td>
+            <td>No (user-supplied)</td>
+            <td>Map of pattern key to Pattern entry.</td>
+          </tr>
+          <tr>
+            <td><code>summary</code></td>
+            <td><code>struct</code></td>
+            <td>Yes</td>
+            <td>Contains <code>total_decisions</code>, <code>total_insights</code>,
+              <code>total_rejected</code>, <code>total_patterns</code>, and
+              <code>total</code> (sum of all).</td>
+          </tr>
+          <tr>
+            <td><code>by_status</code></td>
+            <td><code>struct</code></td>
+            <td>Yes</td>
+            <td>Decisions grouped by status. Keys: <code>proposed</code>, <code>accepted</code>,
+              <code>deprecated</code>, <code>superseded</code>. Values: map of ID to title.</td>
+          </tr>
+          <tr>
+            <td><code>by_confidence</code></td>
+            <td><code>struct</code></td>
+            <td>Yes</td>
+            <td>Insights grouped by confidence. Keys: <code>high</code>, <code>medium</code>,
+              <code>low</code>. Values: map of ID to statement.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <pre class="example cue" title="KGIndex usage in index.cue">
+package kg
+
+import "quicue.ca/kg/aggregate@v0"
+
+index: aggregate.#KGIndex & {
+    project: "my-project"
+
+    decisions: decisions   // references from decisions.cue
+    insights:  insights    // references from insights.cue
+    rejected:  rejected    // references from rejected.cue
+    patterns:  patterns    // references from patterns.cue
+}
+
+// Export: cue export .kg/ -e index.summary --out json</pre>
+
+      <p>
+        All fields within <code>summary</code>, <code>by_status</code>, and
+        <code>by_confidence</code> are derived via CUE comprehensions. Adding an entry
+        to the input maps automatically updates all computed views.
+      </p>
+    </section>
+
+    <!-- 7.2 KGLint -->
+    <section id="kglint">
+      <h3>KGLint (<code>#KGLint</code>)</h3>
+
+      <p>
+        The <dfn>KGLint</dfn> type computes structural quality checks on a knowledge graph.
+        It takes a populated <code>#KGIndex</code> as input and produces a list of lint
+        results at varying severity levels.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>index</code></td>
+            <td><code>#KGIndex</code></td>
+            <td>The knowledge graph index to lint.</td>
+          </tr>
+          <tr>
+            <td><code>results</code></td>
+            <td><code>[...#LintResult]</code></td>
+            <td>List of lint findings.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Each <code>#LintResult</code> contains:</p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>level</code></td>
+            <td><code>"error"</code> | <code>"warn"</code> | <code>"info"</code></td>
+            <td>Severity of the finding.</td>
+          </tr>
+          <tr>
+            <td><code>code</code></td>
+            <td><code>string</code></td>
+            <td>Machine-readable lint rule identifier.</td>
+          </tr>
+          <tr>
+            <td><code>message</code></td>
+            <td><code>string</code></td>
+            <td>Human-readable description of the issue.</td>
+          </tr>
+          <tr>
+            <td><code>entry</code></td>
+            <td><code>string</code></td>
+            <td>OPTIONAL. The entry ID that triggered the finding.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="note">
+        The <code>#KGLint</code> type handles structural checks via CUE comprehensions
+        (e.g., referential integrity of all known IDs). Temporal and heuristic checks
+        (e.g., stale proposals older than 90 days, confidence level upgrade suggestions)
+        are implemented in the CLI layer using <code>jq</code> over exported JSON.
+      </p>
+    </section>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- 8. W3C PROJECTION SEMANTICS                                         -->
+  <!-- ================================================================== -->
+  <section id="w3c-projections">
+    <h2>W3C Projection Semantics</h2>
+
+    <p>
+      quicue-kg provides export projections from CUE-native types to W3C vocabularies,
+      RDF serialization formats, and logic programming languages.
+      These projections are <em>one-way transformations</em>: CUE is the source of truth,
+      and external formats are interoperability surfaces. Each projection is a CUE type in the
+      <code>aggregate</code> package that takes a <code>#KGIndex</code> as input and
+      produces structured output (JSON-LD, RDF text, or logic programs).
+    </p>
+
+    <p>
+      All projections share the <code>kg:</code> namespace prefix, which resolves to
+      <code>https://quicue.ca/kg#</code>.
+    </p>
+
+    <!-- 8.1 PROV-O -->
+    <section id="prov-o-projection">
+      <h3>PROV-O Projection (<code>#Provenance</code>)</h3>
+
+      <p>
+        The provenance projection maps knowledge graph entries to the [[PROV-O]] ontology,
+        producing a machine-navigable audit trail of decisions.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Source (quicue-kg)</th><th></th><th>Target (PROV-O)</th><th>Semantics</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>#Decision</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>prov:Activity</code></td>
+            <td>The act of making a decision.</td>
+          </tr>
+          <tr>
+            <td><code>#Decision.decision</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>prov:Entity</code> (generated)</td>
+            <td>The outcome produced by the decision activity.</td>
+          </tr>
+          <tr>
+            <td><code>#Decision.date</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>prov:startedAtTime</code></td>
+            <td>When the decision activity occurred.</td>
+          </tr>
+          <tr>
+            <td><code>#Decision.supersedes</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>prov:wasInformedBy</code> + <code>prov:wasRevisionOf</code></td>
+            <td>Supersession as provenance chain.</td>
+          </tr>
+          <tr>
+            <td><code>#Insight</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>prov:Entity</code></td>
+            <td>Discovered knowledge as provenance entity.</td>
+          </tr>
+          <tr>
+            <td><code>#Insight.method</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>prov:Activity</code> (generating)</td>
+            <td>The discovery method as a generating activity.</td>
+          </tr>
+          <tr>
+            <td><code>project</code> (from index)</td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>prov:Agent</code></td>
+            <td>The project as the agent associated with decisions.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <pre class="example" title="PROV-O export command">
+cue export .kg/ -e _provenance.graph --out json</pre>
+
+      <p>The projection uses the following JSON-LD context:</p>
+      <pre class="example" title="PROV-O JSON-LD context">
+{
+  "prov":    "http://www.w3.org/ns/prov#",
+  "dcterms": "http://purl.org/dc/terms/",
+  "rdfs":    "http://www.w3.org/2000/01/rdf-schema#",
+  "xsd":     "http://www.w3.org/2001/XMLSchema#",
+  "kg":      "https://quicue.ca/kg#"
+}</pre>
+    </section>
+
+    <!-- 8.2 Web Annotation -->
+    <section id="web-annotation-projection">
+      <h3>Web Annotation Projection (<code>#Annotations</code>)</h3>
+
+      <p>
+        The annotation projection maps insights and rejected approaches to the
+        [[WEB-ANNOTATION]] data model. The two entry types map to different annotation
+        motivations:
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Source (quicue-kg)</th><th></th><th>Target (Web Annotation)</th><th>Semantics</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>#Insight</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>oa:Annotation</code> with <code>oa:motivatedBy oa:commenting</code></td>
+            <td>Commentary on the knowledge domain.</td>
+          </tr>
+          <tr>
+            <td><code>#Insight.statement</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>oa:hasBody</code> (<code>oa:TextualBody</code>)</td>
+            <td>The annotation content.</td>
+          </tr>
+          <tr>
+            <td><code>#Insight.evidence</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>kg:evidence</code> within <code>oa:hasBody</code></td>
+            <td>Supporting evidence for the annotation.</td>
+          </tr>
+          <tr>
+            <td><code>#Insight.related</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>oa:hasTarget</code></td>
+            <td>The entries being annotated.</td>
+          </tr>
+          <tr>
+            <td><code>#Insight.action_items</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>as:result</code> (<code>as:Note</code>)</td>
+            <td>Resulting action items as ActivityStreams notes.</td>
+          </tr>
+          <tr>
+            <td><code>#Rejected</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>oa:Annotation</code> with <code>oa:motivatedBy oa:questioning</code></td>
+            <td>Questioning a previous direction.</td>
+          </tr>
+          <tr>
+            <td><code>#Rejected.approach</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>oa:hasBody</code> (purpose: <code>describing</code>)</td>
+            <td>What was rejected.</td>
+          </tr>
+          <tr>
+            <td><code>#Rejected.reason</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>oa:hasBody</code> (purpose: <code>commenting</code>)</td>
+            <td>Why it was rejected.</td>
+          </tr>
+          <tr>
+            <td><code>#Rejected.alternative</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>oa:hasBody</code> (purpose: <code>replying</code>)</td>
+            <td>The recommended alternative.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <pre class="example" title="Web Annotation export command">
+cue export .kg/ -e _annotations.graph --out json</pre>
+    </section>
+
+    <!-- 8.3 DCAT -->
+    <section id="dcat-projection">
+      <h3>DCAT Projection (<code>#DatasetEntry</code>, <code>#FederatedCatalog</code>)</h3>
+
+      <p>
+        The catalog projection maps knowledge graph metadata to the [[DCAT]] vocabulary.
+        Each project with a <code>.kg/</code> directory becomes a <code>dcat:Dataset</code>,
+        and federation results become a <code>dcat:Catalog</code>.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Source (quicue-kg)</th><th></th><th>Target (DCAT)</th><th>Semantics</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>ext.#Context</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>dcat:Dataset</code></td>
+            <td>The project's knowledge graph as a dataset.</td>
+          </tr>
+          <tr>
+            <td><code>#Context.name</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>dcterms:title</code></td>
+            <td>Dataset title.</td>
+          </tr>
+          <tr>
+            <td><code>#Context.description</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>dcterms:description</code></td>
+            <td>Dataset description.</td>
+          </tr>
+          <tr>
+            <td><code>#Context.license</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>dcterms:license</code></td>
+            <td>License information.</td>
+          </tr>
+          <tr>
+            <td>CUE source (<code>.kg/</code>)</td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>dcat:Distribution</code> (mediaType: <code>application/cue</code>)</td>
+            <td>The CUE source distribution.</td>
+          </tr>
+          <tr>
+            <td>JSON-LD export</td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>dcat:Distribution</code> (mediaType: <code>application/ld+json</code>)</td>
+            <td>The JSON-LD export distribution.</td>
+          </tr>
+          <tr>
+            <td>Federation result</td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>dcat:Catalog</code></td>
+            <td>Aggregation of multiple datasets.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <pre class="example" title="DCAT export commands">
+# Single project dataset
+cue export .kg/ -e _catalog.dataset --out json
+
+# Federated catalog
+kg fed ~/project-a/.kg/ ~/project-b/.kg/ --format dcat</pre>
+    </section>
+
+    <!-- 8.4 N-Triples -->
+    <section id="ntriples-projection">
+      <h3>N-Triples Projection (<code>#NTriples</code>)</h3>
+
+      <p>
+        The N-Triples projection produces the simplest possible RDF serialization: one
+        <code>&lt;subject&gt; &lt;predicate&gt; &lt;object&gt; .</code> triple per line, with
+        fully expanded IRIs (no prefixes). This format is greppable, sortable, and diffable —
+        ideal for unix pipeline processing and bulk loading into any triplestore.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Source (quicue-kg)</th><th></th><th>Target (RDF)</th><th>Semantics</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>#Decision</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>kg:Decision</code>, <code>prov:Activity</code></td>
+            <td>Dual-typed: both a kg decision and a provenance activity.</td>
+          </tr>
+          <tr>
+            <td><code>#Insight</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>kg:Insight</code>, <code>prov:Entity</code></td>
+            <td>Dual-typed: both a kg insight and a provenance entity.</td>
+          </tr>
+          <tr>
+            <td><code>#Pattern</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>kg:Pattern</code></td>
+            <td>Pattern with <code>skos:prefLabel</code> for taxonomy interop.</td>
+          </tr>
+          <tr>
+            <td><code>ext.#SourceFile</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>kg:SourceFile</code>, <code>prov:Entity</code></td>
+            <td>Data source with origin and format metadata.</td>
+          </tr>
+          <tr>
+            <td><code>ext.#CollectionProtocol</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>kg:CollectionProtocol</code>, <code>prov:Plan</code></td>
+            <td>Data collection protocol as a provenance plan.</td>
+          </tr>
+          <tr>
+            <td><code>ext.#PipelineRun</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>kg:PipelineRun</code>, <code>prov:Activity</code></td>
+            <td>Pipeline execution with <code>prov:used</code> links to sources.</td>
+          </tr>
+          <tr>
+            <td><code>ext.#Derivation</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>kg:Derivation</code>, <code>prov:Activity</code></td>
+            <td>Derived output with canon purity tracking.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <pre class="example" title="N-Triples export command">
+cue export .kg/ -e _ntriples.triples --out text</pre>
+
+      <pre class="example" title="N-Triples unix pipeline">
+# Count triples by type
+cue export .kg/ -e _ntriples.triples --out text | grep 'rdf-syntax-ns#type' | sort | uniq -c
+
+# Find all provenance activities
+cue export .kg/ -e _ntriples.triples --out text | grep 'prov#Activity'</pre>
+    </section>
+
+    <!-- 8.5 Turtle -->
+    <section id="turtle-projection">
+      <h3>Turtle Projection (<code>#Turtle</code>)</h3>
+
+      <p>
+        The Turtle projection produces human-readable RDF with <code>@prefix</code>
+        declarations and subject grouping. It uses the same mappings as N-Triples
+        but with compact prefixed names. The output is compatible with existing Turtle
+        files in infra-ontology and can be loaded directly into Oxigraph or any
+        SPARQL endpoint.
+      </p>
+
+      <p>
+        The document is organized by section: decisions, insights, patterns, sources,
+        collection protocols, pipeline runs, and derivations. Each section uses standard
+        RDF vocabularies (<code>prov:</code>, <code>dcterms:</code>, <code>skos:</code>,
+        <code>rdfs:</code>) alongside the <code>kg:</code> namespace.
+      </p>
+
+      <pre class="example" title="Turtle export command">
+cue export .kg/ -e _turtle.document --out text</pre>
+    </section>
+
+    <!-- 8.6 SKOS -->
+    <section id="skos-projection">
+      <h3>SKOS Taxonomy (<code>#SKOSTaxonomy</code>)</h3>
+
+      <p>
+        The SKOS projection maps the project's pattern categories to a
+        <code>skos:ConceptScheme</code> and individual patterns to
+        <code>skos:Concept</code> instances. Categories are top concepts;
+        patterns are narrower concepts within their category. This produces
+        a browsable taxonomy of the project's pattern language.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Source (quicue-kg)</th><th></th><th>Target (SKOS)</th><th>Semantics</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Pattern categories</td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>skos:Concept</code> (<code>skos:topConceptOf</code>)</td>
+            <td>Category as a top-level concept.</td>
+          </tr>
+          <tr>
+            <td><code>#Pattern</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>skos:Concept</code></td>
+            <td>Pattern as a concept with <code>skos:broader</code> to its category.</td>
+          </tr>
+          <tr>
+            <td><code>#Pattern.name</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>skos:prefLabel</code></td>
+            <td>Preferred label.</td>
+          </tr>
+          <tr>
+            <td><code>#Pattern.problem</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>skos:definition</code></td>
+            <td>The problem the pattern solves.</td>
+          </tr>
+          <tr>
+            <td><code>#Pattern.solution</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>skos:note</code></td>
+            <td>The solution approach.</td>
+          </tr>
+          <tr>
+            <td><code>#Pattern.related</code></td>
+            <td class="mapping-arrow">&rarr;</td>
+            <td><code>skos:related</code></td>
+            <td>Associative relationship between patterns.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        The projection outputs both JSON-LD (<code>_taxonomy.graph</code>) and
+        Turtle (<code>_taxonomy.turtle</code>). It also produces a summary with
+        concept and category counts.
+      </p>
+
+      <pre class="example" title="SKOS export commands">
+# JSON-LD concept scheme
+cue export .kg/ -e _taxonomy.graph --out json
+
+# Turtle for compatibility with existing SKOS files
+cue export .kg/ -e _taxonomy.turtle --out text</pre>
+    </section>
+
+    <!-- 8.7 Prolog -->
+    <section id="prolog-projection">
+      <h3>Prolog Projection (<code>#Prolog</code>)</h3>
+
+      <p>
+        The Prolog projection generates facts and inference rules from knowledge graph
+        entries. Unlike RDF projections that describe data, the Prolog projection makes
+        knowledge <em>computable</em>: you can query transitive provenance chains, determine
+        trust levels, and discover shared patterns across projects.
+      </p>
+
+      <p>
+        Facts are generated for each entry type. Rules encode inference logic:
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Rule</th><th>Semantics</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>contributed(Source, Deriv)</code></td>
+            <td>Transitive provenance: which sources contributed to a derivation.</td>
+          </tr>
+          <tr>
+            <td><code>trust(Proto, Level)</code></td>
+            <td>Trust level (high/medium/low) based on protocol authority rank.</td>
+          </tr>
+          <tr>
+            <td><code>most_authoritative(System, Proto)</code></td>
+            <td>Most authoritative protocol for a given system.</td>
+          </tr>
+          <tr>
+            <td><code>shared_pattern(P, Proj1, Proj2)</code></td>
+            <td>Patterns used in more than one project.</td>
+          </tr>
+          <tr>
+            <td><code>active_decision(Id)</code></td>
+            <td>Decisions with status "accepted".</td>
+          </tr>
+          <tr>
+            <td><code>actionable(Id)</code></td>
+            <td>High-confidence insights.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <pre class="example" title="Prolog export and query">
+# Export Prolog program
+cue export .kg/ -e _prolog.program --out text > kb.pl
+
+# Query in SWI-Prolog
+swipl -l kb.pl -g "shared_pattern(P, A, B), writef('%w shared by %w and %w\n', [P, A, B]), fail."</pre>
+    </section>
+
+    <!-- 8.8 Datalog -->
+    <section id="datalog-projection">
+      <h3>Datalog Projection (<code>#Datalog</code>)</h3>
+
+      <p>
+        The Datalog projection generates Souffl&eacute;-compatible Datalog programs. Unlike
+        Prolog, Datalog <em>always terminates</em> &mdash; there are no function symbols, no
+        cuts, no negation-as-failure cycles. This makes it safe for automated infrastructure
+        queries at scale.
+      </p>
+
+      <p>
+        The program includes <code>.decl</code> relation declarations, <code>.output</code>
+        directives for derived relations, facts from the knowledge graph, and the same
+        inference rules as the Prolog projection. Souffl&eacute; compiles these to native
+        C++ for high-performance evaluation.
+      </p>
+
+      <pre class="example" title="Datalog export and evaluation">
+# Export Soufflé-compatible Datalog
+cue export .kg/ -e _datalog.program --out text > kb.dl
+
+# Evaluate with Soufflé
+souffle kb.dl
+
+# Results are written to .csv files (one per .output relation)</pre>
+    </section>
+
+    <!-- 8.9 JSON-LD Context -->
+    <section id="jsonld-context">
+      <h3>JSON-LD Context</h3>
+
+      <p>
+        The <code>kg:</code> namespace resolves to <code>https://quicue.ca/kg#</code>. The
+        full JSON-LD context document is defined in <code>vocab/context.cue</code> and
+        SHOULD be served at <code>https://quicue.ca/kg</code> with content type
+        <code>application/ld+json</code>.
+      </p>
+
+      <p>The JSON-LD context provides the following mappings:</p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Namespace Prefix</th><th>IRI</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>kg:</code></td><td><code>https://quicue.ca/kg#</code></td></tr>
+          <tr><td><code>dcterms:</code></td><td><code>http://purl.org/dc/terms/</code></td></tr>
+          <tr><td><code>prov:</code></td><td><code>http://www.w3.org/ns/prov#</code></td></tr>
+          <tr><td><code>oa:</code></td><td><code>http://www.w3.org/ns/oa#</code></td></tr>
+          <tr><td><code>dcat:</code></td><td><code>http://www.w3.org/ns/dcat#</code></td></tr>
+          <tr><td><code>rdfs:</code></td><td><code>http://www.w3.org/2000/01/rdf-schema#</code></td></tr>
+          <tr><td><code>xsd:</code></td><td><code>http://www.w3.org/2001/XMLSchema#</code></td></tr>
+        </tbody>
+      </table>
+
+      <p>The context also declares RDFS class hierarchy relationships:</p>
+      <ul>
+        <li><code>kg:Decision</code> &mdash; <code>rdfs:subClassOf prov:Activity</code></li>
+        <li><code>kg:Insight</code> &mdash; <code>rdfs:subClassOf prov:Entity</code></li>
+        <li><code>kg:Rejected</code> &mdash; <code>rdfs:subClassOf oa:Annotation</code></li>
+        <li><code>kg:Derivation</code> &mdash; <code>rdfs:subClassOf prov:Activity</code></li>
+        <li><code>kg:Context</code> &mdash; <code>rdfs:subClassOf dcat:Dataset</code></li>
+        <li><code>kg:Pattern</code> &mdash; no W3C superclass (domain-specific)</li>
+        <li><code>kg:Workspace</code> &mdash; no W3C superclass (domain-specific)</li>
+      </ul>
+
+      <pre class="example" title="Exporting the JSON-LD context">
+cue export ./vocab -e context --out json > kg-context.jsonld</pre>
+    </section>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- 9. FEDERATION PROTOCOL                                              -->
+  <!-- ================================================================== -->
+  <section id="federation">
+    <h2>Federation Protocol</h2>
+
+    <p>
+      <a>Federation</a> is the process of discovering, merging, and querying multiple knowledge
+      graphs across project boundaries. Unlike traditional knowledge management systems that
+      require a shared ontology or a centralized query engine, quicue-kg federation uses CUE
+      <a>unification</a> as its merge primitive. This means that conflicting assertions across
+      projects are detected as type errors at build time.
+    </p>
+
+    <!-- 9.1 Discovery -->
+    <section id="discovery">
+      <h3>Discovery</h3>
+
+      <p>
+        A <a>conforming processor</a> discovers knowledge graphs by performing a filesystem
+        walk looking for the presence of <code>.kg/cue.mod/module.cue</code>. The discovery
+        algorithm is:
+      </p>
+
+      <ol>
+        <li>Walk the filesystem from a set of root directories.</li>
+        <li>For each directory, check for the existence of <code>.kg/cue.mod/module.cue</code>.</li>
+        <li>If found, the parent directory contains a knowledge graph.</li>
+        <li>Validate the <code>.kg/</code> directory with <code>cue vet</code>.</li>
+        <li>If validation passes, include the knowledge graph in the federation set.</li>
+      </ol>
+
+      <pre class="example" title="Federation discovery command">
+kg fed ~/project-a/.kg/ ~/project-b/.kg/ ~/project-c/.kg/</pre>
+    </section>
+
+    <!-- 9.2 Merging -->
+    <section id="merging">
+      <h3>Merging</h3>
+
+      <p>
+        Federation merging uses CUE unification. When two knowledge graphs are unified:
+      </p>
+
+      <ul>
+        <li>Entries with <strong>different IDs</strong> are combined into a single namespace.</li>
+        <li>Entries with the <strong>same ID and compatible values</strong> unify to the most
+          specific value satisfying both constraints.</li>
+        <li>Entries with the <strong>same ID and conflicting values</strong> produce a CUE
+          type error, surfacing the conflict explicitly.</li>
+      </ul>
+
+      <p>
+        The <a>struct-as-set</a> idiom ensures that set-valued fields (e.g., <code>used_in</code>,
+        <code>related</code>) merge cleanly: the union of two sets <code>{"a": true}</code>
+        and <code>{"b": true}</code> unifies to <code>{"a": true, "b": true}</code>.
+      </p>
+
+      <p class="note">
+        Conflicts are features, not bugs. A type error during federation means two projects
+        assert contradictory facts. The error message identifies the conflicting entries,
+        requiring explicit human resolution.
+      </p>
+    </section>
+
+    <!-- 9.3 Export -->
+    <section id="federation-export">
+      <h3>Export</h3>
+
+      <p>
+        Federation results MAY be exported as a [[DCAT]] catalog using the
+        <code>#FederatedCatalog</code> type. Each federated knowledge graph becomes a
+        <code>dcat:Dataset</code> entry within a <code>dcat:Catalog</code>.
+      </p>
+
+      <pre class="example" title="Federated DCAT catalog structure">
+{
+  "@context": {
+    "dcat":    "http://www.w3.org/ns/dcat#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "kg":      "https://quicue.ca/kg#"
+  },
+  "@type": "dcat:Catalog",
+  "dcterms:title": "quicue Knowledge Graph Federation",
+  "dcterms:description": "Federated catalog of CUE-native knowledge graphs",
+  "dcat:dataset": [
+    { "@type": "dcat:Dataset", "dcterms:title": "project-a", ... },
+    { "@type": "dcat:Dataset", "dcterms:title": "project-b", ... }
+  ]
+}</pre>
+    </section>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- 10. AGENT INTEGRATION                                               -->
+  <!-- ================================================================== -->
+  <section id="agent-integration">
+    <h2>Agent Integration</h2>
+
+    <p>
+      quicue-kg is designed to be consumed by autonomous software agents and tool-using
+      agents operating within development workflows. This section specifies the interface
+      contract between knowledge graphs and such agents.
+    </p>
+
+    <!-- 10.1 Tool Interface -->
+    <section id="tool-interface">
+      <h3>Tool Interface</h3>
+
+      <p>
+        A <a>conforming processor</a> targeting agent integration SHOULD expose the following
+        tool operations. Each operation corresponds to a <code>kg</code> CLI command and
+        returns structured JSON.
+      </p>
+
+      <table class="def">
+        <thead>
+          <tr><th>Tool Name</th><th>Description</th><th>Returns</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>kg_index</code></td>
+            <td>Retrieve the full knowledge graph index.</td>
+            <td><code>#KGIndex</code> as JSON</td>
+          </tr>
+          <tr>
+            <td><code>kg_decisions</code></td>
+            <td>List all decisions with status filtering.</td>
+            <td>Array of <code>#Decision</code></td>
+          </tr>
+          <tr>
+            <td><code>kg_rejected</code></td>
+            <td>List all rejected approaches.</td>
+            <td>Array of <code>#Rejected</code></td>
+          </tr>
+          <tr>
+            <td><code>kg_insights</code></td>
+            <td>List all insights with confidence filtering.</td>
+            <td>Array of <code>#Insight</code></td>
+          </tr>
+          <tr>
+            <td><code>kg_patterns</code></td>
+            <td>List all patterns with category filtering.</td>
+            <td>Array of <code>#Pattern</code></td>
+          </tr>
+          <tr>
+            <td><code>kg_lint</code></td>
+            <td>Run quality checks and return findings.</td>
+            <td>Array of <code>#LintResult</code></td>
+          </tr>
+          <tr>
+            <td><code>kg_query</code></td>
+            <td>Execute a CUE expression against the knowledge graph.</td>
+            <td>JSON result of the expression</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 10.2 Session Initialization -->
+    <section id="session-initialization">
+      <h3>Session Initialization</h3>
+
+      <p>
+        When an autonomous software agent begins a session in a project containing a
+        <code>.kg/</code> directory, the agent's runtime SHOULD automatically inject
+        knowledge graph context. The RECOMMENDED initialization sequence is:
+      </p>
+
+      <ol>
+        <li>Detect the presence of <code>.kg/cue.mod/module.cue</code> in the project.</li>
+        <li>Run <code>kg index</code> to retrieve the current knowledge graph state.</li>
+        <li>Run <code>kg rejected</code> to load all rejected approaches.</li>
+        <li>Include the rejected approaches in the agent's working context.</li>
+      </ol>
+
+      <p>
+        This ensures the agent begins work with awareness of prior decisions and known
+        dead ends, reducing the likelihood of proposing previously rejected solutions.
+      </p>
+    </section>
+
+    <!-- 10.3 Anti-Hallucination Protocol -->
+    <section id="anti-hallucination">
+      <h3>Anti-Hallucination Protocol</h3>
+
+      <p>
+        To prevent autonomous software agents from proposing solutions that have already been
+        tried and rejected, the following protocol is RECOMMENDED:
+      </p>
+
+      <ol>
+        <li>Before proposing a solution, the agent MUST query <code>kg_rejected</code>.</li>
+        <li>If the proposed approach matches a rejected entry's <code>approach</code> field,
+          the agent MUST acknowledge the prior rejection and explain why the new proposal
+          differs or why circumstances have changed.</li>
+        <li>If the agent cannot differentiate its proposal from a prior rejection, it
+          SHOULD follow the <code>alternative</code> field from the rejected entry instead.</li>
+      </ol>
+
+      <p class="note">
+        The rejected approach database functions as institutional memory. Its value scales
+        with project age: a mature project may have dozens of documented dead ends that
+        prevent cyclic re-exploration by both human developers and software agents.
+      </p>
+    </section>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- 11. SECURITY CONSIDERATIONS                                         -->
+  <!-- ================================================================== -->
+  <section id="security-considerations">
+    <h2>Security Considerations</h2>
+
+    <section id="sensitive-data">
+      <h3>Sensitive Architectural Information</h3>
+
+      <p>
+        Knowledge graph entries MAY contain sensitive architectural decisions, such as
+        security architecture choices, authentication strategy rationale, or infrastructure
+        topology information. Implementors SHOULD consider the following:
+      </p>
+
+      <ul>
+        <li><code>.kg/</code> directories committed to version control inherit the repository's
+          access control. If the repository is public, all knowledge graph entries are public.</li>
+        <li>The <code>context</code> and <code>rationale</code> fields of <code>#Decision</code>
+          entries may inadvertently expose threat models or security assumptions.</li>
+        <li><code>#Workspace</code> entries expose filesystem paths, git remote URLs, and
+          deployment topology &mdash; information useful for reconnaissance.</li>
+      </ul>
+    </section>
+
+    <section id="credential-prohibition">
+      <h3>Credential Prohibition</h3>
+
+      <p>
+        Knowledge graph entries MUST NOT contain credentials, secrets, API keys, tokens, or
+        other authentication material. The <code>.kg/</code> directory is designed for
+        structural and architectural knowledge, not operational secrets.
+      </p>
+
+      <p>
+        A <a>conforming processor</a> SHOULD warn if entry content appears to contain
+        credential-like patterns (e.g., strings matching common API key formats).
+      </p>
+    </section>
+
+    <section id="federation-metadata">
+      <h3>Federation Metadata Exposure</h3>
+
+      <p>
+        The <a href="#federation">federation protocol</a> exposes project metadata across
+        organizational boundaries. When federating knowledge graphs:
+      </p>
+
+      <ul>
+        <li>Project names, descriptions, and status information are shared.</li>
+        <li>Decision context and rationale cross project boundaries.</li>
+        <li>Pattern <code>used_in</code> fields reveal which projects use which patterns.</li>
+      </ul>
+
+      <p>
+        Organizations SHOULD establish federation policies that define which projects may
+        be federated and with whom. The <code>#Context.status</code> field MAY be used
+        to control federation eligibility (e.g., only federate <code>"active"</code> projects).
+      </p>
+    </section>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- 12. IANA CONSIDERATIONS                                             -->
+  <!-- ================================================================== -->
+  <section id="iana-considerations">
+    <h2>IANA Considerations</h2>
+
+    <section id="media-type">
+      <h3>Media Type</h3>
+
+      <p>
+        The CUE source format used by <code>.kg/</code> directories uses file extension
+        <code>.cue</code>. As of publication, the CUE language does not have an
+        IANA-registered media type. This specification uses <code>application/cue</code>
+        as an informational media type identifier in DCAT distribution entries.
+      </p>
+
+      <p>
+        When exporting to JSON-LD, the standard media type <code>application/ld+json</code>
+        SHOULD be used.
+      </p>
+    </section>
+
+    <section id="namespace-uri">
+      <h3>Namespace URI</h3>
+
+      <p>
+        The <code>kg:</code> namespace is bound to the URI <code>https://quicue.ca/kg#</code>.
+        The JSON-LD context document SHOULD be served at <code>https://quicue.ca/kg</code>
+        with content negotiation:
+      </p>
+
+      <ul>
+        <li><code>Accept: application/ld+json</code> &rarr; the JSON-LD context document.</li>
+        <li><code>Accept: text/html</code> &rarr; this specification document.</li>
+      </ul>
+    </section>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- APPENDIX A: CUE SCHEMA REFERENCE                                    -->
+  <!-- ================================================================== -->
+  <section class="appendix" id="cue-schema-reference">
+    <h2>CUE Schema Reference</h2>
+
+    <p>
+      This appendix reproduces the normative CUE type definitions for reference. The
+      canonical definitions are in the <code>quicue.ca/kg@v0</code> module.
+    </p>
+
+    <section id="schema-decision">
+      <h3>#Decision</h3>
+      <pre class="cue">
+// core/decision.cue
+#Decision: {
+    "@type": "kg:Decision"
+    id:      =~"^ADR-\\d{3}$"
+    title:   string & !=""
+    status:  "proposed" | "accepted" | "deprecated" | "superseded"
+    date:    =~"^\\d{4}-\\d{2}-\\d{2}$"
+
+    context:      string & !=""
+    decision:     string & !=""
+    rationale:    string & !=""
+    consequences: [...string] & [_, ...]
+
+    supersedes?: =~"^ADR-\\d{3}$"
+    appliesTo?:  [...{...}]
+    related?:    {[string]: true}
+}</pre>
+    </section>
+
+    <section id="schema-insight">
+      <h3>#Insight</h3>
+      <pre class="cue">
+// core/insight.cue
+#Insight: {
+    "@type":    "kg:Insight"
+    id:         =~"^INSIGHT-\\d{3}$"
+    statement:  string & !=""
+    evidence:   [...string] & [_, ...]
+    method:     "cross_reference" | "gap_analysis" | "statistics" | "experiment" | "observation"
+    confidence: "high" | "medium" | "low"
+    discovered: =~"^\\d{4}-\\d{2}-\\d{2}$"
+
+    implication:   string & !=""
+    action_items?: [...string]
+    related?:      {[string]: true}
+}</pre>
+    </section>
+
+    <section id="schema-rejected">
+      <h3>#Rejected</h3>
+      <pre class="cue">
+// core/rejected.cue
+#Rejected: {
+    "@type":     "kg:Rejected"
+    id:          =~"^REJ-\\d{3}$"
+    approach:    string & !=""
+    reason:      string & !=""
+    date:        =~"^\\d{4}-\\d{2}-\\d{2}$"
+    alternative: string & !=""
+    related?:    {[string]: true}
+}</pre>
+    </section>
+
+    <section id="schema-pattern">
+      <h3>#Pattern</h3>
+      <pre class="cue">
+// core/pattern.cue
+#Pattern: {
+    "@type":  "kg:Pattern"
+    name:     string & !=""
+    category: string & !=""
+    problem:  string & !=""
+    solution: string & !=""
+    context:  string & !=""
+    example?: string
+    used_in:  {[string]: true}
+    related?: {[string]: true}
+}</pre>
+    </section>
+
+    <section id="schema-derivation">
+      <h3>#Derivation</h3>
+      <pre class="cue">
+// ext/derivation.cue
+#Derivation: {
+    "@type":            "kg:Derivation"
+    id:                 =~"^DERIV-\\d{3}$"
+    worker:             string & !=""
+    output_file:        string & !=""
+    date:               =~"^\\d{4}-\\d{2}-\\d{2}$"
+    description:        string & !=""
+    canon_purity:       "pure" | "mixed" | "derived"
+    canon_sources:      [...string] & [_, ...]
+    non_canon_elements: [...string]
+    action_required:    string & !=""
+    input_files:        [...string]
+    record_count?:      int & >=0
+    related?:           {[string]: true}
+}</pre>
+    </section>
+
+    <section id="schema-context">
+      <h3>#Context</h3>
+      <pre class="cue">
+// ext/context.cue
+#Context: {
+    "@type":      "kg:Context"
+    "@id"?:       string
+    name:         string & !=""
+    description:  string & !=""
+    module?:      string
+    repo?:        string
+    status:       "active" | "experimental" | "archived" | "planned"
+    license?:     string
+    cue_version?: string
+    uses?:        [...{...}]
+    knows?:       [...{...}]
+}</pre>
+    </section>
+
+    <section id="schema-workspace">
+      <h3>#Workspace</h3>
+      <pre class="cue">
+// ext/workspace.cue
+#Workspace: {
+    "@type":      "kg:Workspace"
+    name:         string & !=""
+    description:  string & !=""
+    components: {[string]: {
+        path:         string & !=""
+        description:  string & !=""
+        symlink?:     string
+        module?:      string
+        git_remotes?: {[string]: string}
+        branch?:      string
+        ...
+    }}
+    deploy?: {
+        domain?:    string
+        container?: string
+        host?:      string
+        path?:      string
+        ...
+    }
+}</pre>
+    </section>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- APPENDIX B: COMPLETE EXAMPLE                                        -->
+  <!-- ================================================================== -->
+  <section class="appendix" id="complete-example">
+    <h2>Complete Example</h2>
+
+    <p>
+      This appendix presents a minimal but complete <code>.kg/</code> directory demonstrating
+      all core types, a context entry, and an aggregation index.
+    </p>
+
+    <pre class="example" title="decisions.cue">
+package kg
+
+import "quicue.ca/kg/core@v0"
+
+decisions: {
+    "ADR-001": core.#Decision & {
+        id:     "ADR-001"
+        title:  "Use CUE for configuration"
+        status: "accepted"
+        date:   "2026-01-15"
+
+        context:      "Need a type-safe configuration language."
+        decision:     "Use CUE for all configuration and schema definitions."
+        rationale:    "CUE provides compile-time validation and a lattice-based type system."
+        consequences: ["All config files are .cue, validated with cue vet"]
+    }
+}</pre>
+
+    <pre class="example" title="insights.cue">
+package kg
+
+import "quicue.ca/kg/core@v0"
+
+insights: {
+    "INSIGHT-001": core.#Insight & {
+        id:         "INSIGHT-001"
+        statement:  "CUE unification is sufficient for cross-project knowledge merging"
+        evidence:   ["Successfully federated 5 .kg/ directories without conflicts"]
+        method:     "experiment"
+        confidence: "high"
+        discovered: "2026-02-10"
+        implication: "No external query engine needed for federation."
+        related: {"ADR-001": true}
+    }
+}</pre>
+
+    <pre class="example" title="rejected.cue">
+package kg
+
+import "quicue.ca/kg/core@v0"
+
+rejected: {
+    "REJ-001": core.#Rejected & {
+        id:          "REJ-001"
+        approach:    "Store knowledge graph in SQLite"
+        reason:      "Adds runtime dependency. Loses CUE type safety. Cannot federate via unification."
+        date:        "2026-01-10"
+        alternative: "Use flat CUE files in .kg/ directory with cue vet for validation."
+    }
+}</pre>
+
+    <pre class="example" title="patterns.cue">
+package kg
+
+import "quicue.ca/kg/core@v0"
+
+patterns: {
+    "struct-as-set": core.#Pattern & {
+        name:     "Struct-as-Set"
+        category: "data-modeling"
+        problem:  "Arrays allow duplicates and lack O(1) membership testing."
+        solution: "Use {[string]: true} for set-valued fields."
+        context:  "Any field representing set membership."
+        used_in: {"my-project": true}
+    }
+}</pre>
+
+    <pre class="example" title="project.cue">
+package kg
+
+import "quicue.ca/kg/ext@v0"
+
+project: ext.#Context & {
+    name:        "my-project"
+    description: "Example project with a knowledge graph"
+    status:      "active"
+    license:     "Apache-2.0"
+}</pre>
+
+    <pre class="example" title="index.cue">
+package kg
+
+import "quicue.ca/kg/aggregate@v0"
+
+index: aggregate.#KGIndex & {
+    project: "my-project"
+
+    decisions: decisions
+    insights:  insights
+    rejected:  rejected
+    patterns:  patterns
+}</pre>
+
+    <pre class="example" title="Validation and export">
+# Validate the knowledge graph
+cue vet .kg/
+
+# Export the summary
+cue export .kg/ -e index.summary --out json
+# Output: {"total_decisions":1,"total_insights":1,"total_rejected":1,"total_patterns":1,"total":4}
+
+# Export decisions by status
+cue export .kg/ -e index.by_status --out json
+# Output: {"proposed":{},"accepted":{"ADR-001":"Use CUE for configuration"},"deprecated":{},"superseded":{}}</pre>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- APPENDIX C: DESIGN RATIONALE                                        -->
+  <!-- ================================================================== -->
+  <section class="appendix" id="design-rationale">
+    <h2>Design Rationale</h2>
+
+    <p><em>This section is non-normative.</em></p>
+
+    <section id="why-cue">
+      <h3>Why CUE?</h3>
+      <p>
+        CUE's lattice-based type system provides properties that are uniquely suited to
+        knowledge management:
+      </p>
+      <ul>
+        <li><strong>Monotonic refinement.</strong> Values can only be narrowed, never
+          broadened. This means evidence accumulates and constraints tighten over time,
+          preventing silent knowledge loss.</li>
+        <li><strong>Unification as merge.</strong> Combining two knowledge graphs is the
+          same operation as type-checking. Conflicts are type errors, not silent data
+          corruption.</li>
+        <li><strong>Comprehensions as views.</strong> Aggregation is computed from data
+          using CUE's built-in comprehension syntax, eliminating the maintenance burden
+          of manually curated indexes.</li>
+      </ul>
+    </section>
+
+    <section id="why-constructive-rejection">
+      <h3>Why Constructive Rejection?</h3>
+      <p>
+        The <code>#Rejected</code> type requires an <code>alternative</code> field. This is
+        a deliberate design constraint. A rejection without an alternative is a dead end
+        with no signpost. By requiring a constructive alternative, every dead end becomes
+        a redirect, reducing the cost of encountering it from "now what?" to "do this instead."
+      </p>
+    </section>
+
+    <section id="why-struct-as-set">
+      <h3>Why Struct-as-Set?</h3>
+      <p>
+        CUE arrays allow duplicates and have O(n) membership testing. The struct-as-set
+        idiom (<code>{[string]: true}</code>) provides:
+      </p>
+      <ul>
+        <li>O(1) membership testing.</li>
+        <li>Automatic deduplication (CUE structs have unique keys).</li>
+        <li>Clean unification: <code>{"a": true} & {"b": true}</code> yields
+          <code>{"a": true, "b": true}</code>.</li>
+      </ul>
+      <p>
+        This pattern has been validated across 48+ patterns in production use.
+      </p>
+    </section>
+
+    <section id="why-flat-directory">
+      <h3>Why Flat Directory?</h3>
+      <p>
+        CUE packages are directory-scoped. Files in subdirectories are treated as separate
+        package instances, even if they declare the same package name. A file at
+        <code>.kg/decisions/adr-001.cue</code> cannot reference values from
+        <code>.kg/index.cue</code> &mdash; they are different packages. The flat directory
+        requirement ensures all entries share a single package scope, enabling
+        cross-referencing and aggregation.
+      </p>
+    </section>
+  </section>
+
+</body>
+</html>

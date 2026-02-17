@@ -1,0 +1,196 @@
+// JSON-LD vocabulary context for the kg: namespace.
+//
+// Defines the semantic mapping from CUE field names to IRIs,
+// enabling interoperability with JSON-LD tools, PROV-O, DCAT,
+// and Web Annotation consumers.
+//
+// Export: cue export ./vocab -e context --out json > kg-context.jsonld
+// Serve:  Host at https://quicue.ca/kg (Content-Type: application/ld+json)
+
+package vocab
+
+context: {
+	"@context": {
+		// Namespace prefixes
+		"kg":      "https://quicue.ca/kg#"
+		"dcterms": "http://purl.org/dc/terms/"
+		"prov":    "http://www.w3.org/ns/prov#"
+		"oa":      "http://www.w3.org/ns/oa#"
+		"dcat":    "http://www.w3.org/ns/dcat#"
+		"rdfs":    "http://www.w3.org/2000/01/rdf-schema#"
+		"xsd":     "http://www.w3.org/2001/XMLSchema#"
+
+		// Core types
+		"Decision":   "kg:Decision"
+		"Insight":    "kg:Insight"
+		"Rejected":   "kg:Rejected"
+		"Pattern":    "kg:Pattern"
+
+		// Extension types
+		"Derivation":         "kg:Derivation"
+		"Context":            "kg:Context"
+		"Workspace":          "kg:Workspace"
+		"SourceFile":         "kg:SourceFile"
+		"CollectionProtocol": "kg:CollectionProtocol"
+		"PipelineRun":        "kg:PipelineRun"
+
+		// Shared fields → Dublin Core
+		"title":       "dcterms:title"
+		"description": "dcterms:description"
+		"date":        "dcterms:date"
+		"license":     "dcterms:license"
+
+		// Decision fields
+		"id":           "kg:id"
+		"status":       "kg:status"
+		"context_text": "kg:context"
+		"decision":     "kg:decision"
+		"rationale":    "kg:rationale"
+		"consequences": {"@id": "kg:consequences", "@container": "@list"}
+		"supersedes":   {"@id": "kg:supersedes", "@type": "@id"}
+
+		// Insight fields
+		"statement":  "kg:statement"
+		"evidence":   {"@id": "kg:evidence", "@container": "@list"}
+		"method":     "kg:method"
+		"confidence": "kg:confidence"
+		"discovered": "dcterms:created"
+		"implication": "kg:implication"
+
+		// Rejected fields
+		"approach":    "kg:approach"
+		"reason":      "kg:reason"
+		"alternative": "kg:alternative"
+
+		// Pattern fields
+		"problem":  "kg:problem"
+		"solution": "kg:solution"
+		"category": "kg:category"
+		"example":  "kg:example"
+
+		// Derivation fields
+		"worker":             "prov:wasAssociatedWith"
+		"output_file":        "kg:outputFile"
+		"canon_purity":       "kg:canonPurity"
+		"canon_sources":      {"@id": "prov:used", "@container": "@list"}
+		"non_canon_elements": {"@id": "kg:nonCanonElements", "@container": "@list"}
+		"input_files":        {"@id": "prov:used", "@container": "@list"}
+
+		// SourceFile fields
+		"file":          "kg:file"
+		"sha256":        "kg:sha256"
+		"format":        "dcterms:format"
+		"origin":        "kg:origin"
+		"extracted_by":  "prov:wasAttributedTo"
+		"extracted_at":  "prov:generatedAtTime"
+		"record_count":  "kg:recordCount"
+
+		// CollectionProtocol fields
+		"system":        "kg:system"
+		"method":        "kg:method"
+		"schedule":      "kg:schedule"
+		"authority":     "kg:authority"
+		"contact":       "kg:contact"
+		"endpoint":      "kg:endpoint"
+		"query":         "kg:query"
+		"freshness":     "kg:freshness"
+		"known_gaps":    {"@id": "kg:knownGaps", "@container": "@list"}
+
+		// PipelineRun fields
+		"started_at":    "prov:startedAtTime"
+		"ended_at":      "prov:endedAtTime"
+		"git_commit":    "kg:gitCommit"
+		"sources_used":  {"@id": "prov:used", "@container": "@list"}
+		"outputs":       {"@id": "prov:generated", "@container": "@list"}
+		"protocol":      {"@id": "kg:protocol", "@type": "@id"}
+		"error_count":   "kg:errorCount"
+
+		// Context fields
+		"module":      "kg:module"
+		"repo":        "kg:repo"
+		"cue_version": "kg:cueVersion"
+
+		// Set-valued fields
+		"related": {
+			"@id":        "kg:related"
+			"@type":      "@id"
+			"@container": "@set"
+		}
+		"used_in": {
+			"@id":        "kg:usedIn"
+			"@container": "@set"
+		}
+	}
+
+	// Type descriptions (SKOS-style)
+	"@graph": [
+		{
+			"@id":            "kg:Decision"
+			"@type":          "rdfs:Class"
+			"rdfs:label":     "Architecture Decision Record"
+			"rdfs:comment":   "Records an architecture decision with mandatory rationale, consequences, and status tracking."
+			"rdfs:subClassOf": {"@id": "prov:Activity"}
+		},
+		{
+			"@id":            "kg:Insight"
+			"@type":          "rdfs:Class"
+			"rdfs:label":     "Validated Discovery"
+			"rdfs:comment":   "Records a discovery with mandatory evidence and confidence tracking."
+			"rdfs:subClassOf": {"@id": "prov:Entity"}
+		},
+		{
+			"@id":            "kg:Rejected"
+			"@type":          "rdfs:Class"
+			"rdfs:label":     "Rejected Approach"
+			"rdfs:comment":   "Documents a failed approach with reason and mandatory constructive alternative."
+			"rdfs:subClassOf": {"@id": "oa:Annotation"}
+		},
+		{
+			"@id":            "kg:Pattern"
+			"@type":          "rdfs:Class"
+			"rdfs:label":     "Reusable Pattern"
+			"rdfs:comment":   "Problem/solution pair with cross-project usage tracking."
+		},
+		{
+			"@id":            "kg:Derivation"
+			"@type":          "rdfs:Class"
+			"rdfs:label":     "Data Derivation"
+			"rdfs:comment":   "Pipeline audit trail tracking provenance and canon purity."
+			"rdfs:subClassOf": {"@id": "prov:Activity"}
+		},
+		{
+			"@id":            "kg:Context"
+			"@type":          "rdfs:Class"
+			"rdfs:label":     "Project Context"
+			"rdfs:comment":   "Project identity card with status, license, and dependency declarations."
+			"rdfs:subClassOf": {"@id": "dcat:Dataset"}
+		},
+		{
+			"@id":            "kg:Workspace"
+			"@type":          "rdfs:Class"
+			"rdfs:label":     "Multi-Repo Workspace"
+			"rdfs:comment":   "Physical layout of a multi-repo project with component paths and symlinks."
+		},
+		{
+			"@id":            "kg:SourceFile"
+			"@type":          "rdfs:Class"
+			"rdfs:label":     "Source Data File"
+			"rdfs:comment":   "A data artifact consumed by pipeline activities. Anchored by file path and content hash."
+			"rdfs:subClassOf": {"@id": "prov:Entity"}
+		},
+		{
+			"@id":            "kg:CollectionProtocol"
+			"@type":          "rdfs:Class"
+			"rdfs:label":     "Data Collection Protocol"
+			"rdfs:comment":   "Standing procedure for collecting data from a source system. Governs pipeline runs."
+			"rdfs:subClassOf": {"@id": "prov:Plan"}
+		},
+		{
+			"@id":            "kg:PipelineRun"
+			"@type":          "rdfs:Class"
+			"rdfs:label":     "Pipeline Execution"
+			"rdfs:comment":   "A single execution of the data pipeline, consuming sources and producing canonical output."
+			"rdfs:subClassOf": {"@id": "prov:Activity"}
+		},
+	]
+}

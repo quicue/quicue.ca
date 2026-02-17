@@ -1,0 +1,42 @@
+# GitLab CI template for CUE testing
+# Include in your .gitlab-ci.yml:
+#   include:
+#     - remote: 'https://raw.githubusercontent.com/quicue/quicue-ci/main/gitlab/cue-test.yml'
+
+.cue-test:
+  image: cuelang/cue:latest
+  stage: test
+  variables:
+    TEST_PATH: "./tests"
+  script:
+    - cue vet -c ${TEST_PATH}/...
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# Test with examples (validates examples evaluate correctly)
+.cue-test-examples:
+  image: cuelang/cue:latest
+  stage: test
+  variables:
+    EXAMPLES_PATH: "./examples"
+  script:
+    - |
+      for dir in ${EXAMPLES_PATH}/*/; do
+        echo "Testing ${dir}..."
+        cue vet ${dir}
+        cue eval ${dir} -e output > /dev/null || echo "No output expression in ${dir}"
+      done
+
+# Full integration test
+.cue-integration:
+  image: cuelang/cue:latest
+  stage: test
+  script:
+    - cue vet ./...
+    - cue vet -c ./tests/...
+    - |
+      for dir in ./examples/*/; do
+        echo "Validating ${dir}..."
+        cue vet ${dir}
+      done

@@ -1,0 +1,200 @@
+# GitLab CI template for topology visualization and deployment planning
+#
+# Include in your .gitlab-ci.yml:
+#   include:
+#     - project: 'user/quicue-ci'
+#       file: '/gitlab/cue-topology.yml'
+
+# Export topology layers as artifact
+.cue-topology:
+  image: cuelang/cue:latest
+  stage: build
+  variables:
+    CUE_PATH: "."
+    GRAPH_EXPR: "infra"
+  script:
+    - mkdir -p artifacts
+    - |
+      echo "=== Topology Analysis ==="
+
+      # Export full topology
+      cue export ${CUE_PATH} \
+        -e "${GRAPH_EXPR}.topology" \
+        --out json > artifacts/topology.json
+
+      # Export summary
+      cue eval ${CUE_PATH} -e "
+        {
+          layers: ${GRAPH_EXPR}.topology
+          roots: ${GRAPH_EXPR}.roots
+          leaves: ${GRAPH_EXPR}.leaves
+          total_resources: len(${GRAPH_EXPR}.Input)
+          depth: len(${GRAPH_EXPR}.topology)
+        }
+      " --out yaml > artifacts/topology-summary.yaml
+
+      echo "Topology exported to artifacts/"
+      cat artifacts/topology-summary.yaml
+  artifacts:
+    paths:
+      - artifacts/topology.json
+      - artifacts/topology-summary.yaml
+    expire_in: 7 days
+
+# Export deployment plan (startup/shutdown sequences)
+.cue-deployment-plan:
+  image: cuelang/cue:latest
+  stage: build
+  variables:
+    CUE_PATH: "."
+    GRAPH_EXPR: "infra"
+  script:
+    - mkdir -p artifacts
+    - |
+      echo "=== Deployment Plan ==="
+
+      cue eval ${CUE_PATH} -e "
+        import \"quicue.ca/patterns\"
+
+        _plan: patterns.#DeploymentPlan & {Graph: ${GRAPH_EXPR}}
+
+        {
+          startup_sequence: _plan.startup_sequence
+          shutdown_sequence: _plan.shutdown_sequence
+          layers: _plan.layers
+        }
+      " --out yaml > artifacts/deployment-plan.yaml
+
+      echo "Deployment plan:"
+      cat artifacts/deployment-plan.yaml
+  artifacts:
+    paths:
+      - artifacts/deployment-plan.yaml
+    expire_in: 7 days
+
+# Criticality ranking - what to protect most
+.cue-criticality:
+  image: cuelang/cue:latest
+  stage: build
+  variables:
+    CUE_PATH: "."
+    GRAPH_EXPR: "infra"
+  script:
+    - mkdir -p artifacts
+    - |
+      echo "=== Criticality Ranking ==="
+
+      cue eval ${CUE_PATH} -e "
+        import \"quicue.ca/patterns\"
+
+        _crit: patterns.#CriticalityRank & {Graph: ${GRAPH_EXPR}}
+
+        {
+          ranked: _crit.ranked
+          critical: [for r in _crit.ranked if r.dependents > 3 {r.name}]
+          single_points_of_failure: [for r in _crit.ranked if r.dependents > 5 {r}]
+        }
+      " --out yaml > artifacts/criticality.yaml
+
+      echo "Criticality ranking:"
+      cat artifacts/criticality.yaml
+  artifacts:
+    paths:
+      - artifacts/criticality.yaml
+    expire_in: 7 days
+
+# Graph validation
+.cue-graph-validate:
+  image: cuelang/cue:latest
+  stage: validate
+  variables:
+    CUE_PATH: "."
+    GRAPH_EXPR: "infra"
+  script:
+    - |
+      echo "=== Graph Validation ==="
+
+      RESULT=$(cue eval ${CUE_PATH} -e "
+        import \"quicue.ca/patterns\"
+
+        _v: patterns.#ValidateGraph & {Input: ${GRAPH_EXPR}.Input}
+
+        {
+          valid: _v.valid
+          issues: _v.issues
+        }
+      " --out yaml)
+
+      echo "$RESULT"
+
+      # Fail if not valid
+      if echo "$RESULT" | grep -q "valid: false"; then
+        echo "ERROR: Graph validation failed"
+        exit 1
+      fi
+
+      echo "Graph validation passed"
+
+# Export graph as Mermaid diagram
+.cue-mermaid:
+  image: cuelang/cue:latest
+  stage: build
+  variables:
+    CUE_PATH: "."
+    GRAPH_EXPR: "infra"
+  script:
+    - mkdir -p artifacts
+    - |
+      echo "=== Mermaid Diagram Generation ==="
+
+      # Generate mermaid from graph
+      cue eval ${CUE_PATH} -e "
+        import \"strings\"
+
+        _resources: ${GRAPH_EXPR}.Input
+
+        // Generate mermaid flowchart
+        _lines: [
+          \"graph TD\",
+          for name, r in _resources {
+            if r.depends_on != _|_ {
+              for dep in r.depends_on {
+                \"    \(dep) --> \(name)\"
+              }
+            }
+          }
+        ]
+
+        strings.Join(_lines, \"\\n\")
+      " --out text > artifacts/graph.mmd
+
+      echo "Mermaid diagram:"
+      cat artifacts/graph.mmd
+  artifacts:
+    paths:
+      - artifacts/graph.mmd
+    expire_in: 7 days
+
+# Group resources by type
+.cue-group-by-type:
+  image: cuelang/cue:latest
+  stage: build
+  variables:
+    CUE_PATH: "."
+    GRAPH_EXPR: "infra"
+  script:
+    - mkdir -p artifacts
+    - |
+      echo "=== Resources by Type ==="
+
+      cue eval ${CUE_PATH} -e "
+        import \"quicue.ca/patterns\"
+
+        patterns.#GroupByType & {Input: ${GRAPH_EXPR}.Input}
+      " --out yaml > artifacts/by-type.yaml
+
+      cat artifacts/by-type.yaml
+  artifacts:
+    paths:
+      - artifacts/by-type.yaml
+    expire_in: 7 days

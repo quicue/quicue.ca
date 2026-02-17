@@ -1,0 +1,185 @@
+# GitLab CI template for impact analysis on MRs
+# Shows what resources are affected by changes
+#
+# Include in your .gitlab-ci.yml:
+#   include:
+#     - project: 'user/quicue-ci'
+#       file: '/gitlab/cue-impact.yml'
+
+.cue-impact:
+  image: cuelang/cue:latest
+  stage: test
+  variables:
+    # Override these in your job
+    CUE_PATH: "."
+    IMPACT_EXPR: "impact"
+    GRAPH_EXPR: "infra"
+  script:
+    - |
+      echo "=== Impact Analysis ==="
+
+      # Get changed .cue files
+      CHANGED_FILES=$(git diff --name-only $CI_MERGE_REQUEST_DIFF_BASE_SHA..HEAD -- '*.cue' 2>/dev/null || echo "")
+
+      if [ -z "$CHANGED_FILES" ]; then
+        echo "No CUE files changed"
+        exit 0
+      fi
+
+      echo "Changed files:"
+      echo "$CHANGED_FILES"
+      echo ""
+
+      # Extract resource names from changed files
+      CHANGED_RESOURCES=""
+      for file in $CHANGED_FILES; do
+        # Try to extract resource name from file (assumes filename = resource name pattern)
+        resource=$(basename "$file" .cue)
+        CHANGED_RESOURCES="$CHANGED_RESOURCES $resource"
+      done
+
+      echo "Potentially affected resources: $CHANGED_RESOURCES"
+      echo ""
+
+      # Run impact query for each changed resource
+      for resource in $CHANGED_RESOURCES; do
+        echo "--- Impact of '$resource' ---"
+        cue eval ${CUE_PATH} \
+          -e "patterns.#ImpactQuery & {Graph: ${GRAPH_EXPR}, Target: \"${resource}\"}" \
+          2>/dev/null || echo "Could not analyze impact for $resource"
+        echo ""
+      done
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  allow_failure: true
+
+# Impact analysis with MR comment
+.cue-impact-comment:
+  extends: .cue-impact
+  variables:
+    GITLAB_API_URL: "${CI_API_V4_URL}"
+  script:
+    - |
+      echo "=== Impact Analysis with MR Comment ==="
+
+      # Get changed .cue files
+      CHANGED_FILES=$(git diff --name-only $CI_MERGE_REQUEST_DIFF_BASE_SHA..HEAD -- '*.cue' 2>/dev/null || echo "")
+
+      if [ -z "$CHANGED_FILES" ]; then
+        echo "No CUE files changed"
+        exit 0
+      fi
+
+      # Build impact report
+      REPORT="## Impact Analysis\n\n"
+      REPORT="${REPORT}**Changed files:**\n"
+      for file in $CHANGED_FILES; do
+        REPORT="${REPORT}- \`$file\`\n"
+      done
+      REPORT="${REPORT}\n"
+
+      # Analyze each changed resource
+      for file in $CHANGED_FILES; do
+        resource=$(basename "$file" .cue)
+        REPORT="${REPORT}### $resource\n\n"
+
+        # Get affected resources
+        AFFECTED=$(cue eval ${CUE_PATH} \
+          -e "patterns.#ImpactQuery & {Graph: ${GRAPH_EXPR}, Target: \"${resource}\"}" \
+          -e ".affected" \
+          --out json 2>/dev/null || echo "[]")
+
+        if [ "$AFFECTED" != "[]" ] && [ "$AFFECTED" != "null" ]; then
+          REPORT="${REPORT}**Affected resources:**\n"
+          REPORT="${REPORT}\`\`\`json\n${AFFECTED}\n\`\`\`\n\n"
+        else
+          REPORT="${REPORT}_No downstream dependencies_\n\n"
+        fi
+      done
+
+      # Post comment to MR
+      if [ -n "$CI_MERGE_REQUEST_IID" ] && [ -n "$GITLAB_TOKEN" ]; then
+        echo "Posting impact report to MR #${CI_MERGE_REQUEST_IID}"
+        curl --silent --request POST \
+          --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+          --header "Content-Type: application/json" \
+          --data "{\"body\": \"$(echo -e "$REPORT" | sed 's/"/\\"/g' | tr '\n' ' ')\"}" \
+          "${GITLAB_API_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/notes"
+      else
+        echo "No GITLAB_TOKEN or not an MR - printing report:"
+        echo -e "$REPORT"
+      fi
+  allow_failure: true
+
+# Blast radius analysis - more detailed impact
+.cue-blast-radius:
+  image: cuelang/cue:latest
+  stage: test
+  variables:
+    CUE_PATH: "."
+    GRAPH_EXPR: "infra"
+    TARGET: ""
+  script:
+    - |
+      if [ -z "$TARGET" ]; then
+        echo "ERROR: TARGET variable must be set"
+        exit 1
+      fi
+
+      echo "=== Blast Radius Analysis for '$TARGET' ==="
+      echo ""
+
+      # Full blast radius analysis
+      cue eval ${CUE_PATH} -e "
+        import \"quicue.ca/patterns\"
+
+        _blast: patterns.#BlastRadius & {
+          Graph: ${GRAPH_EXPR}
+          Target: \"${TARGET}\"
+        }
+
+        {
+          target: \"${TARGET}\"
+          affected: _blast.affected
+          affected_count: len(_blast.affected)
+          rollback_order: _blast.rollback_order
+          safe_peers: _blast.safe_peers
+        }
+      " --out yaml
+  when: manual
+  allow_failure: true
+
+# Health propagation simulation
+.cue-health-sim:
+  image: cuelang/cue:latest
+  stage: test
+  variables:
+    CUE_PATH: "."
+    GRAPH_EXPR: "infra"
+    DOWN_RESOURCES: ""  # Space-separated list: "dns auth"
+  script:
+    - |
+      echo "=== Health Propagation Simulation ==="
+
+      # Build status map from DOWN_RESOURCES
+      STATUS_MAP="{"
+      for resource in $DOWN_RESOURCES; do
+        STATUS_MAP="${STATUS_MAP}\"${resource}\": \"down\", "
+      done
+      STATUS_MAP="${STATUS_MAP%%, }}"
+
+      echo "Simulating: $DOWN_RESOURCES down"
+      echo ""
+
+      cue eval ${CUE_PATH} -e "
+        import \"quicue.ca/patterns\"
+
+        _health: patterns.#HealthStatus & {
+          Graph: ${GRAPH_EXPR}
+          Status: ${STATUS_MAP}
+        }
+
+        _health.propagated
+      " --out yaml
+  when: manual
+  allow_failure: true

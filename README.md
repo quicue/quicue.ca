@@ -1,0 +1,167 @@
+# quicue.ca
+
+[![Validate](https://github.com/quicue/quicue.ca/actions/workflows/validate.yml/badge.svg)](https://github.com/quicue/quicue.ca/actions/workflows/validate.yml)
+
+A [CUE](https://cuelang.org/) vocabulary for modeling infrastructure as typed, queryable dependency graphs.
+
+## Why
+
+Infrastructure tools define *what* to deploy but not *how things relate*. When something breaks, you're left grepping configs to figure out what depends on what. Blast radius is tribal knowledge. Deployment ordering is a wiki page that's always out of date.
+
+quicue.ca models infrastructure as a graph of typed resources with explicit dependencies. CUE's type system validates the graph at compile time — before anything runs. The graph drives deployment ordering, impact analysis, rollback plans, and documentation, all computed from one source of truth.
+
+**Who this is for:** Platform engineers and infrastructure teams who manage enough resources that dependency relationships matter. Works for homelabs and datacenters alike.
+
+## What it does
+
+```
+You write CUE          quicue.ca computes           You get
+─────────────          ──────────────────           ────────
+Resources              Dependency graph              Deployment plans
+  with @type           Blast radius                  Executable commands
+  and depends_on       SPOF detection                Jupyter runbooks
+                       Criticality ranking           Rundeck jobs
+Provider bindings      Impact analysis               MkDocs wiki
+  by @type overlap     Health simulation             JSON-LD graph
+                       Rollback plans                OpenAPI spec
+```
+
+## Quick start
+
+```bash
+# Clone and validate
+git clone https://github.com/quicue/quicue.ca.git
+cd quicue.ca
+cue vet ./vocab/ ./patterns/
+
+# Run the datacenter example (30 resources, 29 providers, 654 resolved commands)
+cue eval ./examples/datacenter/ -e output.summary
+
+# See what breaks if the router goes down
+cue eval ./examples/datacenter/ -e output.impact.\"router-core\"
+
+# Export the full execution plan as JSON
+cue export ./examples/datacenter/ -e output --out json
+```
+
+## How it works
+
+Resources declare what they are (`@type`) and what they depend on (`depends_on`), both as sets:
+
+```cue
+dns: #Resource & {
+    "@type":     {LXCContainer: true, DNSServer: true}
+    depends_on:  {router: true}
+    host:        "node-1"
+    container_id: "101"
+}
+```
+
+Providers declare what resource types they serve. quicue.ca matches providers to resources by type overlap, then resolves command templates at compile time — every `{host}` and `{container_id}` placeholder is filled from resource fields before you run anything. If a field is missing, CUE catches it as a type error.
+
+The result is a fully resolved execution plan: deployment order, rollback sequence, and per-resource commands, all as plain JSON.
+
+## Architecture
+
+Four-layer model:
+
+| Layer | Path | Purpose |
+|-------|------|---------|
+| **Definition** | `vocab/`, `patterns/` | Core schemas and graph algorithms |
+| **Template** | `template/*/` | 29 platform-specific providers |
+| **Value** | `examples/` | Concrete infrastructure definitions |
+| **Interaction** | `ou/` | Role-scoped views and W3C Hydra JSON-LD API |
+
+### Core schemas (`vocab/`)
+
+- **`#Resource`** — Identity, network, hosting, dependencies, capabilities
+- **`#Action`** — Executable operations with timeout, destructive flags, prerequisites
+- **`#ActionDef`** — Action definitions with typed parameters and compile-time `from_field` bindings
+- **`#TypeRegistry`** — Maps resource types to supported actions
+
+### Graph patterns (`patterns/`)
+
+- **`#InfraGraph`** — Dependency analysis: depth, ancestors, topology, DAG validation
+- **`#BindCluster`** — Provider binding: matches `@type` overlap, resolves command templates
+- **`#ExecutionPlan`** — Unified binding + deployment ordering
+- **`#ImpactQuery`** — "What breaks if X fails?"
+- **`#BlastRadius`** — Transitive failure propagation
+- **`#SinglePointsOfFailure`** — Resources whose failure cascades widely
+- **`#CriticalityRank`** — Rank resources by downstream impact
+- **`#HealthStatus`** — Simulate failures and see propagation
+- **`#RollbackPlan`** — "If layer N fails, what do we undo?"
+- **`#DeploymentPlan`** — Layer-by-layer startup ordering with gates
+
+## Providers (29)
+
+| Category | Providers |
+|----------|-----------|
+| Compute | proxmox, govc, powercli, kubevirt |
+| Container/Orchestration | docker, incus, k3d, kubectl, argocd |
+| CI/CD | dagger, gitlab |
+| Networking | vyos, caddy, nginx |
+| DNS | cloudflare, powerdns, technitium |
+| Identity/Secrets | vault, keycloak |
+| Database | postgresql |
+| DCIM/IPAM | netbox |
+| Provisioning | foreman |
+| Automation | ansible, awx |
+| Monitoring | zabbix |
+| IaC | terraform, opentofu |
+| Backup | restic, pbs |
+
+Each provider follows:
+```
+template/<name>/
+  meta/meta.cue         # Metadata
+  patterns/<name>.cue   # Action definitions using #ActionDef
+  examples/demo.cue     # Working example
+  README.md
+```
+
+## Examples
+
+### `examples/datacenter/` — Full pipeline
+30 resources across all 29 providers. Exercises every pattern: graph analysis, provider binding, impact queries, blast radius, SPOF detection, deployment planning, execution plans, JSON-LD export, OpenAPI generation.
+
+### `examples/homelab/` — Reference homelab
+14 resources on a 3-node cluster. Edit `_site` config, swap `providers.cue` for your stack (Proxmox, Docker, K8s, Incus), run `cue export`.
+
+### Focused examples
+- `graph-patterns/` — Dependency analysis patterns
+- `drift-detection/` — Declared vs live state reconciliation
+- `federation/` — Multi-site core/edge topology
+- `type-composition/` — @type matching and provider binding
+- `3-layer/` — Minimal 3-layer infrastructure
+- `docker-bootstrap/` — Generate docker run commands from CUE
+- `wiki-projection/` — Generate MkDocs from resource graphs
+- `toon-export/` — Token-optimized compact notation (~55% smaller than JSON)
+
+## Additional modules
+
+- `orche/` — Multi-site federation and drift detection
+- `boot/` — Bootstrap sequencing and credential collection
+- `cab/` — Change Advisory Board reports (impact analysis, runbooks)
+- `ci/gitlab/` — Reusable GitLab CI templates
+- `wiki/` — Generate MkDocs sites from resource graphs
+- `ou/` — Role-scoped views (ops/dev/readonly) with W3C Hydra JSON-LD
+- `server/` — FastAPI execution gateway ([api.quicue.ca](https://api.quicue.ca/docs))
+- `kg/` — Knowledge graph framework ([quicue-kg](https://github.com/quicue/quicue-kg))
+
+## Knowledge graph
+
+`.kg/` tracks project decisions, patterns, insights, and rejected approaches as validated CUE data. See [quicue-kg](https://github.com/quicue/quicue-kg) for the framework.
+
+```bash
+# What decisions does this project track?
+cd .kg && cue export . -e _index.summary --out json
+```
+
+## Requirements
+
+- [CUE](https://cuelang.org/) v0.15.4+
+- Python 3.12+ (only for the optional server)
+
+## License
+
+Apache 2.0

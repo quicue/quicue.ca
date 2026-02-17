@@ -1,0 +1,41 @@
+site_name: quicue.ca
+site_description: Infrastructure as typed dependency graphs in CUE
+site_url: https://docs.quicue.ca/
+repo_url: https://github.com/quicue/quicue.ca
+repo_name: quicue/quicue.ca
+edit_uri: blob/main/docs/
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: blue
+  features:
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - tables
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Architecture: architecture.md
+  - Patterns: patterns.md
+  - Templates: templates.md
+  - Example Output: example/index.md

@@ -1,0 +1,17 @@
+# vcsim + PowerCLI container for testing
+#
+# Usage:
+#   docker compose up -d
+#   docker compose exec powercli pwsh
+#   PS> Connect-VIServer -Server vcsim -Port 8989 -User user -Password pass
+services:
+  vcsim:
+    image: vmware/vcsim
+    ports:
+      - "8989:8989"
+  powercli:
+    image: vmware/powerclicore
+    depends_on:
+      - vcsim
+    stdin_open: true
+    tty: true

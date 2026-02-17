@@ -1,0 +1,115 @@
+# Nightly Validation Pipeline
+#
+# Runs scheduled validation of the entire infrastructure graph.
+# Designed for CAB workflows where changes accumulate during the day
+# and are validated overnight for morning review.
+#
+# Usage:
+#   include:
+#     - project: 'quicue/quicue-cab'
+#       file: '/gitlab/nightly-validation.yml'
+#
+#   nightly:
+#     extends: .cab-nightly-validation
+#     variables:
+#       CUE_PATH: "."
+#       GRAPH_EXPR: "infra"
+
+.cab-nightly-validation:
+  image: cuelang/cue:latest
+  stage: validate
+  variables:
+    CUE_PATH: "."
+    GRAPH_EXPR: "infra"
+  script:
+    - |
+      echo "=== CAB Nightly Validation ==="
+      echo "Date: $(date -u +%Y-%m-%d)"
+      echo "Commit: ${CI_COMMIT_SHA}"
+      echo ""
+
+      # Full schema validation
+      echo "--- Schema Validation ---"
+      cue vet ${CUE_PATH}/...
+      echo "Schema validation: PASSED"
+
+      # Graph structure validation
+      echo ""
+      echo "--- Graph Validation ---"
+      cue eval ${CUE_PATH} -e "
+        import \"quicue.ca@v0:patterns\"
+
+        _graph: patterns.#InfraGraph & {Input: ${GRAPH_EXPR}}
+        _validation: patterns.#ValidateGraph & {Graph: _graph}
+
+        {
+          valid: _validation.valid
+          issues: _validation.issues
+          metrics: {
+            total_resources: len([for k, _ in _graph.resources {k}])
+            max_depth: _graph.metrics.max_depth
+            roots: len(_graph.roots)
+            leaves: len(_graph.leaves)
+          }
+        }
+      " --out yaml
+
+      # Check for validation issues
+      ISSUES=$(cue eval ${CUE_PATH} -e "
+        import \"quicue.ca@v0:patterns\"
+        _graph: patterns.#InfraGraph & {Input: ${GRAPH_EXPR}}
+        _validation: patterns.#ValidateGraph & {Graph: _graph}
+        len(_validation.issues)
+      " --out text)
+
+      if [ "$ISSUES" != "0" ]; then
+        echo ""
+        echo "WARNING: Graph has $ISSUES validation issues"
+        exit 1
+      fi
+
+      echo ""
+      echo "Graph validation: PASSED"
+  artifacts:
+    paths:
+      - validation-report.yml
+    expire_in: 30 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+# Validation with full analysis (takes longer, more comprehensive)
+.cab-nightly-full-analysis:
+  extends: .cab-nightly-validation
+  script:
+    - |
+      echo "=== CAB Full Analysis ==="
+
+      # Run all analysis queries
+      cue eval ${CUE_PATH} -e "
+        import \"quicue.ca@v0:patterns\"
+        import \"quicue.ca/infra\"
+
+        _graph: patterns.#InfraGraph & {Input: ${GRAPH_EXPR}}
+
+        // Redundancy check
+        _redundancy: infra.#RedundancyCheck & {Resources: ${GRAPH_EXPR}}
+
+        // Criticality ranking
+        _criticality: patterns.#CriticalityRank & {Graph: _graph}
+
+        // Single points of failure
+        _spof: patterns.#SinglePointsOfFailure & {Graph: _graph}
+
+        {
+          graph_metrics: _graph.metrics
+          redundancy: _redundancy.summary
+          top_critical: [for r in _criticality.ranked[:5] {r}]
+          single_points_of_failure: _spof.risks
+        }
+      " --out yaml > full-analysis.yml
+
+      cat full-analysis.yml
+  artifacts:
+    paths:
+      - full-analysis.yml
+    expire_in: 30 days

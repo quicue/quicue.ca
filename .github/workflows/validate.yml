@@ -1,0 +1,53 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  cue-vet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install CUE
+        uses: cue-lang/setup-cue@v1.0.1
+        with:
+          version: v0.15.4
+
+      - name: Validate core vocabulary
+        run: cue vet ./vocab/ ./patterns/
+
+      - name: Validate all examples
+        run: |
+          for d in examples/*/; do
+            echo "=== $(basename $d) ==="
+            cue vet "./$d"
+          done
+
+      - name: Validate all provider templates
+        run: |
+          for d in template/*/; do
+            echo "=== $(basename $d) ==="
+            cue vet "./$d/..."
+          done
+
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install server dependencies
+        run: pip install -r server/requirements.txt
+
+      - name: Install test dependencies
+        run: pip install pytest httpx pytest-asyncio
+
+      - name: Run server tests
+        run: pytest server/tests/ -v

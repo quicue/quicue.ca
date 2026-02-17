@@ -1,0 +1,128 @@
+{
+  "@context": {
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "quicue": "https://quicue.ca/vocab#"
+  },
+  "@graph": [
+    {
+      "@id": "quicue:Vocabulary",
+      "@type": "skos:ConceptScheme",
+      "skos:prefLabel": "Quicue Infrastructure Vocabulary",
+      "skos:definition": "A CUE vocabulary for modeling infrastructure as typed, queryable graphs",
+      "skos:hasTopConcept": [
+        {"@id": "quicue:Resource"},
+        {"@id": "quicue:Action"},
+        {"@id": "quicue:TypeRegistry"}
+      ]
+    },
+    {
+      "@id": "quicue:Resource",
+      "@type": "skos:Concept",
+      "skos:prefLabel": "Resource",
+      "skos:definition": "Core resource definition for infrastructure-as-graph. Every infrastructure resource conforms to this schema.",
+      "skos:inScheme": {"@id": "quicue:Vocabulary"},
+      "skos:narrower": [
+        {"@id": "quicue:ResourceIdentity"},
+        {"@id": "quicue:ResourceNetwork"},
+        {"@id": "quicue:ResourceHosting"},
+        {"@id": "quicue:ResourceDependencies"}
+      ],
+      "quicue:cueType": "#Resource"
+    },
+    {
+      "@id": "quicue:ResourceIdentity",
+      "@type": "skos:Concept",
+      "skos:prefLabel": "Resource Identity",
+      "skos:definition": "Identity fields: name, @id (IRI), @type (semantic types)",
+      "skos:broader": {"@id": "quicue:Resource"}
+    },
+    {
+      "@id": "quicue:ResourceNetwork",
+      "@type": "skos:Concept",
+      "skos:prefLabel": "Resource Network",
+      "skos:definition": "Network fields: ip, fqdn for connectivity",
+      "skos:broader": {"@id": "quicue:Resource"}
+    },
+    {
+      "@id": "quicue:ResourceHosting",
+      "@type": "skos:Concept",
+      "skos:prefLabel": "Resource Hosting",
+      "skos:definition": "Hosting fields: host, container_id, vm_id, hosted_on for placement",
+      "skos:broader": {"@id": "quicue:Resource"}
+    },
+    {
+      "@id": "quicue:ResourceDependencies",
+      "@type": "skos:Concept",
+      "skos:prefLabel": "Resource Dependencies",
+      "skos:definition": "Dependency graph: depends_on (set membership for unification)",
+      "skos:broader": {"@id": "quicue:Resource"}
+    },
+    {
+      "@id": "quicue:Action",
+      "@type": "skos:Concept",
+      "skos:prefLabel": "Action",
+      "skos:definition": "Base schema for all operational actions. Commands with typed parameters.",
+      "skos:inScheme": {"@id": "quicue:Vocabulary"},
+      "skos:narrower": [
+        {"@id": "quicue:ActionDef"},
+        {"@id": "quicue:ActionRegistry"}
+      ],
+      "quicue:cueType": "#Action"
+    },
+    {
+      "@id": "quicue:ActionDef",
+      "@type": "skos:Concept",
+      "skos:prefLabel": "Action Definition",
+      "skos:definition": "Action with explicit parameter contracts: params, command_template, category",
+      "skos:broader": {"@id": "quicue:Action"},
+      "quicue:cueType": "#ActionDef"
+    },
+    {
+      "@id": "quicue:ActionRegistry",
+      "@type": "skos:Concept",
+      "skos:prefLabel": "Action Registry",
+      "skos:definition": "Catalog of known actions: ping, ssh, container_status, etc. Extensible by providers.",
+      "skos:broader": {"@id": "quicue:Action"},
+      "quicue:cueType": "#ActionRegistry"
+    },
+    {
+      "@id": "quicue:TypeRegistry",
+      "@type": "skos:Concept",
+      "skos:prefLabel": "Type Registry",
+      "skos:definition": "Semantic types for infrastructure resources. Types describe WHAT a resource IS.",
+      "skos:inScheme": {"@id": "quicue:Vocabulary"},
+      "skos:narrower": [
+        {"@id": "quicue:ImplementationType"},
+        {"@id": "quicue:SemanticType"},
+        {"@id": "quicue:ClassificationType"}
+      ],
+      "quicue:cueType": "#TypeRegistry"
+    },
+    {
+      "@id": "quicue:ImplementationType",
+      "@type": "skos:Concept",
+      "skos:prefLabel": "Implementation Type",
+      "skos:definition": "How a resource runs: LXCContainer, DockerContainer, VirtualMachine",
+      "skos:broader": {"@id": "quicue:TypeRegistry"},
+      "skos:example": ["LXCContainer", "DockerContainer", "ComposeStack", "VirtualMachine"]
+    },
+    {
+      "@id": "quicue:SemanticType",
+      "@type": "skos:Concept",
+      "skos:prefLabel": "Semantic Type",
+      "skos:definition": "What a resource does: DNSServer, ReverseProxy, Vault, Database",
+      "skos:broader": {"@id": "quicue:TypeRegistry"},
+      "skos:example": ["DNSServer", "ReverseProxy", "AuthServer", "Database", "MonitoringServer"]
+    },
+    {
+      "@id": "quicue:ClassificationType",
+      "@type": "skos:Concept",
+      "skos:prefLabel": "Classification Type",
+      "skos:definition": "Operational tier/tag: CriticalInfra (extra monitoring/alerting)",
+      "skos:broader": {"@id": "quicue:TypeRegistry"},
+      "skos:example": ["CriticalInfra"]
+    }
+  ]
+}

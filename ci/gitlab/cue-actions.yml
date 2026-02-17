@@ -1,0 +1,190 @@
+# GitLab CI template for action generation and command export
+# Generates runbooks and operational commands from graph
+#
+# Include in your .gitlab-ci.yml:
+#   include:
+#     - project: 'user/quicue-ci'
+#       file: '/gitlab/cue-actions.yml'
+
+# Export all actions as JSON artifact
+.cue-export-actions:
+  image: cuelang/cue:latest
+  stage: build
+  variables:
+    CUE_PATH: "."
+    ACTIONS_EXPR: "actions"
+  script:
+    - mkdir -p artifacts
+    - |
+      echo "=== Action Export ==="
+
+      cue export ${CUE_PATH} \
+        -e "${ACTIONS_EXPR}" \
+        --out json > artifacts/actions.json
+
+      # Count actions
+      ACTION_COUNT=$(jq '[.. | .command? | select(. != null)] | length' artifacts/actions.json)
+      echo "Exported $ACTION_COUNT actions to artifacts/actions.json"
+  artifacts:
+    paths:
+      - artifacts/actions.json
+    expire_in: 7 days
+
+# Generate bash script with all commands
+.cue-generate-runbook:
+  image: cuelang/cue:latest
+  stage: build
+  variables:
+    CUE_PATH: "."
+    RESOURCES_EXPR: "resources"
+  script:
+    - mkdir -p artifacts
+    - |
+      echo "=== Runbook Generation ==="
+
+      cat > artifacts/runbook.sh << 'HEADER'
+      #!/bin/bash
+      # Auto-generated runbook from quicue graph
+      # Generated: $(date -Iseconds)
+
+      set -e
+
+      usage() {
+        echo "Usage: $0 <resource> <action>"
+        echo ""
+        echo "Resources:"
+        grep "^#.*resource:" "$0" | sed 's/# resource: /  /'
+        exit 1
+      }
+
+      [ $# -lt 2 ] && usage
+
+      RESOURCE="$1"
+      ACTION="$2"
+
+      HEADER
+
+      # Export commands per resource
+      cue eval ${CUE_PATH} -e "
+        _resources: ${RESOURCES_EXPR}
+
+        // Generate case statements
+        for name, r in _resources {
+          if r.actions != _|_ {
+            \"# resource: \(name)\"
+            for actionName, action in r.actions {
+              if action.command != _|_ {
+                \"if [ \\\"\\$RESOURCE\\\" = \\\"\(name)\\\" ] && [ \\\"\\$ACTION\\\" = \\\"\(actionName)\\\" ]; then\"
+                \"  \(action.command)\"
+                \"  exit 0\"
+                \"fi\"
+              }
+            }
+          }
+        }
+      " --out text >> artifacts/runbook.sh
+
+      echo 'echo "Unknown resource/action: $RESOURCE $ACTION"' >> artifacts/runbook.sh
+      echo 'exit 1' >> artifacts/runbook.sh
+
+      chmod +x artifacts/runbook.sh
+      echo "Generated runbook.sh"
+      head -50 artifacts/runbook.sh
+  artifacts:
+    paths:
+      - artifacts/runbook.sh
+    expire_in: 7 days
+
+# Generate GitLab CI jobs dynamically from CUE definitions
+.cue-generate-ci-jobs:
+  image: cuelang/cue:latest
+  stage: build
+  variables:
+    CUE_PATH: "."
+    RESOURCES_EXPR: "resources"
+    OUTPUT_FILE: ".gitlab-ci-generated.yml"
+  script:
+    - |
+      echo "=== Dynamic CI Job Generation ==="
+
+      cue eval ${CUE_PATH} -e "
+        import \"encoding/yaml\"
+
+        _resources: ${RESOURCES_EXPR}
+
+        _jobs: {
+          stages: [\"resource-actions\"]
+
+          for name, r in _resources {
+            if r.actions != _|_ {
+              for actionName, action in r.actions {
+                if action.command != _|_ {
+                  \"\(name):\(actionName)\": {
+                    stage: \"resource-actions\"
+                    script: [action.command]
+                    when: \"manual\"
+                    allow_failure: true
+                    rules: [{if: \"\\$CI_PIPELINE_SOURCE == \\\"web\\\"\"}]
+                    if action.category != _|_ {
+                      tags: [action.category]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        yaml.Marshal(_jobs)
+      " --out text > ${OUTPUT_FILE}
+
+      JOB_COUNT=$(grep -c "stage:" ${OUTPUT_FILE} || echo 0)
+      echo "Generated $JOB_COUNT CI jobs to ${OUTPUT_FILE}"
+  artifacts:
+    paths:
+      - ${OUTPUT_FILE}
+    expire_in: 7 days
+
+# Validate generated actions
+.cue-validate-actions:
+  image: cuelang/cue:latest
+  stage: test
+  variables:
+    CUE_PATH: "."
+    RESOURCES_EXPR: "resources"
+  script:
+    - |
+      echo "=== Action Validation ==="
+
+      # Check all actions have required fields
+      RESULT=$(cue eval ${CUE_PATH} -e "
+        _resources: ${RESOURCES_EXPR}
+
+        _issues: [
+          for name, r in _resources {
+            if r.actions != _|_ {
+              for actionName, action in r.actions {
+                if action.command == _|_ {
+                  {resource: name, action: actionName, issue: \"missing command\"}
+                }
+                if action.name == _|_ {
+                  {resource: name, action: actionName, issue: \"missing name\"}
+                }
+              }
+            }
+          }
+        ]
+
+        {
+          total_issues: len(_issues)
+          issues: _issues
+        }
+      " --out yaml)
+
+      echo "$RESULT"
+
+      if echo "$RESULT" | grep -q "total_issues: 0"; then
+        echo "All actions valid"
+      else
+        echo "WARNING: Some actions have issues"
+      fi

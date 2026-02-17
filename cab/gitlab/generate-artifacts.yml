@@ -1,0 +1,77 @@
+# Artifact Generation Pipeline
+#
+# Generates all provider configs from the infrastructure graph.
+# Single evaluation, multiple outputs for efficiency.
+#
+# Usage:
+#   include:
+#     - project: 'quicue/quicue-cab'
+#       file: '/gitlab/generate-artifacts.yml'
+#
+#   generate:
+#     extends: .cab-generate-all
+#     variables:
+#       CUE_PATH: "."
+#       GRAPH_EXPR: "infra"
+
+.cab-generate-all:
+  image: cuelang/cue:latest
+  stage: build
+  variables:
+    CUE_PATH: "."
+    GRAPH_EXPR: "infra"
+    OUTPUT_DIR: "artifacts"
+  script:
+    - |
+      echo "=== CAB Artifact Generation ==="
+      mkdir -p ${OUTPUT_DIR}/{configs,reports}
+
+      # Generate all configs in single evaluation where possible
+      echo "--- Generating Provider Configs ---"
+
+      # Ansible inventory
+      cue eval ${CUE_PATH} -e "
+        import \"quicue.ca/infra\"
+        infra.#AnsibleInventory & {Resources: ${GRAPH_EXPR}}
+      " --out yaml > ${OUTPUT_DIR}/configs/ansible-inventory.yml 2>/dev/null || echo "Ansible: skipped"
+
+      # Prometheus targets
+      cue eval ${CUE_PATH} -e "
+        import \"quicue.ca/infra\"
+        infra.#PrometheusTargets & {Resources: ${GRAPH_EXPR}}
+      " --out yaml > ${OUTPUT_DIR}/configs/prometheus-targets.yml 2>/dev/null || echo "Prometheus: skipped"
+
+      # SSH config
+      cue eval ${CUE_PATH} -e "
+        import \"quicue.ca/infra\"
+        (infra.#SSHConfigGenerator & {Resources: ${GRAPH_EXPR}}).output
+      " --out text > ${OUTPUT_DIR}/configs/ssh-config 2>/dev/null || echo "SSH: skipped"
+
+      # Full graph export (JSON for tooling)
+      cue export ${CUE_PATH} -e ${GRAPH_EXPR} --out json > ${OUTPUT_DIR}/configs/graph.json
+
+      echo ""
+      echo "--- Generated Artifacts ---"
+      find ${OUTPUT_DIR} -type f -exec ls -lh {} \;
+  artifacts:
+    paths:
+      - ${OUTPUT_DIR}/
+    expire_in: 30 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+# Generate with custom providers
+.cab-generate-custom:
+  extends: .cab-generate-all
+  variables:
+    PROVIDERS: "ansible prometheus ssh"  # Space-separated list
+  script:
+    - |
+      mkdir -p ${OUTPUT_DIR}/configs
+
+      for provider in ${PROVIDERS}; do
+        echo "Generating: ${provider}"
+        cue export ${CUE_PATH} -e "${provider}_config" --out yaml > ${OUTPUT_DIR}/configs/${provider}.yml 2>/dev/null || echo "${provider}: not found"
+      done
+
+      find ${OUTPUT_DIR} -type f

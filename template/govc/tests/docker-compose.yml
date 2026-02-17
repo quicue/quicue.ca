@@ -1,0 +1,13 @@
+# vcsim — vCenter Simulator for testing govc commands
+# Default inventory: 1 datacenter, 1 cluster, 3 hosts, 2 VMs per host
+#
+# Usage:
+#   docker compose up -d
+#   export GOVC_URL=https://localhost:8989 GOVC_USERNAME=user GOVC_PASSWORD=pass GOVC_INSECURE=1
+#   govc ls /
+services:
+  vcsim:
+    image: vmware/vcsim
+    ports:
+      - "8989:8989"
+    # Customize inventory: -dc N -host N -vm N

@@ -1,0 +1,614 @@
+#!/usr/bin/env bash
+# kg — CUE-native knowledge graph CLI
+# Usage: kg <command> [args...]
+set -euo pipefail
+
+KG_DIR=".kg"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MODULE_DIR="$(dirname "$SCRIPT_DIR")"
+
+# .kg/ is its own CUE module — all cue commands must run from inside it
+_cue() { (cd "$KG_DIR" && cue "$@"); }
+_cue_here() { (cd "$1" && cue "${@:2}"); }
+
+cmd_help() {
+    cat <<'USAGE'
+Usage: kg <command> [args...]
+
+Commands:
+  init              Scaffold .kg/ directory with imports
+  add <type>        Create new entry (decision|pattern|insight|rejected)
+  vet               Validate .kg/ content
+  index [--full]    Export aggregated index as JSON
+  query <expr>      Query via CUE expression
+  lint              Knowledge quality checks
+  settle            Compact: conflicts, coverage gaps, referential integrity
+  diff [ref]        Semantic changelog since git ref
+  link <a> <b>      Cross-reference two entries
+  graph [--dot]     Export relationships as VizData JSON or DOT
+  fed <dirs...>     Federate multiple .kg/ directories
+USAGE
+}
+
+# ── init ──────────────────────────────────────────────────────────
+
+cmd_init() {
+    if [ -d "$KG_DIR" ]; then
+        echo "ERROR: $KG_DIR/ already exists" >&2
+        exit 1
+    fi
+
+    mkdir -p "$KG_DIR/cue.mod"
+
+    # Detect parent module name or use default
+    local module_name="local.project/kg"
+    if [ -f "cue.mod/module.cue" ]; then
+        module_name=$(grep -oP 'module:\s*"\K[^"]+' cue.mod/module.cue 2>/dev/null || echo "local.project/kg")
+    fi
+
+    cat > "$KG_DIR/cue.mod/module.cue" <<MOD
+module: "${module_name}/kg"
+language: version: "v0.15.4"
+source: kind: "self"
+MOD
+
+    # Create symlink to quicue-kg schemas
+    mkdir -p "$KG_DIR/cue.mod/pkg/quicue.ca"
+    if [ -d "$MODULE_DIR/core" ]; then
+        ln -sf "$MODULE_DIR" "$KG_DIR/cue.mod/pkg/quicue.ca/kg"
+    fi
+
+    # Scaffold project context
+    cat > "$KG_DIR/project.cue" <<'CTX'
+package kg
+
+import "quicue.ca/kg/ext@v0"
+
+project: ext.#Context & {
+	name:        "TODO: project name"
+	description: "TODO: project description"
+	status:      "active"
+}
+CTX
+
+    echo "Initialized $KG_DIR/"
+    echo "  Edit $KG_DIR/project.cue to set project identity"
+    echo "  Run: kg add decision   to create your first ADR"
+}
+
+# ── vet ───────────────────────────────────────────────────────────
+
+cmd_vet() {
+    if [ ! -d "$KG_DIR" ]; then
+        echo "ERROR: No $KG_DIR/ directory found. Run 'kg init' first." >&2
+        exit 1
+    fi
+
+    local strict="${1:-}"
+    echo "Validating $KG_DIR/..."
+    _cue vet .
+
+    if [ "$strict" = "--strict" ]; then
+        local todos
+        todos=$(grep -r "TODO" "$KG_DIR/" --include="*.cue" -l 2>/dev/null || true)
+        if [ -n "$todos" ]; then
+            echo "WARN: Files with TODO placeholders:"
+            echo "$todos" | sed 's/^/  /'
+        fi
+    fi
+
+    echo "OK: All .kg/ entries valid"
+}
+
+# ── add ───────────────────────────────────────────────────────────
+
+cmd_add() {
+    if [ ! -d "$KG_DIR" ]; then
+        echo "ERROR: No $KG_DIR/ directory found. Run 'kg init' first." >&2
+        exit 1
+    fi
+
+    local entry_type="${1:-}"
+    case "$entry_type" in
+        decision)  _add_decision ;;
+        pattern)   _add_pattern ;;
+        insight)   _add_insight ;;
+        rejected)  _add_rejected ;;
+        *)         echo "Usage: kg add <decision|pattern|insight|rejected>"; exit 1 ;;
+    esac
+}
+
+_next_id() {
+    local prefix="$1" dir="$2"
+    local max=0
+    if [ -d "$dir" ]; then
+        for f in "$dir"/*.cue; do
+            [ -f "$f" ] || continue
+            local num
+            num=$(grep -oP "${prefix}-\K\d+" "$f" 2>/dev/null | head -1)
+            if [ -n "$num" ] && [ "$num" -gt "$max" ]; then
+                max="$num"
+            fi
+        done
+    fi
+    printf "%s-%03d" "$prefix" $((max + 1))
+}
+
+_add_decision() {
+    local id
+    id=$(_next_id "ADR" "$KG_DIR")
+    local num="${id#ADR-}"
+    local file="$KG_DIR/${num}-untitled.cue"
+
+    cat > "$file" <<TMPL
+package kg
+
+import "quicue.ca/kg/core@v0"
+
+d${num}: core.#Decision & {
+	id:     "${id}"
+	title:  "TODO: decision title"
+	status: "proposed"
+	date:   "$(date +%Y-%m-%d)"
+
+	context:      "TODO: what situation led to this decision?"
+	decision:     "TODO: what was decided?"
+	rationale:    "TODO: why this approach over alternatives?"
+	consequences: ["TODO: what follows from this decision?"]
+}
+TMPL
+
+    echo "Created $file"
+    echo "  Edit the file, then run: kg vet"
+}
+
+_add_pattern() {
+    local file="$KG_DIR/new-pattern.cue"
+    local n=1
+    while [ -f "$file" ]; do
+        file="$KG_DIR/new-pattern-${n}.cue"
+        n=$((n + 1))
+    done
+
+    cat > "$file" <<TMPL
+package kg
+
+import "quicue.ca/kg/core@v0"
+
+new_pattern: core.#Pattern & {
+	name:     "TODO: pattern name"
+	category: "TODO: data|cue|pipeline|deploy|knowledge|ui|code"
+	problem:  "TODO: what problem does this solve?"
+	solution: "TODO: how does it solve it?"
+	context:  "TODO: when should you use this?"
+	used_in:  {"TODO-project": true}
+}
+TMPL
+
+    echo "Created $file"
+}
+
+_add_insight() {
+    local id
+    id=$(_next_id "INSIGHT" "$KG_DIR")
+    local num="${id#INSIGHT-}"
+    local file="$KG_DIR/insight-${num}.cue"
+
+    cat > "$file" <<TMPL
+package kg
+
+import "quicue.ca/kg/core@v0"
+
+i${num}: core.#Insight & {
+	id:          "${id}"
+	statement:   "TODO: what did you discover?"
+	evidence:    ["TODO: what evidence supports this?"]
+	method:      "observation"
+	confidence:  "low"
+	discovered:  "$(date +%Y-%m-%d)"
+	implication: "TODO: what does this mean?"
+}
+TMPL
+
+    echo "Created $file"
+}
+
+_add_rejected() {
+    local id
+    id=$(_next_id "REJ" "$KG_DIR")
+    local num="${id#REJ-}"
+    local file="$KG_DIR/rejected-${num}.cue"
+
+    cat > "$file" <<TMPL
+package kg
+
+import "quicue.ca/kg/core@v0"
+
+r${num}: core.#Rejected & {
+	id:          "${id}"
+	approach:    "TODO: what approach was tried?"
+	reason:      "TODO: why did it fail?"
+	date:        "$(date +%Y-%m-%d)"
+	alternative: "TODO: what should be done instead?"
+}
+TMPL
+
+    echo "Created $file"
+}
+
+# ── index ─────────────────────────────────────────────────────────
+
+cmd_index() {
+    if [ ! -d "$KG_DIR" ]; then
+        echo "ERROR: No $KG_DIR/ directory found." >&2; exit 1
+    fi
+
+    local expr="${1:---summary}"
+    case "$expr" in
+        --summary) _cue export . -e _index.summary 2>/dev/null || echo '{}' ;;
+        --full)    _cue export . -e _index 2>/dev/null || echo '{}' ;;
+        *)         _cue export . -e "_index.${expr}" 2>/dev/null || echo '{}' ;;
+    esac
+}
+
+# ── query ─────────────────────────────────────────────────────────
+
+cmd_query() {
+    if [ ! -d "$KG_DIR" ]; then
+        echo "ERROR: No $KG_DIR/ directory found." >&2; exit 1
+    fi
+
+    local expr="${1:-}"
+    if [ -z "$expr" ]; then
+        echo "Usage: kg query <cue-expression>"
+        echo "Examples:"
+        echo "  kg query decisions"
+        echo "  kg query 'patterns[x].used_in'"
+        exit 1
+    fi
+
+    _cue export . -e "$expr"
+}
+
+# ── lint ──────────────────────────────────────────────────────────
+
+cmd_lint() {
+    if [ ! -d "$KG_DIR" ]; then
+        echo "ERROR: No $KG_DIR/ directory found." >&2; exit 1
+    fi
+
+    # First validate
+    if ! _cue vet . 2>/dev/null; then
+        echo "ERR: CUE validation failed — fix errors before linting"
+        _cue vet .
+        exit 1
+    fi
+
+    local issues=0
+
+    # Check for TODO placeholders
+    local todos
+    todos=$(grep -r "TODO" "$KG_DIR/" --include="*.cue" -l 2>/dev/null || true)
+    if [ -n "$todos" ]; then
+        echo "$todos" | while read -r f; do
+            echo "WARN: $f contains TODO placeholders"
+        done
+        issues=$((issues + 1))
+    fi
+
+    # Check for empty decisions directory
+    if [ -d "$KG_DIR/decisions" ] && [ -z "$(ls "$KG_DIR/decisions/"*.cue 2>/dev/null)" ]; then
+        echo "INFO: No decisions recorded yet"
+    fi
+
+    # Export and analyze with jq if available
+    if command -v jq &>/dev/null; then
+        local index_json
+        index_json=$(_cue export . -e _index 2>/dev/null || echo '{}')
+
+        if [ "$index_json" != "{}" ]; then
+            # Check for proposed decisions older than 30 days
+            echo "$index_json" | jq -r '
+                .decisions // {} | to_entries[] |
+                select(.value.status == "proposed") |
+                "WARN: Decision \(.key) has been proposed since \(.value.date)"
+            ' 2>/dev/null || true
+
+            # Check for low-confidence insights with multiple evidence items
+            echo "$index_json" | jq -r '
+                .insights // {} | to_entries[] |
+                select(.value.confidence == "low" and (.value.evidence | length) >= 3) |
+                "WARN: Insight \(.key) has \(.value.evidence | length) evidence items but low confidence — consider upgrading"
+            ' 2>/dev/null || true
+        fi
+    fi
+
+    if [ $issues -eq 0 ]; then
+        echo "OK: No lint issues found"
+    fi
+}
+
+# ── settle ────────────────────────────────────────────────────────
+
+cmd_settle() {
+    if [ ! -d "$KG_DIR" ]; then
+        echo "ERROR: No $KG_DIR/ directory found." >&2; exit 1
+    fi
+
+    echo "Settling $KG_DIR/..."
+    echo ""
+
+    # 1. Validate first
+    if ! _cue vet . 2>/dev/null; then
+        echo "ERR: Validation failed — fix errors before settling"
+        _cue vet .
+        exit 1
+    fi
+    echo "OK: Validation passed"
+
+    # 2. Check referential integrity of related links
+    if command -v jq &>/dev/null; then
+        local index_json
+        index_json=$(_cue export . -e _index 2>/dev/null || echo '{}')
+
+        if [ "$index_json" != "{}" ]; then
+            # Collect all known IDs
+            local all_ids
+            all_ids=$(echo "$index_json" | jq -r '[
+                (.decisions // {} | keys[]),
+                (.insights // {} | keys[]),
+                (.rejected // {} | keys[]),
+                (.patterns // {} | keys[])
+            ] | .[]' 2>/dev/null)
+
+            # Show related links
+            local links
+            links=$(echo "$index_json" | jq -r '
+                [
+                    (.decisions // {} | to_entries[] | {entry: .key, refs: (.value.related // {} | keys)}),
+                    (.insights // {} | to_entries[] | {entry: .key, refs: (.value.related // {} | keys)}),
+                    (.rejected // {} | to_entries[] | {entry: .key, refs: (.value.related // {} | keys)}),
+                    (.patterns // {} | to_entries[] | {entry: .key, refs: (.value.related // {} | keys)})
+                ] | .[] | select(.refs | length > 0) |
+                .entry as $entry | .refs[] |
+                "  \($entry) -> \(.)"
+            ' 2>/dev/null || true)
+
+            if [ -n "$links" ]; then
+                echo ""
+                echo "Links:"
+                echo "$links"
+            fi
+
+            # Check for dangling references
+            echo ""
+            echo "Referential integrity:"
+            local dangling
+            dangling=$(echo "$index_json" | jq -r --argjson ids "$(echo "$all_ids" | jq -Rs 'split("\n") | map(select(length > 0))')" '
+                [
+                    (.decisions // {} | to_entries[] | {entry: .key, refs: (.value.related // {} | keys)}),
+                    (.insights // {} | to_entries[] | {entry: .key, refs: (.value.related // {} | keys)}),
+                    (.rejected // {} | to_entries[] | {entry: .key, refs: (.value.related // {} | keys)}),
+                    (.patterns // {} | to_entries[] | {entry: .key, refs: (.value.related // {} | keys)})
+                ] | .[] | select(.refs | length > 0) |
+                .entry as $entry | .refs[] |
+                select(. as $ref | $ids | index($ref) | not) |
+                "  ERR: \($entry) references unknown entry \(.)"
+            ' 2>/dev/null || true)
+
+            if [ -n "$dangling" ]; then
+                echo "$dangling"
+            else
+                echo "  OK: All references resolve"
+            fi
+
+            # Coverage analysis
+            echo ""
+            echo "Coverage:"
+            echo "$index_json" | jq -r '.summary | to_entries[] | "  \(.key): \(.value)"' 2>/dev/null || true
+        fi
+    else
+        echo "WARN: jq not available — install jq for full settle analysis"
+    fi
+
+    echo ""
+    echo "Settle complete."
+}
+
+# ── diff ──────────────────────────────────────────────────────────
+
+cmd_diff() {
+    if [ ! -d "$KG_DIR" ]; then
+        echo "ERROR: No $KG_DIR/ directory found." >&2; exit 1
+    fi
+
+    local ref="${1:-HEAD}"
+
+    # Current summary
+    local current
+    current=$(_cue export . -e _index.summary 2>/dev/null || echo '{}')
+
+    echo "Changes in $KG_DIR/ since $ref:"
+    git diff --stat "${ref}" -- "$KG_DIR/" 2>/dev/null || echo "  No git history for $KG_DIR/"
+    echo ""
+    git diff "${ref}" -- "$KG_DIR/" --name-status 2>/dev/null || true
+    echo ""
+    echo "Current summary:"
+    echo "$current"
+}
+
+# ── link ──────────────────────────────────────────────────────────
+
+cmd_link() {
+    if [ ! -d "$KG_DIR" ]; then
+        echo "ERROR: No $KG_DIR/ directory found." >&2; exit 1
+    fi
+
+    local id_a="${1:-}" id_b="${2:-}"
+    if [ -z "$id_a" ] || [ -z "$id_b" ]; then
+        echo "Usage: kg link <entry-id-a> <entry-id-b>"
+        echo "Example: kg link ADR-001 INSIGHT-003"
+        exit 1
+    fi
+
+    # Find files containing each ID
+    local file_a file_b
+    file_a=$(grep -rl "\"$id_a\"" "$KG_DIR/" --include="*.cue" 2>/dev/null | head -1)
+    file_b=$(grep -rl "\"$id_b\"" "$KG_DIR/" --include="*.cue" 2>/dev/null | head -1)
+
+    if [ -z "$file_a" ]; then
+        echo "ERROR: Entry $id_a not found in $KG_DIR/" >&2; exit 1
+    fi
+    if [ -z "$file_b" ]; then
+        echo "ERROR: Entry $id_b not found in $KG_DIR/" >&2; exit 1
+    fi
+
+    echo "Linking $id_a ($file_a) <-> $id_b ($file_b)"
+    echo ""
+    echo "Add to $file_a:"
+    echo "  related: {\"$id_b\": true}"
+    echo ""
+    echo "Add to $file_b:"
+    echo "  related: {\"$id_a\": true}"
+    echo ""
+    echo "Note: kg link shows what to add. Edit the files to add related references."
+    echo "      CUE struct-as-set means adding to existing related: merges automatically."
+}
+
+# ── graph ─────────────────────────────────────────────────────────
+
+cmd_graph() {
+    if [ ! -d "$KG_DIR" ]; then
+        echo "ERROR: No $KG_DIR/ directory found." >&2; exit 1
+    fi
+
+    local format="${1:---json}"
+
+    if ! command -v jq &>/dev/null; then
+        echo "ERROR: jq required for graph export" >&2; exit 1
+    fi
+
+    local index_json
+    index_json=$(_cue export . -e _index 2>/dev/null || echo '{}')
+
+    case "$format" in
+        --json)
+            # Export as VizData-compatible JSON (nodes + edges from related links)
+            echo "$index_json" | jq '{
+                nodes: [
+                    (.decisions // {} | to_entries[] | {id: .key, type: "decision", label: .value.title}),
+                    (.insights // {} | to_entries[] | {id: .key, type: "insight", label: .value.statement}),
+                    (.rejected // {} | to_entries[] | {id: .key, type: "rejected", label: .value.approach}),
+                    (.patterns // {} | to_entries[] | {id: .key, type: "pattern", label: .value.name})
+                ],
+                edges: [
+                    (.decisions // {} | to_entries[] | select(.value.related != null) |
+                        .key as $src | .value.related | keys[] | {source: $src, target: ., type: "related"}),
+                    (.insights // {} | to_entries[] | select(.value.related != null) |
+                        .key as $src | .value.related | keys[] | {source: $src, target: ., type: "related"}),
+                    (.rejected // {} | to_entries[] | select(.value.related != null) |
+                        .key as $src | .value.related | keys[] | {source: $src, target: ., type: "related"}),
+                    (.patterns // {} | to_entries[] | select(.value.related != null) |
+                        .key as $src | .value.related | keys[] | {source: $src, target: ., type: "related"})
+                ]
+            }'
+            ;;
+        --dot)
+            echo "digraph kg {"
+            echo "  rankdir=LR;"
+            echo "$index_json" | jq -r '
+                (.decisions // {} | to_entries[] | "  \"\(.key)\" [shape=box label=\"\(.value.title)\"];"),
+                (.insights // {} | to_entries[] | "  \"\(.key)\" [shape=ellipse label=\"\(.value.statement | .[0:40])...\"];"),
+                (.rejected // {} | to_entries[] | "  \"\(.key)\" [shape=octagon label=\"\(.value.approach | .[0:40])...\"];"),
+                (.patterns // {} | to_entries[] | "  \"\(.key)\" [shape=diamond label=\"\(.value.name)\"];"),
+                (
+                    (.decisions // {} | to_entries[] | select(.value.related != null) |
+                        .key as $src | .value.related | keys[] | "  \"\($src)\" -> \"\(.)\";"),
+                    (.insights // {} | to_entries[] | select(.value.related != null) |
+                        .key as $src | .value.related | keys[] | "  \"\($src)\" -> \"\(.)\";"),
+                    (.rejected // {} | to_entries[] | select(.value.related != null) |
+                        .key as $src | .value.related | keys[] | "  \"\($src)\" -> \"\(.)\";"),
+                    (.patterns // {} | to_entries[] | select(.value.related != null) |
+                        .key as $src | .value.related | keys[] | "  \"\($src)\" -> \"\(.)\";")
+                )
+            ' 2>/dev/null
+            echo "}"
+            ;;
+        *)
+            echo "Usage: kg graph [--json|--dot]"; exit 1 ;;
+    esac
+}
+
+# ── fed ───────────────────────────────────────────────────────────
+
+cmd_fed() {
+    if [ $# -eq 0 ]; then
+        echo "Usage: kg fed <dir1> <dir2> [dir3...]"
+        echo "Federates multiple .kg/ directories and shows combined index"
+        exit 1
+    fi
+
+    if ! command -v jq &>/dev/null; then
+        echo "ERROR: jq required for federation" >&2; exit 1
+    fi
+
+    echo "Federating $# knowledge graphs..."
+    echo ""
+
+    local all_indexes="[]"
+    for dir in "$@"; do
+        local kg_path="$dir/.kg"
+        if [ ! -d "$kg_path" ]; then
+            kg_path="$dir"
+        fi
+        if [ ! -d "$kg_path" ]; then
+            echo "WARN: $dir has no .kg/ directory, skipping" >&2
+            continue
+        fi
+
+        local name
+        name=$(basename "$dir")
+        local idx
+        idx=$(_cue_here "$kg_path" export . -e _index 2>/dev/null || echo '{}')
+
+        if [ "$idx" != "{}" ]; then
+            all_indexes=$(echo "$all_indexes" | jq --arg name "$name" --argjson idx "$idx" '. + [{name: $name, index: $idx}]')
+            echo "  + $name: $(echo "$idx" | jq -r '.summary.total // 0') entries"
+        else
+            echo "  - $name: no index (missing _index expression?)"
+        fi
+    done
+
+    echo ""
+    echo "Federated summary:"
+    echo "$all_indexes" | jq '{
+        projects: [.[].name],
+        totals: (reduce .[].index.summary as $s (
+            {total_decisions: 0, total_insights: 0, total_rejected: 0, total_patterns: 0};
+            {
+                total_decisions: (.total_decisions + ($s.total_decisions // 0)),
+                total_insights: (.total_insights + ($s.total_insights // 0)),
+                total_rejected: (.total_rejected + ($s.total_rejected // 0)),
+                total_patterns: (.total_patterns + ($s.total_patterns // 0))
+            }
+        ))
+    }' 2>/dev/null || echo "$all_indexes"
+}
+
+# ── dispatch ──────────────────────────────────────────────────────
+
+case "${1:-help}" in
+    init)    shift; cmd_init "$@" ;;
+    add)     shift; cmd_add "$@" ;;
+    vet)     shift; cmd_vet "$@" ;;
+    index)   shift; cmd_index "$@" ;;
+    query)   shift; cmd_query "$@" ;;
+    lint)    shift; cmd_lint "$@" ;;
+    settle)  shift; cmd_settle "$@" ;;
+    diff)    shift; cmd_diff "$@" ;;
+    link)    shift; cmd_link "$@" ;;
+    graph)   shift; cmd_graph "$@" ;;
+    fed)     shift; cmd_fed "$@" ;;
+    help|-h) cmd_help ;;
+    *)       echo "Unknown command: $1"; cmd_help; exit 1 ;;
+esac

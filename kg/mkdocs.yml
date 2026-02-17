@@ -1,0 +1,38 @@
+site_name: quicue-kg
+site_description: CUE-native knowledge graph framework
+site_url: https://kg.quicue.ca/
+repo_url: https://github.com/quicue/quicue-kg
+repo_name: quicue/quicue-kg
+edit_uri: blob/main/docs/
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: teal
+  features:
+    - navigation.sections
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - tables
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/quicue/quicue-kg
+
+nav:
+  - Home: index.md
+  - Semantic Web: semantic-web.md
+  - Specification: specification.md

@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.venv/
+node_modules/
+.claude/
+docs/plans/
+.kg/cue.mod/pkg/
+site/

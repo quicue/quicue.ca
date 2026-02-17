@@ -1,0 +1,117 @@
+# Release Package Pipeline
+#
+# Packages all artifacts into a versioned release for deployment.
+# Creates dated artifacts ready for CAB approval and deployment.
+#
+# Usage:
+#   include:
+#     - project: 'quicue/quicue-cab'
+#       file: '/gitlab/release-package.yml'
+#
+#   package:
+#     extends: .cab-package-release
+#     needs: [validate, generate, reports]
+
+.cab-package-release:
+  image: alpine:latest
+  stage: deploy
+  variables:
+    ARTIFACT_PREFIX: "datacenter"
+    OUTPUT_DIR: "artifacts"
+  before_script:
+    - apk add --no-cache tar gzip
+  script:
+    - |
+      echo "=== CAB Release Packaging ==="
+
+      DATE=$(date -u +%Y-%m-%d)
+      TIMESTAMP=$(date -u +%Y%m%d-%H%M%S)
+      RELEASE_NAME="${ARTIFACT_PREFIX}-${DATE}"
+
+      # Create manifest
+      cat > ${OUTPUT_DIR}/MANIFEST.yml << MANIFEST
+      artifact_id: ${RELEASE_NAME}
+      timestamp: ${TIMESTAMP}
+      git_commit: ${CI_COMMIT_SHA}
+      git_ref: ${CI_COMMIT_REF_NAME}
+      pipeline_id: ${CI_PIPELINE_ID}
+      pipeline_url: ${CI_PIPELINE_URL}
+
+      contents:
+        configs:
+          - ansible-inventory.yml
+          - prometheus-targets.yml
+          - ssh-config
+          - graph.json
+        reports:
+          - cab-summary.md
+          - change-report.md
+          - impact-report.md
+          - deployment-runbook.md
+          - rollback-plan.md
+
+      validation:
+        schema: passed
+        graph: passed
+
+      deployment:
+        status: pending_approval
+        approved_by: null
+        approved_at: null
+        deployed_at: null
+      MANIFEST
+
+      # Create release tarball
+      echo "--- Creating Release Package ---"
+      tar -czvf ${RELEASE_NAME}.tar.gz -C ${OUTPUT_DIR} .
+
+      # Create checksums
+      sha256sum ${RELEASE_NAME}.tar.gz > ${RELEASE_NAME}.sha256
+
+      echo ""
+      echo "--- Release Package ---"
+      ls -lh ${RELEASE_NAME}.*
+
+      echo ""
+      echo "Package ready for CAB review: ${RELEASE_NAME}.tar.gz"
+  artifacts:
+    paths:
+      - "*.tar.gz"
+      - "*.sha256"
+    expire_in: 90 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+# Create git tag for release
+.cab-tag-release:
+  image: alpine/git:latest
+  stage: deploy
+  variables:
+    ARTIFACT_PREFIX: "datacenter"
+  script:
+    - |
+      DATE=$(date -u +%Y-%m-%d)
+      TAG_NAME="cab/${DATE}"
+
+      # Check if tag exists
+      if git rev-parse ${TAG_NAME} >/dev/null 2>&1; then
+        echo "Tag ${TAG_NAME} already exists, skipping"
+      else
+        echo "Creating tag: ${TAG_NAME}"
+        git tag -a ${TAG_NAME} -m "CAB release ${DATE}"
+        git push origin ${TAG_NAME}
+      fi
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: manual
+      allow_failure: true
+
+# Full nightly pipeline (combine all stages)
+.cab-nightly-pipeline:
+  stage: .pre
+  trigger:
+    include:
+      - local: .gitlab-ci.yml
+    strategy: depend
+  variables:
+    CAB_NIGHTLY: "true"
