@@ -17,7 +17,18 @@ downstream: {
 		path:        "~/cjlq"
 		description: "Energy efficiency scenario modeling (NHCF, Greener Homes)"
 		imports: ["quicue.ca/patterns@v0"]
-		pattern_count: 17
+		pattern_count: 15
+		has_kg:        true
+		status:        "active"
+	}
+	"maison-613": {
+		"@id":       "https://rfam.cc/project/maison-613"
+		module:      "rfam.cc/maison-613@v0"
+		path:        "~/maison-613"
+		description: "Real estate operations — 7 graphs (transaction, referral, compliance, listing, operations, onboarding, client)"
+		imports: ["quicue.ca/patterns@v0"]
+		pattern_count: 14
+		has_kg:        true
 		status:        "active"
 	}
 	apercue: {
