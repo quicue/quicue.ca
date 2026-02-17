@@ -1,5 +1,5 @@
 site_name: quicue.ca
-site_description: Infrastructure as typed dependency graphs in CUE
+site_description: Typed dependency graphs in CUE — for any domain with hierarchies
 site_url: https://docs.quicue.ca/
 repo_url: https://github.com/quicue/quicue.ca
 repo_name: quicue/quicue.ca
@@ -36,6 +36,7 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Architecture: architecture.md
+  - Federation: federation.md
   - Patterns: patterns.md
   - Templates: templates.md
   - Example Output: example/index.md
