@@ -128,7 +128,7 @@ template/<name>/
 14 resources on a 3-node cluster. Edit `_site` config, swap `providers.cue` for your stack (Proxmox, Docker, K8s, Incus), run `cue export`.
 
 ### `examples/devbox/` — Single-machine developer tooling
-11 resources (Docker, Postgres, Redis, Gitea, Traefik, k3d, Grafana, and more) on one host. Exercises graph analysis, provider binding, and deployment planning without any hypervisor — the whole stack is Docker Compose.
+14 resources on one host via Docker Compose. Includes an `#App` template — define an app (image, port, dependencies) and get a graph-integrated resource with Traefik FQDN and computed dependency edges. Also demonstrates contract-via-unification: `verify.cue` declares graph invariants as CUE constraints that must merge with the computed output.
 
 ### Focused examples
 - `graph-patterns/` — Dependency analysis patterns
