@@ -1,6 +1,6 @@
 # Architecture
 
-quicue.ca models infrastructure as typed dependency graphs in CUE. This document explains how the layers compose, what each module does, and how data flows from resource definitions to executable deployment plans.
+quicue.ca models any domain as typed dependency graphs in CUE. This document explains how the layers compose, what each module does, and how data flows from resource definitions to executable plans.
 
 ## Four-layer model
 
@@ -228,7 +228,7 @@ The execution plan can be projected into multiple output formats:
 | `http` | `.http` | RFC 9110 REST Client files |
 | `wiki` | Markdown | MkDocs site (index + per-resource pages) |
 | `script` | Bash | Self-contained deployment script with parallelism |
-| `imperator` | JSON | Task list for `cue cmd` consumption |
+| `ops` | JSON | Task list for `cue cmd` consumption |
 
 ### Visualization (`visualization.cue`)
 
@@ -378,7 +378,7 @@ Produces MkDocs-compatible markdown from the resource graph: index page, per-lay
 
 ### `server/` — FastAPI gateway
 
-HTTP API for executing resolved commands. Reads the CUE-generated OpenAPI spec and exposes 654 actions across 29 providers as REST endpoints. Live at [api.quicue.ca](https://api.quicue.ca/docs) (mock mode). Serves W3C Hydra JSON-LD and graph data for the [imperator](https://imp.quicue.ca/) frontend.
+HTTP API for executing resolved commands. Reads the CUE-generated OpenAPI spec and exposes 654 actions across 29 providers as REST endpoints. Live at [api.quicue.ca](https://api.quicue.ca/docs) (mock mode). Serves W3C Hydra JSON-LD and graph data for the [operator](https://ops.quicue.ca/) frontend.
 
 ### `kg/` — Knowledge graph
 
@@ -386,9 +386,9 @@ Vendored copy of the [quicue-kg](https://github.com/quicue/quicue-kg) framework.
 
 #### Downstream validation
 
-`.kg/downstream.cue` registers known consumers (grdn, cjlq, apercue). Each consumer maintains its own `.kg/deps.cue` cataloging which vocab and pattern definitions it imports and where they're used — for example, grdn's deps.cue records 14 pattern and 2 vocab definitions with source, purpose, and consuming files.
+`.kg/downstream.cue` registers known consumers (grdn, cjlq, maison-613, apercue). Each consumer maintains its own `.kg/deps.cue` cataloging which vocab and pattern definitions it imports and where they're used — for example, grdn's deps.cue records 14 pattern and 2 vocab definitions with source, purpose, and consuming files.
 
-The `make check-downstream` target runs `cue vet` on all registered consumers. This is the real self-insert detector: renaming a field in `#InfraGraph` produces a unification error in grdn's `graph.cue`, caught at build time rather than discovered in production. The deps.cue files are documentation; the Makefile target is enforcement.
+The `make check-downstream` target runs `cue vet` on 8 validation targets across 4 projects — grdn (infrastructure + .kg/), cjlq (2 scenarios + .kg/), and maison-613 (2 scenarios + .kg/). Renaming a field in `#InfraGraph` produces a unification error in any consumer that references it, caught at build time rather than discovered in production. The deps.cue files are documentation; the Makefile target is enforcement.
 
 ## Data flow summary
 

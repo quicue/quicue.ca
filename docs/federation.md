@@ -56,7 +56,16 @@ downstream: {
         module:        "rfam.cc/cjlq@v0"
         description:   "Energy efficiency scenario modeling (NHCF, Greener Homes)"
         imports:       ["quicue.ca/patterns@v0"]
-        pattern_count: 17
+        pattern_count: 15
+        has_kg:        true
+        status:        "active"
+    }
+    "maison-613": {
+        module:        "rfam.cc/maison-613@v0"
+        description:   "Real estate operations — 7 graphs (transaction, referral, compliance, ...)"
+        imports:       ["quicue.ca/patterns@v0"]
+        pattern_count: 14
+        has_kg:        true
         status:        "active"
     }
 }
