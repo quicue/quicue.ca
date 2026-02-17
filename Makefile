@@ -1,4 +1,4 @@
-.PHONY: test validate examples providers check-downstream datacenter homelab summary impact clean
+.PHONY: test validate examples providers check-downstream datacenter homelab devbox summary impact clean
 
 # Full test suite — run this before committing
 test: validate examples providers
@@ -35,6 +35,10 @@ datacenter:
 # Homelab example
 homelab:
 	cue eval ./examples/homelab/ -e output.summary
+
+# Devbox example
+devbox:
+	cue eval ./examples/devbox/ -e output.summary
 
 # What breaks if the router dies?
 impact:
