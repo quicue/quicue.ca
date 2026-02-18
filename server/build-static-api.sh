@@ -261,13 +261,28 @@ cat > "$OUT/_headers" << 'EOF'
 /*.json
   Content-Type: application/json
 
+/
+  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+
+/index.json
+  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+
 /api/v1/hydra.json
+  Content-Type: application/ld+json
+
+/api/v1/hydra
   Content-Type: application/ld+json
 
 /api/v1/graph.jsonld.json
   Content-Type: application/ld+json
 
+/api/v1/graph.jsonld
+  Content-Type: application/ld+json
+
 /api/v1/types.json
+  Content-Type: application/ld+json
+
+/api/v1/types
   Content-Type: application/ld+json
 
 /api/v1/index.json
@@ -293,6 +308,11 @@ cat > "$OUT/_headers" << 'EOF'
   Link: <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"
 
 /api/v1/resources/*/index.json
+  Content-Type: application/json
+  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
+
+/api/v1/resources/*
   Content-Type: application/json
   Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
   Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
