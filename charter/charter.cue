@@ -133,13 +133,19 @@ import (
 	// ── Depth check ──────────────────────────────────────────────
 	// Uses topology (public) instead of _depth (hidden/package-scoped)
 	_max_depth: len(Graph.topology) - 1
-	depth_satisfied: true
+	depth_satisfied: bool
+	if Charter.scope.min_depth == _|_ {
+		depth_satisfied: true
+	}
 	if Charter.scope.min_depth != _|_ {
 		depth_satisfied: _max_depth >= Charter.scope.min_depth
 	}
 
 	// ── Resource count check ─────────────────────────────────────
-	count_satisfied: true
+	count_satisfied: bool
+	if Charter.scope.total_resources == _|_ {
+		count_satisfied: true
+	}
 	if Charter.scope.total_resources != _|_ {
 		count_satisfied: resource_count >= Charter.scope.total_resources
 	}
