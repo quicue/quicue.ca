@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finds — quicue.ca</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<style>
+  :root { --r-background-color: #0d1117; --r-main-color: #e6edf3; --r-heading-color: #e6edf3; }
+  .reveal { font-family: 'Segoe UI', system-ui, sans-serif; }
+  .reveal h1, .reveal h2, .reveal h3 { font-weight: 700; text-transform: none; }
+  .reveal h1 { font-size: 2.2em; }
+  .reveal h2 { font-size: 1.5em; color: #58a6ff; }
+  .reveal h3 { font-size: 1.1em; color: #8b949e; }
+  .reveal pre { font-size: 0.55em; box-shadow: none; }
+  .reveal pre code { padding: 1em; border-radius: 8px; background: #161b22; max-height: 500px; }
+  .reveal p, .reveal li { font-size: 0.75em; line-height: 1.6; color: #c9d1d9; }
+  .reveal .small { font-size: 0.6em; color: #8b949e; }
+  .reveal table { font-size: 0.65em; margin: 0 auto; }
+  .reveal table th { color: #58a6ff; border-bottom: 1px solid #30363d; }
+  .reveal table td { border-bottom: 1px solid #21262d; color: #c9d1d9; }
+  .reveal .accent { color: #58a6ff; }
+  .reveal .green { color: #3fb950; }
+  .reveal .dim { color: #8b949e; }
+  .reveal .number { font-size: 3em; font-weight: 700; color: #58a6ff; line-height: 1; }
+  .reveal .stat-row { display: flex; justify-content: center; gap: 3em; margin: 1em 0; }
+  .reveal .stat { text-align: center; }
+  .reveal .stat .number { font-size: 2em; }
+  .reveal .stat .label { font-size: 0.6em; color: #8b949e; }
+  .reveal a { color: #58a6ff; }
+  .slide-bg { position: absolute; inset: 0; opacity: 0.03; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- Title -->
+<section>
+  <h1>Finds</h1>
+  <h3>Things that fell out of one CUE value</h3>
+  <p class="small" style="margin-top: 2em;">
+    <a href="https://github.com/quicue/quicue.ca">quicue.ca</a>
+  </p>
+</section>
+
+<!-- The setup -->
+<section>
+  <h2>It's one value</h2>
+  <pre><code data-trim data-noescape class="language-javascript">
+"dns-internal": {
+    "@type": {LXCContainer: true, DNSServer: true, CriticalInfra: true}
+    depends_on: {"pve-node1": true}
+    host:         "pve-node1"
+    container_id: 100
+}
+  </code></pre>
+  <p>Two fields: <code>@type</code> (what it is) and <code>depends_on</code> (what it needs).</p>
+  <p>Both are <code>{Key: true}</code> structs. Composition is unification.</p>
+</section>
+
+<!-- Stats -->
+<section>
+  <h2>One <code>cue export</code></h2>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="number">30</div>
+      <div class="label">resources</div>
+    </div>
+    <div class="stat">
+      <div class="number">29</div>
+      <div class="label">providers</div>
+    </div>
+    <div class="stat">
+      <div class="number">654</div>
+      <div class="label">resolved commands</div>
+    </div>
+    <div class="stat">
+      <div class="number">72+</div>
+      <div class="label">projections</div>
+    </div>
+  </div>
+  <p class="dim">Deployment plans, blast radius, Jupyter notebooks, JSON-LD, Hydra, DCAT, SHACL, a wiki, a static API&hellip; all from one evaluation.</p>
+</section>
+
+<!-- Type overlap -->
+<section>
+  <h2>Type overlap as dispatch</h2>
+  <pre><code data-trim data-noescape class="language-javascript">
+let _matched = [
+    for tname, _ in provider.types
+    if resource["@type"][tname] != _|_ {tname},
+]
+if len(_matched) > 0 {
+    (pname): (#BindActions & {
+        "registry": provider.registry
+        "resource": resource
+    }).actions
+}
+  </code></pre>
+  <p>Provider declares types it serves. Resource declares types it is.<br>
+  Binding is <code>!= _|_</code> on a struct field. That's it.</p>
+</section>
+
+<!-- Provider swapping -->
+<section>
+  <h2>Provider swapping</h2>
+  <p style="font-size: 0.85em;">
+    <code class="dim">{LXCContainer: true, DNSServer: true}</code>
+  </p>
+  <p style="font-size: 0.7em;">matches Proxmox <em>and</em> PowerDNS simultaneously</p>
+  <br>
+  <p style="font-size: 0.85em;">
+    Replace <code class="dim">LXCContainer</code> with <code class="accent">DockerContainer</code>
+  </p>
+  <p style="font-size: 0.7em;">Docker binds instead of Proxmox. The set intersection changed.</p>
+  <br>
+  <p class="green" style="font-size: 0.8em;">29 providers. Zero special cases.</p>
+</section>
+
+<!-- Transitive closure -->
+<section>
+  <h2>Transitive closure from unification</h2>
+  <pre><code data-trim data-noescape class="language-javascript">
+_ancestors: {
+    [_]: true
+    if _hasDeps {
+        for d, _ in _deps {
+            (d): true
+            resources[d]._ancestors
+        }
+    }
+}
+  </code></pre>
+  <p>Six lines. "Include your parents' ancestors."<br>
+  CUE resolves the fixpoint. Struct expands until idempotent.</p>
+</section>
+
+<!-- Queries -->
+<section>
+  <h2>Every query is already computed</h2>
+  <pre><code data-trim data-noescape class="language-javascript">
+// "What breaks if this goes down?"
+affected: {
+    for rname, r in Graph.resources
+    if r._ancestors[Target] != _|_ {(rname): true}
+}
+  </code></pre>
+  <p>Impact, blast radius, SPOF, criticality &mdash; each is one comprehension over <code>_ancestors</code>.</p>
+  <p class="green" style="font-size: 0.85em; margin-top: 1em;">If every answer is known at build time, the API is a file server.</p>
+  <p class="dim">727 static JSON files on a CDN. No server.</p>
+</section>
+
+<!-- Constraints -->
+<section>
+  <h2>Constraints are values</h2>
+  <pre><code data-trim data-noescape class="language-javascript">
+// verify.cue — same package as the computation
+validate: valid: true
+infra: roots: {"docker": true}
+deployment: layers: [{layer: 0, resources: ["docker"]}, ...]
+impact_docker: affected: {
+    for name, _ in _resources if name != "docker" {
+        "\(name)": true
+    }
+}
+  </code></pre>
+  <p>If the graph disagrees, unification is bottom. <code>cue vet</code> fails.<br>
+  No assertion framework &mdash; the language is one.</p>
+</section>
+
+<!-- W3C -->
+<section>
+  <h2>The W3C stack is more projections</h2>
+  <table>
+    <tr><th>Format</th><th>Produces</th><th>Spec</th></tr>
+    <tr><td>JSON-LD</td><td>Typed IRIs, <code>@context</code>, dependency links</td><td>JSON-LD 1.1</td></tr>
+    <tr><td>Hydra</td><td>Role-scoped API docs from bound actions</td><td>Hydra Core</td></tr>
+    <tr><td>DCAT 3</td><td>Data catalogue with dataset per resource</td><td>DCAT 3</td></tr>
+    <tr><td>N-Triples</td><td>Greppable RDF for triplestore loading</td><td>RDF 1.1</td></tr>
+    <tr><td>SHACL</td><td>Validation shapes from type registry</td><td>SHACL</td></tr>
+    <tr><td>ODRL</td><td>Machine-readable access policies</td><td>ODRL 2.2</td></tr>
+    <tr><td>ActivityStreams</td><td>Change feeds from bound commands</td><td>AS 2.0</td></tr>
+  </table>
+  <p class="small" style="margin-top: 1em;">Each takes <code>#InfraGraph</code>, produces JSON-LD. No converters.</p>
+</section>
+
+<!-- Cross-domain -->
+<section>
+  <h2>Works across domains</h2>
+  <table>
+    <tr><th>Domain</th><th>Graph</th><th>Shape</th></tr>
+    <tr><td>IT infrastructure</td><td>30 resources, 29 providers</td><td>Service topology</td></tr>
+    <tr><td>Construction PM</td><td>18 CMHC retrofit work packages</td><td>Project delivery</td></tr>
+    <tr><td>Energy efficiency</td><td>17-service Greener Homes</td><td>Platform topology</td></tr>
+    <tr><td>Real estate</td><td>Transaction + compliance</td><td>Workflow graph</td></tr>
+  </table>
+  <p style="margin-top: 1em;">The PM sees schedule phases. The platform engineer sees deployment layers.<br>
+  Same code. Same <code>cue export</code>.</p>
+</section>
+
+<!-- Closing -->
+<section>
+  <h2 style="color: #e6edf3;">Links</h2>
+  <p style="font-size: 0.85em; line-height: 2;">
+    <a href="https://github.com/quicue/quicue.ca">github.com/quicue/quicue.ca</a><br>
+    <a href="https://demo.quicue.ca">demo.quicue.ca</a> &mdash; D3 graph, planner, browser<br>
+    <a href="https://api.quicue.ca">api.quicue.ca</a> &mdash; 727 static JSON files<br>
+    <a href="https://docs.quicue.ca">docs.quicue.ca</a> &mdash; pattern docs<br>
+    <a href="https://kg.quicue.ca">kg.quicue.ca</a> &mdash; knowledge graph spec
+  </p>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  history: true,
+  transition: 'none',
+  backgroundTransition: 'none',
+  plugins: [RevealHighlight],
+  width: 1200,
+  height: 700,
+  margin: 0.08
+});
+</script>
+</body>
+</html>
