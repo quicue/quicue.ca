@@ -24,6 +24,7 @@ import (
 #HydraContext: vocab.context."@context" & {
 	"hydra":        "http://www.w3.org/ns/hydra/core#"
 	"rdfs":         "http://www.w3.org/2000/01/rdf-schema#"
+	"rdf":          "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 	"ActionResult": "quicue:ActionResult"
 }
 
@@ -70,6 +71,9 @@ import (
 	"hydra:supportedProperty":     [...#HydraSupportedProperty]
 }
 
+// _apiBase — canonical prefix for dereferenceable resource URLs.
+_apiBase: "https://api.quicue.ca/api/v1/resources/"
+
 // #ApiDocumentation — generates Hydra JSON-LD from an #InteractionCtx.
 // This is the top-level export — a complete, self-describing API surface.
 #ApiDocumentation: {
@@ -90,7 +94,7 @@ import (
 		"hydra:supportedClass": [
 			for rname, rv in ctx.view.resources {
 				#HydraClass & {
-					"@id":        "quicue:\(rname)"
+					"@id":        "\(_apiBase)\(rname)"
 					"@type":      "hydra:Class"
 					"rdfs:label": rname
 
@@ -145,7 +149,7 @@ import (
 							#HydraSupportedProperty & {
 								"hydra:property": {
 									"@type":      "hydra:Link"
-									"@id":        "quicue:\(dep)"
+									"@id":        "\(_apiBase)\(dep)"
 									"rdfs:label": "depends on \(dep)"
 								}
 								"hydra:title": "depends_on/\(dep)"
@@ -192,7 +196,7 @@ import (
 		"hydra:totalItems": ctx.total_resources
 		"hydra:member": [
 			for rname, rv in ctx.view.resources {
-				"@id":   "quicue:\(rname)"
+				"@id":   "\(_apiBase)\(rname)"
 				"@type": [ for t, _ in rv.resource."@type" {t}]
 				"name": rname
 			},
