@@ -1,5 +1,5 @@
 site_name: quicue.ca
-site_description: Typed dependency graphs in CUE — for any domain with hierarchies
+site_description: Model it in CUE. Validate by unification. Export to whatever the world expects.
 site_url: https://docs.quicue.ca/
 repo_url: https://github.com/quicue/quicue.ca
 repo_name: quicue/quicue.ca
@@ -36,7 +36,9 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Architecture: architecture.md
-  - Federation: federation.md
   - Patterns: patterns.md
+  - Knowledge Graph: knowledge-graph.md
+  - Linked Data: linked-data.md
   - Templates: templates.md
+  - Federation: federation.md
   - Example Output: example/index.md
