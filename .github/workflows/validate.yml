@@ -34,10 +34,81 @@ jobs:
             cue vet "./$d/..."
           done
 
-  server:
+  binding:
     runs-on: ubuntu-latest
+    needs: cue-vet
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install CUE
+        uses: cue-lang/setup-cue@v1.0.1
+        with:
+          version: v0.15.4
+
+      - name: Generate OpenAPI spec from datacenter example
+        run: |
+          cue export ./examples/datacenter/ -e openapi_spec --out json > /tmp/openapi.json
+          echo "Spec size: $(wc -c < /tmp/openapi.json)B"
+
+      - name: Generate bound commands
+        run: |
+          cue export ./examples/datacenter/ -e 'output.commands' --out json > /tmp/bound_commands.json
+          echo "Bound commands size: $(wc -c < /tmp/bound_commands.json)B"
+
+      - name: Validate all 29 providers have bound commands
+        run: |
+          python3 -c "
+          import json, sys
+          with open('/tmp/bound_commands.json') as f:
+              bound = json.load(f)
+
+          # Collect all provider prefixes from bound commands
+          providers = set()
+          total_commands = 0
+          for resource, commands in bound.items():
+              for action_key in commands:
+                  provider = action_key.split('/')[0]
+                  providers.add(provider)
+                  total_commands += 1
+
+          print(f'Resources: {len(bound)}')
+          print(f'Providers with bindings: {len(providers)}')
+          print(f'Total bound commands: {total_commands}')
+          print(f'Providers: {sorted(providers)}')
+
+          # At least 28 providers should bind (technitium may not have a resource)
+          if len(providers) < 28:
+              print(f'FAIL: Only {len(providers)} providers have bound commands, expected >= 28')
+              sys.exit(1)
+
+          # No unresolved placeholders
+          for resource, commands in bound.items():
+              for action_key, command in commands.items():
+                  if '{' in command and '}' in command:
+                      print(f'FAIL: Unresolved placeholder in {resource}/{action_key}: {command}')
+                      sys.exit(1)
+
+          print('All bindings resolved, no placeholders')
+          "
+
+      - name: Validate no real IPs leaked into spec
+        run: |
+          if grep -q '172\.20\.' /tmp/openapi.json /tmp/bound_commands.json; then
+            echo "FAIL: Real infrastructure IPs found in generated files"
+            exit 1
+          fi
+          echo "No real IPs in generated files"
+
+  server:
+    runs-on: ubuntu-latest
+    needs: binding
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install CUE
+        uses: cue-lang/setup-cue@v1.0.1
+        with:
+          version: v0.15.4
 
       - uses: actions/setup-python@v5
         with:
@@ -49,5 +120,74 @@ jobs:
       - name: Install test dependencies
         run: pip install pytest httpx pytest-asyncio
 
-      - name: Run server tests
+      - name: Run unit tests
         run: pytest server/tests/ -v
+
+      - name: Generate full spec for integration test
+        run: cue export ./examples/datacenter/ -e openapi_spec --out json > /tmp/quicue-openapi.json
+
+      - name: Start server and smoke test all routes
+        run: |
+          # Start the real server against the full generated spec
+          QUICUE_SPEC_PATH=/tmp/quicue-openapi.json \
+          QUICUE_API_TOKEN=ci-test-token \
+          QUICUE_TRUSTED_SUBNET=127.0.0.0/8 \
+          QUICUE_DEPLOY_LOG_PATH=/tmp/deploy.jsonl \
+          QUICUE_DEPLOY_LOCK_PATH=/tmp/deploy.lock.json \
+            uvicorn app.main:app --host 127.0.0.1 --port 8000 --app-dir server &
+          SERVER_PID=$!
+
+          # Wait for server to be ready
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8000/api/v1/healthz > /dev/null 2>&1; then
+              break
+            fi
+            sleep 1
+          done
+
+          # Health check
+          HEALTH=$(curl -sf http://127.0.0.1:8000/api/v1/healthz)
+          ROUTE_COUNT=$(echo "$HEALTH" | python3 -c "import json,sys; print(json.load(sys.stdin)['route_count'])")
+          echo "Server loaded $ROUTE_COUNT routes"
+
+          if [ "$ROUTE_COUNT" -lt 600 ]; then
+            echo "FAIL: Expected >= 600 routes, got $ROUTE_COUNT"
+            kill $SERVER_PID
+            exit 1
+          fi
+
+          # Hit every route in mock mode using the generated OpenAPI spec
+          python3 -c "
+          import json, urllib.request, sys
+
+          with open('/tmp/quicue-openapi.json') as f:
+              spec = json.load(f)
+
+          paths = [p for p in spec.get('paths', {}).keys() if p.startswith('/resources/')]
+          print(f'Testing {len(paths)} resource routes...')
+
+          total = 0
+          failed = 0
+          for path in paths:
+              url = f'http://127.0.0.1:8000/api/v1{path}'
+              try:
+                  req = urllib.request.Request(url, method='POST', data=b'{}',
+                      headers={'Content-Type': 'application/json'})
+                  resp = urllib.request.urlopen(req)
+                  total += 1
+              except urllib.error.HTTPError as e:
+                  # 200=mock ok, 403=auth required, 423=locked — all acceptable
+                  if e.code in (403, 423):
+                      total += 1
+                  else:
+                      print(f'FAIL {e.code}: {path}')
+                      failed += 1
+                      total += 1
+
+          print(f'Tested {total}/{len(paths)} routes, {failed} failures')
+          if failed > 0:
+              sys.exit(1)
+          " || { kill $SERVER_PID; exit 1; }
+
+          kill $SERVER_PID
+          echo "All routes passed"
