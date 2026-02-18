@@ -29,6 +29,7 @@ package charter
 import (
 	"list"
 	"quicue.ca/patterns@v0"
+	"quicue.ca/vocab@v0"
 )
 
 // #Charter — what "done" looks like.
@@ -69,6 +70,24 @@ import (
 	requires:    {[string]: true} // resource names that must be present
 	depends_on?: {[string]: true} // other gate names that must be satisfied first
 	description?: string
+}
+
+// #InfraCharter — type-safe charter for infrastructure graphs.
+//
+// Constrains required_types keys to vocab.#TypeNames — the same
+// type vocabulary that providers match on and JSON-LD exports as
+// typed IRIs. A typo in required_types becomes a cue vet error.
+//
+// Usage:
+//   charter: charter.#InfraCharter & {
+//       name: "Example Datacenter"
+//       scope: {
+//           total_resources: 30
+//           required_types: {DNSServer: true, VirtualizationPlatform: true}
+//       }
+//   }
+#InfraCharter: #Charter & {
+	scope: required_types?: {[vocab.#TypeNames]: true}
 }
 
 // #GapAnalysis — given a charter and a graph, compute what's missing.
