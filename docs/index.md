@@ -37,7 +37,6 @@ The graph patterns are domain-agnostic. `#BlastRadius`, `#ImpactQuery`, `#Single
 | Construction management | Deep retrofit work packages for 270-unit community housing program | [CMHC Retrofit](https://cmhc-retrofit.quicue.ca/) |
 | Energy efficiency | 17-service processing platform for Ontario Greener Homes | [Greener Homes](https://cmhc-retrofit.quicue.ca/#greener-homes) |
 | Real estate operations | Transaction pipelines, referral networks, compliance workflows | [maison-613](https://maison613.quicue.ca/) |
-| Biomedical research | 95 genes across 16 databases — funding gap analysis for NIDCR | [lacuene](https://lacuene.apercue.ca/) |
 
 ## Quick start
 

@@ -94,3 +94,45 @@ i005: core.#Insight & {
 	]
 	related: {"ADR-005": true, "ADR-007": true}
 }
+
+i006: core.#Insight & {
+	id:        "INSIGHT-006"
+	statement: "Everything is a projection of the same typed dependency graph — 72+ projections exist"
+	evidence: [
+		"Terraform state, Ansible playbooks, Rundeck YAML, Jupyter notebooks, MkDocs wiki, bash deploy scripts, HTTP requests, OpenAPI specs, Justfile recipes, JSON-LD, Graphviz DOT, Mermaid, TOON, N-Triples, DCAT catalogue — all generated from the same #InfraGraph",
+		"projections.cue alone produces 6 output formats; visualization.cue adds 2 more; each template/ provider adds resolved commands",
+		"29 providers × multiple actions × datacenter resources = 654 resolved commands from one graph",
+		"CMHC retrofit, maison-613, grdn all consume the same patterns and produce domain-specific projections",
+		"The quicue.ca site renders 7 D3 visualizations from one VizData payload",
+	]
+	method:     "cross_reference"
+	confidence: "high"
+	discovered: "2026-02-18"
+	implication: "The graph is the single source of truth. Every artifact — config files, deployment scripts, documentation, visualizations, linked data exports — is a derived projection. Adding a new projection means writing one more CUE definition, not building a new pipeline."
+	action_items: [
+		"Document the full projection inventory in patterns/README.md",
+		"Track projection count as a metric in showcase charter",
+	]
+	related: {"INSIGHT-002": true}
+}
+
+i007: core.#Insight & {
+	id:        "INSIGHT-007"
+	statement: "CUE unification obviates SPARQL — precomputed comprehensions ARE the query layer"
+	evidence: [
+		"quicue.ca implements 8 query patterns: ImpactQuery, DependencyChain, PathFinder, ImmediateDependents, CriticalityRank, GroupByType, topology, validation",
+		"Each pattern is a CUE definition that takes Graph: #InfraGraph and produces computed results at eval time",
+		"A SPARQL query like 'SELECT ?x WHERE { ?x dependsOn ?y }' is equivalent to a CUE comprehension: {for name, r in resources if r.depends_on[y] != _|_ {(name): true}}",
+		"No triplestore runtime needed — the entire query universe is precomputed by cue export",
+		"N-Triples export exists for W3C interop, not for querying",
+	]
+	method:     "experiment"
+	confidence: "high"
+	discovered: "2026-02-18"
+	implication: "SPARQL is unnecessary for the primary use case. CUE comprehensions precompute all graph queries at evaluation time. A triplestore adds value only for cross-dataset federation with external linked data sources — not for querying your own graph."
+	action_items: [
+		"Reclassify Oxigraph from 'required' to 'optional interop' in showcase plan",
+		"Document CUE-vs-SPARQL equivalence table for the 8 query patterns",
+	]
+	related: {"INSIGHT-006": true}
+}
