@@ -296,10 +296,15 @@ cat > "$OUT/_redirects" << 'EOF'
 # Resource listing
 /api/v1/resources /api/v1/resources/index.json 200
 
-# Per-resource endpoints — splat rules
+# Per-resource endpoints — with /api/v1/ prefix
 /api/v1/resources/:resource /api/v1/resources/:resource/index.json 200
 /api/v1/resources/:resource/commands /api/v1/resources/:resource/commands.json 200
 /api/v1/resources/:resource/:provider/:action /api/v1/resources/:resource/:provider/:action.json 200
+
+# Non-prefixed aliases (Swagger compat)
+/resources/:resource /api/v1/resources/:resource/index.json 200
+/resources/:resource/commands /api/v1/resources/:resource/commands.json 200
+/resources/:resource/:provider/:action /api/v1/resources/:resource/:provider/:action.json 200
 EOF
 
 # ─── Done ────────────────────────────────────────────────────────────────────
