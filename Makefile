@@ -1,11 +1,16 @@
-.PHONY: test validate examples providers check-downstream datacenter homelab devbox impact blast spof export jsonld clean
+.PHONY: test validate examples providers charter check-downstream datacenter homelab devbox impact blast spof export jsonld clean
 
 # Full test suite — run this before committing
-test: validate examples providers
+test: validate examples providers charter
 	@echo "=== .kg/ ==="
 	@cd .kg && cue vet .
 	@echo ""
 	@echo "All tests passed."
+
+# Charter module
+charter:
+	@echo "=== charter ==="
+	@cue vet ./charter/
 
 # Core validation
 validate:
