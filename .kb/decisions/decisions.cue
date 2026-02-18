@@ -168,6 +168,23 @@ d010: core.#Decision & {
 	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
 }
 
+d012: core.#Decision & {
+	id:        "ADR-012"
+	title:     "Static-first showcase: all public surfaces on Cloudflare Pages"
+	status:    "accepted"
+	date:      "2026-02-18"
+	context:   "Public showcases (demo, API, catalogue, KG spec, CMHC retrofit, maison-613) were originally served by Caddy on container 612 behind a Cloudflare Tunnel. The tunnel depends on port 7844 outbound, which ISP equipment (Bell Giga Hub) blocks intermittently. Dynamic features (WebSocket MUDs, live execution) are unused in read-only showcases."
+	decision:  "Deploy all static showcases to Cloudflare Pages. The static API (727 pre-computed JSON files from cue export) serves the same endpoints as the original FastAPI server, but as GET-only static files. No servers, no tunnels, no containers for the public showcase surface."
+	rationale: "CUE comprehensions pre-compute all possible API responses at eval time. If every answer is known at build time, a web server adds latency and failure modes without adding capability. CF Pages provides global CDN, zero-downtime deploys, and eliminates the tunnel dependency entirely."
+	consequences: [
+		"7 CF Pages projects replace Caddy vhosts on container 612",
+		"All API examples use GET (POST returns 405 on static hosting)",
+		"Tunnel is only needed for dynamic services: MUDs (WebSocket), live execution",
+		"Deploy workflow: cue export → build-static-api.sh → wrangler pages deploy",
+	]
+	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
+}
+
 d011: core.#Decision & {
 	id:        "ADR-011"
 	title:     "lacuene is not a downstream consumer"
