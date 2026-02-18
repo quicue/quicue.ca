@@ -116,6 +116,26 @@ i006: core.#Insight & {
 	related: {"INSIGHT-002": true}
 }
 
+i008: core.#Insight & {
+	id:        "INSIGHT-008"
+	statement: "When CUE comprehensions pre-compute all possible answers, the API is just a file server — the 'universe cheat sheet' pattern"
+	evidence: [
+		"build-static-api.sh runs cue export once, then splits the output into 727 static JSON files",
+		"654 mock action responses, Swagger UI, OpenAPI spec, graph.jsonld, hydra entrypoint — all pre-computed",
+		"Replacing FastAPI with CF Pages static hosting produces identical API responses with zero server runtime",
+		"The same pattern that makes SPARQL unnecessary (INSIGHT-007) makes a web server unnecessary for read-only APIs",
+	]
+	method:     "experiment"
+	confidence: "high"
+	discovered: "2026-02-18"
+	implication: "If your domain model is a closed world and CUE comprehensions compute all queries at eval time, the entire API surface is known at build time. A static file server (CDN) is the optimal runtime — zero latency, zero failure modes, global distribution."
+	action_items: [
+		"Document the universe cheat sheet pattern in patterns/",
+		"Consider extending to other read-only API surfaces (catalogue, kg spec)",
+	]
+	related: {"INSIGHT-007": true, "ADR-012": true}
+}
+
 i007: core.#Insight & {
 	id:        "INSIGHT-007"
 	statement: "CUE unification obviates SPARQL — precomputed comprehensions ARE the query layer"

@@ -95,6 +95,22 @@ p_gap_as_backlog: core.#Pattern & {
 	}
 }
 
+p_universe_cheatsheet: core.#Pattern & {
+	name:     "Universe Cheat Sheet"
+	category: "architecture"
+	problem:  "Read-only APIs backed by CUE graphs still deploy a web server (FastAPI, Express, etc.) to handle requests at runtime, adding latency, failure modes, and operational overhead."
+	solution: "Run cue export once at build time to produce all possible API responses as static JSON files. Deploy to a CDN (CF Pages, S3, GitHub Pages). The API is a directory of pre-computed answers — no server, no runtime, no state."
+	context:  "Any CUE-backed API where the query universe is finite and the data changes only at build time. The pattern works because CUE comprehensions precompute all queries — the response to every possible request is already a field in the export."
+	example:  "cue export ./examples/datacenter/ -e _bulk | build-static-api.sh → 727 JSON files → CF Pages at api.quicue.ca"
+	used_in: {
+		"quicue.ca": true
+	}
+	related: {
+		"compile_time_binding": true
+		"safe_deploy":         true
+	}
+}
+
 p_safe_deploy: core.#Pattern & {
 	name:     "Safe Deploy Pipeline"
 	category: "operations"
