@@ -41,6 +41,24 @@ cat > "$OUT/index.json" << 'EOF'
 }
 EOF
 
+# ─── Step 2b: API version index ───────────────────────────────────────────────
+cat > "$OUT/api/v1/index.json" << 'EOF'
+{
+  "version": "v1",
+  "endpoints": {
+    "healthz": "/api/v1/healthz",
+    "readyz": "/api/v1/readyz",
+    "spec-info": "/api/v1/spec-info",
+    "resources": "/api/v1/resources",
+    "hydra": "/api/v1/hydra",
+    "graph": "/api/v1/graph.jsonld",
+    "deploy_history": "/api/v1/deploy/history",
+    "deploy_lock": "/api/v1/deploy/lock"
+  },
+  "docs": "/docs/index.html"
+}
+EOF
+
 # ─── Step 3: Health endpoints ────────────────────────────────────────────────
 ROUTE_COUNT=$(jq '.bound_commands | [to_entries[].value | to_entries | length] | add' "$BULK")
 
@@ -282,6 +300,10 @@ EOF
 cat > "$OUT/_redirects" << 'EOF'
 # Root → index.json
 / /index.json 200
+
+# API version index
+/api/v1 /api/v1/index.json 200
+/api/v1/ /api/v1/index.json 200
 
 # API endpoints → pre-computed JSON
 /api/v1/healthz /api/v1/healthz.json 200
