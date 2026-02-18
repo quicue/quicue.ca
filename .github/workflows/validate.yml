@@ -81,11 +81,15 @@ jobs:
               print(f'FAIL: Only {len(providers)} providers have bound commands, expected >= 28')
               sys.exit(1)
 
-          # No unresolved placeholders
+          # No unresolved template placeholders (e.g. {node}, {ctid})
+          # Exclude JSON bodies like {\"key\":...} and shell constructs
+          import re
+          placeholder_re = re.compile(r'\{[a-z_]+\}')
           for resource, commands in bound.items():
               for action_key, command in commands.items():
-                  if '{' in command and '}' in command:
-                      print(f'FAIL: Unresolved placeholder in {resource}/{action_key}: {command}')
+                  matches = placeholder_re.findall(command)
+                  if matches:
+                      print(f'FAIL: Unresolved placeholder in {resource}/{action_key}: {matches} in {command}')
                       sys.exit(1)
 
           print('All bindings resolved, no placeholders')
