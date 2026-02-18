@@ -407,7 +407,7 @@ cluster: patterns.#BindCluster & {
     }
 }
 // cluster.bound.dns.actions.proxmox.container_status.command = "ssh pve-node1 'pct status 101'"
-// cluster.summary = {total_resources: 14, total_providers: 5, bound_actions: 87}
+// cluster.summary = {total_resources: 14, total_providers: 5, resolved_commands: 87}
 ```
 
 **Binding algorithm:**
@@ -489,7 +489,7 @@ These extend `#ExecutionPlan` to produce specific output formats:
 | `http` | Text (`.http`) | RFC 9110 HTTP files for REST Client extensions |
 | `wiki` | Markdown | MkDocs pages (index + per-resource detail) |
 | `script` | Bash | Self-contained deployment script with parallelism |
-| `imperator` | JSON | Task list for `cue cmd` consumption |
+| `ops` | JSON | Task list for `cue cmd` consumption |
 
 ## Composition example
 
