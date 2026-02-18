@@ -1,4 +1,4 @@
-.PHONY: test validate examples providers charter kb check-downstream datacenter homelab devbox impact blast spof export jsonld clean
+.PHONY: test validate examples providers charter kb check-downstream datacenter homelab devbox impact blast spof export jsonld dcat ntriples shacl semantic-export clean
 
 # Full test suite — run this before committing
 test: validate examples providers charter kb
@@ -75,6 +75,32 @@ export:
 # JSON-LD graph
 jsonld:
 	cue export ./examples/datacenter/ -e jsonld --out json
+
+# DCAT 3 catalog
+dcat:
+	cue export ./examples/datacenter/ -e dcat_catalog --out json
+
+# N-Triples for SPARQL
+ntriples:
+	cue export ./examples/datacenter/ -e sparql_export --out text
+
+# SHACL shapes
+shacl:
+	cue export ./examples/datacenter/ -e shapes.graph --out json
+
+# Full semantic export (all projections)
+semantic-export:
+	@echo "=== DCAT 3 Catalog ==="
+	@cue export ./examples/datacenter/ -e dcat_catalog --out json | head -5
+	@echo "..."
+	@echo ""
+	@echo "=== N-Triples ==="
+	@cue export ./examples/datacenter/ -e sparql_export --out text | head -5
+	@echo "..."
+	@echo ""
+	@echo "=== SHACL Shapes ==="
+	@cue export ./examples/datacenter/ -e shapes.graph --out json | head -5
+	@echo "..."
 
 # Validate known downstream consumers still unify with current patterns
 check-downstream:

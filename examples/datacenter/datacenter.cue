@@ -893,3 +893,27 @@ jsonld: {
 		}},
 	]
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DCAT 3 CATALOG
+// ═══════════════════════════════════════════════════════════════════════════════
+
+_dcat: patterns.#DCAT3Catalog & {
+	Graph:       infra
+	CatalogID:   _base + "catalog"
+	Publisher:    "Example Datacenter Operations"
+	Title:       "Datacenter Infrastructure Catalog"
+	Description: "DCAT 3 catalog of datacenter infrastructure resources — \(metrics.total_resources) resources, \(metrics.max_depth) layers deep"
+	BaseIRI:     _base
+}
+dcat_catalog: _dcat.catalog
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// N-TRIPLES EXPORT (for SPARQL triplestore)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+_nt: patterns.#NTriplesExport & {
+	Graph:   infra
+	BaseIRI: _base
+}
+sparql_export: _nt.triples
