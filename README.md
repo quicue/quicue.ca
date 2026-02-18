@@ -91,6 +91,10 @@ Four-layer model:
 - **`#HealthStatus`** — Simulate failures and see propagation
 - **`#RollbackPlan`** — "If layer N fails, what do we undo?"
 - **`#DeploymentPlan`** — Layer-by-layer startup ordering with gates
+- **`#DCAT3Catalog`** — W3C DCAT 3 data catalog from `#InfraGraph`
+- **`#NTriplesExport`** — N-Triples RDF serialization for triplestore loading
+- **`#ODRLPolicy`** — W3C ODRL 2.2 machine-readable access policies
+- **`#SHACLShapes`** — W3C SHACL node shapes from type registry
 
 ## Providers (29)
 
@@ -159,7 +163,7 @@ The same graph patterns power projects across different domains:
 - `cab/` — Change Advisory Board reports (impact analysis, runbooks)
 - `ci/gitlab/` — Reusable GitLab CI templates
 - `wiki/` — Generate MkDocs sites from resource graphs
-- `ou/` — Role-scoped views (ops/dev/readonly) with W3C Hydra JSON-LD
+- `ou/` — Role-scoped views (ops/dev/readonly) with W3C Hydra JSON-LD, LDES event streams
 - `server/` — FastAPI execution gateway ([api.quicue.ca](https://api.quicue.ca/docs))
 - `kg/` — Knowledge graph framework ([quicue-kg](https://github.com/quicue/quicue-kg))
 

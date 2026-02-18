@@ -12,8 +12,12 @@ quicue.ca produces W3C-compatible linked data from two layers: the **infrastruct
 │                                                          │
 │  vocab/context.cue          JSON-LD @context             │
 │  patterns/shacl.cue         SHACL shapes                 │
+│  patterns/dcat.cue          DCAT 3 data catalog          │
+│  patterns/ntriples.cue      N-Triples (greppable RDF)    │
+│  patterns/odrl.cue          ODRL access policies         │
 │  ou/hydra.cue               Hydra API documentation      │
 │  ou/activitystreams.cue     AS2 change feed              │
+│  ou/ldes.cue                LDES event stream            │
 │  examples/*/jsonld           JSON-LD graph export         │
 ├──────────────────────────────────────────────────────────┤
 │  Knowledge layer (quicue.ca/kg)                          │
@@ -54,6 +58,38 @@ cue export -e shapes.graph --out json > shapes.jsonld
 ### Hydra API
 
 `ou/hydra.cue` generates self-describing API documentation. Each resource type becomes a `hydra:Class` with `supportedOperation` and `supportedProperty`.
+
+### DCAT 3 catalog
+
+`patterns/dcat.cue` generates a [DCAT 3](https://www.w3.org/TR/vocab-dcat-3/) data catalog from any `#InfraGraph`. Each resource becomes a `dcat:Dataset` entry, with optional `dcat:DataService` endpoints for SPARQL and LDES:
+
+```bash
+cue export ./examples/datacenter/ -e dcat_catalog --out json
+```
+
+### N-Triples
+
+`patterns/ntriples.cue` serializes any `#InfraGraph` as [N-Triples](https://www.w3.org/TR/n-triples/) — one triple per line, loadable into any triplestore. Combines with kg N-Triples for cross-layer SPARQL queries:
+
+```bash
+cue export ./examples/datacenter/ -e sparql_export --out text > data.nt
+```
+
+### ODRL access policies
+
+`patterns/odrl.cue` generates [ODRL 2.2](https://www.w3.org/TR/odrl-model/) machine-readable access policies. Policies declare who can perform what action on which resources — enforcement is external (Cloudflare Access, Caddy, etc.):
+
+```bash
+cue export -e policy.policy --out json > policy.jsonld
+```
+
+### LDES event stream
+
+`ou/ldes.cue` generates [LDES](https://w3id.org/ldes/specification) event streams via the [TREE](https://treecg.github.io/specification/) specification. Each graph snapshot becomes an immutable event in an append-only stream — static JSON-LD files on any HTTP server, no streaming infrastructure needed:
+
+```bash
+cue export -e event.event --out json > ldes/event.jsonld
+```
 
 ### ActivityStreams 2.0
 
@@ -135,6 +171,9 @@ HAVING (COUNT(?dep) > 3)
 | `sh:` | `http://www.w3.org/ns/shacl#` | Infrastructure |
 | `hydra:` | `http://www.w3.org/ns/hydra/core#` | Infrastructure |
 | `as:` | `https://www.w3.org/ns/activitystreams#` | Infrastructure |
+| `odrl:` | `http://www.w3.org/ns/odrl/2/` | Infrastructure |
+| `tree:` | `https://w3id.org/tree#` | Infrastructure |
+| `ldes:` | `https://w3id.org/ldes#` | Infrastructure |
 | `dcterms:` | `http://purl.org/dc/terms/` | Both |
 
 JSON-LD contexts: [`quicue:`](https://quicue.ca/vocab) | [`kg:`](https://kg.quicue.ca/context.jsonld)
@@ -147,10 +186,12 @@ JSON-LD contexts: [`quicue:`](https://quicue.ca/vocab) | [`kg:`](https://kg.quic
 | Validate RDF externally | SHACL shapes |
 | Self-describing API for frontends | Hydra |
 | Feed changes to subscribers | ActivityStreams |
+| Publish immutable snapshots | LDES event stream |
+| Declare access policies | ODRL |
 | Decision audit trails | PROV-O |
 | Load into a triplestore | Turtle or N-Triples |
-| Process with unix tools | N-Triples |
+| Process with unix tools | N-Triples (infrastructure or knowledge) |
 | Browse patterns as taxonomy | SKOS |
 | Query provenance chains | Prolog or Datalog |
 | Automated CI checks | Datalog |
-| Register in a data catalog | DCAT |
+| Register in a data catalog | DCAT 3 |
