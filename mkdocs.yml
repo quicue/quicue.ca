@@ -37,6 +37,7 @@ nav:
   - Getting Started: getting-started.md
   - Architecture: architecture.md
   - Patterns: patterns.md
+  - Charter: charter.md
   - Knowledge Graph: knowledge-graph.md
   - Linked Data: linked-data.md
   - Templates: templates.md
