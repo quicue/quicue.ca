@@ -88,7 +88,7 @@ curl -X POST https://api.quicue.ca/api/v1/resources/router-core/vyos/show_interf
 - `Dockerfile` — Container build
 - `docker-compose.yml` — Dev environment
 - `.env.example` — Environment variable template
-- `update-server.sh` — Deploy script (export CUE data, push to container 625)
+- `update-server.sh` — Deploy script (export CUE data, push to API server)
 
 ## See Also
 
