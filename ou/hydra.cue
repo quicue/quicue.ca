@@ -22,8 +22,9 @@ import (
 
 // #HydraContext — extends the quicue JSON-LD context with Hydra namespace.
 #HydraContext: vocab.context."@context" & {
-	"hydra": "http://www.w3.org/ns/hydra/core#"
-	"rdfs":  "http://www.w3.org/2000/01/rdf-schema#"
+	"hydra":        "http://www.w3.org/ns/hydra/core#"
+	"rdfs":         "http://www.w3.org/2000/01/rdf-schema#"
+	"ActionResult": "quicue:ActionResult"
 }
 
 // #HydraOperation — a single executable operation on a resource.
@@ -32,12 +33,23 @@ import (
 	"hydra:method":        "GET"
 	"hydra:title":         string
 	"rdfs:comment":        string
+	"hydra:returns":       "quicue:ActionResult"
 	"quicue:provider":     string
 	"quicue:action":       string
 	"quicue:category":     string
 	"quicue:idempotent":   bool | *false
 	"quicue:destructive":  bool | *false
 	"quicue:command"?:     string
+}
+
+// #HydraSupportedProperty — a property descriptor for a resource field.
+#HydraSupportedProperty: {
+	"@type":           "hydra:SupportedProperty"
+	"hydra:property":  string | {...}
+	"hydra:title":     string
+	"hydra:required":  bool | *false
+	"hydra:readable":  bool | *true
+	"hydra:writeable": bool | *false
 }
 
 // #HydraLink — a navigable relationship to another resource.
@@ -55,7 +67,7 @@ import (
 	"@type":                       "hydra:Class"
 	"rdfs:label":                  string
 	"hydra:supportedOperation":    [...#HydraOperation]
-	"hydra:supportedProperty":     [...#HydraLink]
+	"hydra:supportedProperty":     [...#HydraSupportedProperty]
 }
 
 // #ApiDocumentation — generates Hydra JSON-LD from an #InteractionCtx.
@@ -105,20 +117,84 @@ import (
 					]
 
 					"hydra:supportedProperty": [
+						// Core fields: @type and name are required
+						#HydraSupportedProperty & {
+							"hydra:property": "quicue:type"
+							"hydra:title":    "@type"
+							"hydra:required": true
+						},
+						#HydraSupportedProperty & {
+							"hydra:property": "quicue:name"
+							"hydra:title":    "name"
+							"hydra:required": true
+						},
+						// Resource-specific fields (skip internal/structural)
+						for fname, _ in rv.resource
+						if !strings.HasPrefix(fname, "_")
+						if !strings.HasPrefix(fname, "@")
+						if fname != "name" && fname != "depends_on" && fname != "actions" {
+							#HydraSupportedProperty & {
+								"hydra:property": "quicue:\(fname)"
+								"hydra:title":    fname
+							}
+						},
+						// Navigation links (depends_on → hydra:Link)
 						if rv.resource.depends_on != _|_
 						for dep, _ in rv.resource.depends_on
-						// Only link to resources visible in this scope
 						if ctx.view.resources[dep] != _|_ {
-							#HydraLink & {
+							#HydraSupportedProperty & {
 								"hydra:property": {
 									"@type":      "hydra:Link"
 									"@id":        "quicue:\(dep)"
 									"rdfs:label": "depends on \(dep)"
 								}
+								"hydra:title": "depends_on/\(dep)"
 							}
 						},
 					]
 				}
+			},
+		]
+	}
+}
+
+// #HydraEntryPoint — dereferenceable API root for generic Hydra clients.
+// Serves as the "front door" — clients discover collections from here.
+#HydraEntryPoint: {
+	ctx: _
+
+	entrypoint: {
+		"@context": #HydraContext
+		"@type":    "hydra:EntryPoint"
+		"@id":      "https://api.quicue.ca/api/v1/"
+
+		"hydra:collection": {
+			"@id":   "https://api.quicue.ca/api/v1/resources"
+			"@type": "hydra:Collection"
+			"hydra:totalItems": ctx.total_resources
+			"hydra:manages": {
+				"hydra:property": "rdf:type"
+				"hydra:object":   "quicue:Resource"
+			}
+		}
+	}
+}
+
+// #HydraCollection — resource listing as hydra:Collection with hydra:member.
+// Serves at /api/v1/resources — LDP-compatible container.
+#HydraCollection: {
+	ctx: _
+
+	collection: {
+		"@context":         #HydraContext
+		"@type":            "hydra:Collection"
+		"@id":              "https://api.quicue.ca/api/v1/resources"
+		"hydra:totalItems": ctx.total_resources
+		"hydra:member": [
+			for rname, rv in ctx.view.resources {
+				"@id":   "quicue:\(rname)"
+				"@type": [ for t, _ in rv.resource."@type" {t}]
+				"name": rname
 			},
 		]
 	}

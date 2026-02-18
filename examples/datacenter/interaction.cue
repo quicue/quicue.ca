@@ -59,6 +59,21 @@ datacenter_hydra: (ou.#ApiDocumentation & {ctx: {
 	total_actions:   ops_session.summary.total_actions
 }}).doc
 
+datacenter_hydra_entrypoint: (ou.#HydraEntryPoint & {ctx: {
+	total_resources: ops_session.summary.total_resources
+}}).entrypoint
+
+datacenter_hydra_collection: (ou.#HydraCollection & {ctx: {
+	view:            ops_session.view
+	total_resources: ops_session.summary.total_resources
+}}).collection
+
+// ============================================================================
+// SKOS Type Vocabulary
+// ============================================================================
+
+datacenter_skos_types: (ou.#TypeVocabulary & {}).vocabulary
+
 // ============================================================================
 // Summary Output
 // ============================================================================

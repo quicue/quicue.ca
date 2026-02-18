@@ -22,9 +22,12 @@ _bulk: {
 	bound_commands:  output.commands
 	notebook:        execution.notebook
 	ops_tasks:       execution.ops
-	graph_jsonld:    jsonld
-	hydra:           datacenter_hydra
-	interaction:     interaction_summary
+	graph_jsonld:       jsonld
+	hydra:              datacenter_hydra
+	hydra_entrypoint:   datacenter_hydra_entrypoint
+	hydra_collection:   datacenter_hydra_collection
+	skos_types:         datacenter_skos_types
+	interaction:        interaction_summary
 	wiki:            execution.wiki
 	rundeck:         execution.rundeck
 	script:          execution.script
