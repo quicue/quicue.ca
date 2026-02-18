@@ -27,7 +27,7 @@ quicue exports infrastructure and knowledge as linked data across two layers: **
 └──────────────────────────────────────────────────────────┘
 ```
 
-The layers share namespace wiring. `vocab/context.cue` already includes `prov:`, `dcat:`, `oa:`, `as:`, and `sh:` prefixes — both layers export to the same IRI space. A SPARQL query can join infrastructure state with the decisions that shaped it.
+The layers share namespace wiring. `vocab/context.cue` already includes `prov:`, `dcat:`, `oa:`, `as:`, and `sh:` prefixes — both layers export to the same IRI space. Inside CUE, comprehensions precompute every query. Outside CUE, the shared IRIs let a SPARQL endpoint join infrastructure state with the decisions that shaped it.
 
 ## RDF in 60 seconds
 

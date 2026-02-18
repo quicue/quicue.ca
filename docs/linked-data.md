@@ -33,7 +33,7 @@ quicue.ca produces W3C-compatible linked data from two layers: the **infrastruct
 └──────────────────────────────────────────────────────────┘
 ```
 
-The layers share namespace wiring. `vocab/context.cue` includes `prov:`, `dcat:`, `oa:`, `as:`, and `sh:` prefixes — both layers export to the same IRI space. A SPARQL query can join infrastructure state with the decisions that shaped it.
+The layers share namespace wiring. `vocab/context.cue` includes `prov:`, `dcat:`, `oa:`, `as:`, and `sh:` prefixes — both layers export to the same IRI space. Inside CUE, comprehensions precompute every query. Outside CUE, the shared IRIs let a SPARQL endpoint join infrastructure state with the decisions that shaped it.
 
 ## Infrastructure projections
 
