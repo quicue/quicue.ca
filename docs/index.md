@@ -17,14 +17,15 @@ dns: #Resource & {
 
 No runtime. No state file. No plugins. CUE validates everything simultaneously, and the output is plain JSON.
 
-## Two modules
+## Modules
 
 | Module | What it models | What it answers |
 |--------|---------------|-----------------|
 | **[quicue.ca/patterns](patterns.md)** | Resources, dependencies, operations | What exists? What depends on what? What breaks if X goes down? |
+| **[quicue.ca/charter](charter.md)** | Scope, gates, completion criteria | What does "done" look like? What's missing? What's next? |
 | **[quicue.ca/kg](knowledge-graph.md)** | Decisions, patterns, insights, rejected approaches | Why does it exist? What was decided? What failed? |
 
-Both export to [W3C linked data standards](linked-data.md) — JSON-LD, PROV-O, DCAT, SHACL, SKOS, and more. The infrastructure graph and the knowledge graph share a single IRI space.
+All three export to [W3C linked data standards](linked-data.md) — JSON-LD, PROV-O, DCAT, SHACL, SKOS, and more. The infrastructure graph and the knowledge graph share a single IRI space.
 
 ## Not just infrastructure
 
@@ -69,8 +70,10 @@ cue export ./examples/datacenter/ -e jsonld --out json
 | `#HealthStatus` | Simulated failure propagation |
 | `#DeploymentPlan` | Ordered layers with gates |
 | `#ExecutionPlan` | All of the above, unified |
+| `#Charter` | What "done" looks like — scope, gates, completion |
+| `#GapAnalysis` | What's missing, what's next, which gates are satisfied |
 
-See the [Pattern Catalog](patterns.md) for the full list.
+See the [Pattern Catalog](patterns.md) for the full list and [Charter](charter.md) for project planning.
 
 ## Contract-via-unification
 
