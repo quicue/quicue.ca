@@ -68,7 +68,7 @@ p_contract_via_unification: core.#Pattern & {
 	example:  "validate: valid: true; infra: roots: {\"docker\": true}; summary: total_resources: 18"
 	used_in: {
 		"quicue.ca":  true
-		"cjlq":       true
+		"cmhc-retrofit": true
 		"maison-613": true
 		"grdn":       true
 	}

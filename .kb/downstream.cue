@@ -10,10 +10,10 @@ downstream: {
 		pattern_count: 14
 		status:        "active"
 	}
-	cjlq: {
-		"@id":       "https://rfam.cc/project/cjlq"
-		module:      "rfam.cc/cjlq@v0"
-		description: "Energy efficiency scenario modeling (NHCF deep retrofit, Greener Homes processing platform)"
+	"cmhc-retrofit": {
+		"@id":       "https://quicue.ca/project/cmhc-retrofit"
+		module:      "quicue.ca/cmhc-retrofit@v0"
+		description: "Construction program management (NHCF deep retrofit, Greener Homes processing platform)"
 		imports: ["quicue.ca/patterns@v0"]
 		pattern_count: 15
 		has_kb:        true

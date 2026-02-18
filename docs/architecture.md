@@ -386,7 +386,7 @@ Vendored copy of the [quicue-kg](https://github.com/quicue/quicue-kg) framework.
 
 #### Downstream validation
 
-`.kb/downstream.cue` registers known consumers (grdn, cjlq, maison-613, apercue). Each consumer maintains its own `.kb/` with a deps registry cataloging which vocab and pattern definitions it imports and where they're used — for example, grdn's deps.cue records 14 pattern and 2 vocab definitions with source, purpose, and consuming files.
+`.kb/downstream.cue` registers known consumers (grdn, cmhc-retrofit, maison-613, apercue). Each consumer maintains its own `.kb/` with a deps registry cataloging which vocab and pattern definitions it imports and where they're used — for example, grdn's deps.cue records 14 pattern and 2 vocab definitions with source, purpose, and consuming files.
 
 The `make check-downstream` target runs `cue vet` on validation targets across downstream projects. Renaming a field in `#InfraGraph` produces a unification error in any consumer that references it, caught at build time rather than discovered in production.
 
