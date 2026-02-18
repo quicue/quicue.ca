@@ -122,8 +122,14 @@ make validate     # Core schemas
 make examples     # All examples
 make providers    # All providers
 make datacenter   # Datacenter example summary
+make homelab      # Homelab example summary
+make devbox       # Devbox example summary
 make impact       # Impact analysis demo
+make blast        # Blast radius analysis
 make spof         # SPOF detection demo
+make export       # Full JSON export
+make jsonld       # JSON-LD graph export
+make check-downstream  # Validate all downstream consumers
 ```
 
 ## Pull requests

@@ -138,7 +138,7 @@ infra: #InfraGraph & {
 }
 ```
 
-Generate precomputed values with the Python helper at `examples/hybrid-demo/precompute.py`.
+Precomputed depth values bypass transitive closure for graphs with wide fan-in.
 
 ### Query patterns
 
@@ -352,7 +352,7 @@ output: {
 
 ### `ou/` — Role-scoped views
 
-Organizational unit views that filter resources and actions by role:
+Role-scoped views that filter resources and actions by role:
 
 - `ops` — full access to all actions
 - `dev` — read-only monitoring and log access
