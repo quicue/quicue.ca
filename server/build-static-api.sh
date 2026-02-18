@@ -140,7 +140,40 @@ echo '{"entries": [], "count": 0}' > "$OUT/api/v1/deploy/history.json"
 echo '{"locked": false, "operator": null, "acquired_at": null, "expires_at": null}' > "$OUT/api/v1/deploy/lock.json"
 
 # ─── Step 8: OpenAPI spec + Swagger UI ───────────────────────────────────────
-cp "$OPENAPI" "$OUT/openapi.json"
+# Patch OpenAPI spec for static serving:
+# 1. Change POST → GET (static files can't accept POST)
+# 2. Prefix paths with /api/v1 (to match the static file layout)
+python3 << PYEOF > "$OUT/openapi.json"
+import json, sys
+
+with open("$OPENAPI") as f:
+    spec = json.load(f)
+
+# Rewrite paths: POST → GET, add /api/v1 prefix
+new_paths = {}
+for path, methods in spec.get("paths", {}).items():
+    new_path = f"/api/v1{path}"
+    new_methods = {}
+    for method, op in methods.items():
+        # Change POST to GET for static serving
+        new_method = "get" if method.lower() == "post" else method.lower()
+        op["description"] = op.get("description", "") or op.get("summary", "")
+        if method.lower() == "post":
+            op["description"] += " (static mock response)"
+        new_methods[new_method] = op
+    new_paths[new_path] = new_methods
+spec["paths"] = new_paths
+
+# Update server info
+spec["servers"] = [{"url": "https://api.quicue.ca", "description": "Static API (pre-computed from CUE)"}]
+spec["info"]["description"] = (
+    "654 pre-computed mock responses from the representative datacenter example. "
+    "All data uses RFC 5737 TEST-NET IPs. Every response was generated at build time by CUE."
+)
+
+json.dump(spec, sys.stdout, indent=2)
+PYEOF
+
 mkdir -p "$OUT/docs"
 
 cat > "$OUT/docs/index.html" << 'SWAGGEREOF'
