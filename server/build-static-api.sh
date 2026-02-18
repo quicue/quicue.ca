@@ -41,23 +41,7 @@ cat > "$OUT/index.json" << 'EOF'
 }
 EOF
 
-# ─── Step 2b: API version index ───────────────────────────────────────────────
-cat > "$OUT/api/v1/index.json" << 'EOF'
-{
-  "version": "v1",
-  "endpoints": {
-    "healthz": "/api/v1/healthz",
-    "readyz": "/api/v1/readyz",
-    "spec-info": "/api/v1/spec-info",
-    "resources": "/api/v1/resources",
-    "hydra": "/api/v1/hydra",
-    "graph": "/api/v1/graph.jsonld",
-    "deploy_history": "/api/v1/deploy/history",
-    "deploy_lock": "/api/v1/deploy/lock"
-  },
-  "docs": "/docs/index.html"
-}
-EOF
+# ─── Step 2b: API version index (now generated from CUE as Hydra EntryPoint) ─
 
 # ─── Step 3: Health endpoints ────────────────────────────────────────────────
 ROUTE_COUNT=$(jq '.bound_commands | [to_entries[].value | to_entries | length] | add' "$BULK")
@@ -106,7 +90,10 @@ PYEOF
 
 # ─── Step 5: Semantic endpoints ──────────────────────────────────────────────
 jq '.hydra' "$BULK" > "$OUT/api/v1/hydra.json"
+jq '.hydra_entrypoint' "$BULK" > "$OUT/api/v1/index.json"
+jq '.hydra_collection' "$BULK" > "$OUT/api/v1/resources/index.json"
 jq '.graph_jsonld' "$BULK" > "$OUT/api/v1/graph.jsonld.json"
+jq '.skos_types' "$BULK" > "$OUT/api/v1/types.json"
 
 # ─── Step 6: Pre-generate all 654 mock action responses ─────────────────────
 echo "Generating mock responses for all resource/provider/action combos..."
@@ -223,23 +210,7 @@ cat > "$OUT/docs/index.html" << 'SWAGGEREOF'
 SWAGGEREOF
 
 # ─── Step 9: Resource listing endpoint ───────────────────────────────────────
-python3 << PYEOF > "$OUT/api/v1/resources/index.json"
-import json, sys
-with open("$BULK") as f:
-    bulk = json.load(f)
-
-resources = []
-graph = bulk.get("plan", {}).get("Graph", {})
-for name, res in graph.get("resources", graph.get("Input", {})).items():
-    resources.append({
-        "@id": res.get("@id", f"https://infra.example.com/resources/{name}"),
-        "name": name,
-        "@type": list(res.get("@type", {}).keys()),
-        "depends_on": list(res.get("depends_on", {}).keys()),
-    })
-
-json.dump({"resources": resources, "count": len(resources)}, sys.stdout, indent=2)
-PYEOF
+# Now generated from CUE as hydra:Collection (Step 5) — /api/v1/resources/index.json
 
 # ─── Step 10: Per-resource detail endpoints ──────────────────────────────────
 python3 << PYEOF
@@ -295,6 +266,36 @@ cat > "$OUT/_headers" << 'EOF'
 
 /api/v1/graph.jsonld.json
   Content-Type: application/ld+json
+
+/api/v1/types.json
+  Content-Type: application/ld+json
+
+/api/v1/index.json
+  Content-Type: application/ld+json
+  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+
+/api/v1/
+  Content-Type: application/ld+json
+  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+
+/api/v1
+  Content-Type: application/ld+json
+  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+
+/api/v1/resources/index.json
+  Content-Type: application/ld+json
+  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"
+
+/api/v1/resources
+  Content-Type: application/ld+json
+  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"
+
+/api/v1/resources/*/index.json
+  Content-Type: application/json
+  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
 EOF
 
 cat > "$OUT/_redirects" << 'EOF'
@@ -311,6 +312,7 @@ cat > "$OUT/_redirects" << 'EOF'
 /api/v1/spec-info /api/v1/spec-info.json 200
 /api/v1/hydra /api/v1/hydra.json 200
 /api/v1/graph.jsonld /api/v1/graph.jsonld.json 200
+/api/v1/types /api/v1/types.json 200
 /api/v1/deploy/history /api/v1/deploy/history.json 200
 /api/v1/deploy/lock /api/v1/deploy/lock.json 200
 /docs /docs/index.html 200
