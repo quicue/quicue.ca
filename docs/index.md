@@ -34,8 +34,8 @@ The graph patterns are domain-agnostic. `#BlastRadius`, `#ImpactQuery`, `#Single
 | Domain | What the graph models | Live |
 |--------|----------------------|------|
 | IT infrastructure | 30 servers, containers, and services across 7 dependency layers | [datacenter example](example/index.md) |
-| Construction management | Deep retrofit work packages for 270-unit community housing program | [CMHC Retrofit](https://quicue.ca/cmhc-retrofit/) |
-| Energy efficiency | 17-service processing platform for Ontario Greener Homes | [Greener Homes](https://quicue.ca/cmhc-retrofit/#greener-homes) |
+| Construction management | Deep retrofit work packages for 270-unit community housing program | [CMHC Retrofit](https://cmhc-retrofit.quicue.ca/) |
+| Energy efficiency | 17-service processing platform for Ontario Greener Homes | [Greener Homes](https://cmhc-retrofit.quicue.ca/#greener-homes) |
 | Real estate operations | Transaction pipelines, referral networks, compliance workflows | [maison-613](https://maison613.quicue.ca/) |
 | Biomedical research | 95 genes across 16 databases — funding gap analysis for NIDCR | [lacuene](https://lacuene.apercue.ca/) |
 
