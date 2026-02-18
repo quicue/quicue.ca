@@ -180,9 +180,9 @@ Commands:
 
 ## Specification
 
-The full specification (directory layout, type constraints, aggregation semantics, federation protocol) is published at [quicue.github.io/quicue-kg/spec.html](https://quicue.github.io/quicue-kg/spec.html).
+The full specification (directory layout, type constraints, aggregation semantics, federation protocol) is published at [kg.quicue.ca/spec/](https://kg.quicue.ca/spec/).
 
-JSON-LD vocabulary context: [quicue.github.io/quicue-kg/context.jsonld](https://quicue.github.io/quicue-kg/context.jsonld)
+JSON-LD vocabulary context: [kg.quicue.ca/context.jsonld](https://kg.quicue.ca/context.jsonld)
 
 ## Development
 

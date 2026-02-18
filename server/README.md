@@ -87,7 +87,8 @@ curl https://api.quicue.ca/api/v1/spec-info
 curl https://api.quicue.ca/api/v1/graph.jsonld
 
 # Execute an action (mock mode — returns command without running it)
-curl -X POST https://api.quicue.ca/api/v1/resources/router-core/vyos/show_interfaces
+# Note: the static API serves all endpoints as GET (POST returns 405 on CF Pages)
+curl https://api.quicue.ca/api/v1/resources/router-core/vyos/show_interfaces
 ```
 
 ## Files
