@@ -179,6 +179,47 @@ scope: {
 
 The gap IS the backlog. No separate tracking system needed.
 
+## Live integrations
+
+Charter is used across five downstream projects, each a different domain shape:
+
+| Project | Graph | Nodes | Gates | Domain |
+|---------|-------|-------|-------|--------|
+| [cmhc-retrofit](https://github.com/quicue/cmhc-retrofit) NHCF | Project delivery | 18 | 5 (audits → baseline → design → construction → closeout) | Construction PM |
+| cmhc-retrofit Greener Homes | Service topology | 17 | 5 (data → storage → compute → quality → live) | IT platform |
+| maison-613 Transaction | Deal phases | 16 | 6 (listing → prep → market → offer → conditions → closing) | Real estate |
+| maison-613 Compliance | Obligation graph | 12 | 4 (foundations → post-reg → transaction → renewal) | Regulatory |
+| grdn | Infrastructure | 50 | 2 (hardware → core-services) | Homelab |
+
+**Example: NHCF gap analysis**
+
+```bash
+cue eval ./nhcf/ -e nhcf_gaps.complete
+# true
+
+cue eval ./nhcf/ -e nhcf_milestone
+# gate:          "design-complete"
+# phase:         4
+# satisfied:     true
+# missing_count: 0
+# blocker_count: 0
+```
+
+When resources are missing, the gap analysis tells you exactly what to build:
+
+```bash
+cue eval ./nhcf/ -e nhcf_gaps.unsatisfied_gates
+# "construction-complete": {
+#     "rideau-retrofit":    true
+#     "gladstone-retrofit": true
+# }
+
+cue eval ./nhcf/ -e nhcf_gaps.next_gate
+# "construction-complete"
+```
+
+The gap IS the backlog. No separate tracking system needed.
+
 ## Validation
 
 ```bash
