@@ -60,7 +60,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     app = FastAPI(
         title="Datacenter Operations API",
-        description="Live execution gateway for quicue.ca resolved commands",
+        description=(
+            "Execution gateway for quicue.ca resolved commands. "
+            "All data comes from the representative datacenter example "
+            "(RFC 5737 TEST-NET IPs). Unauthenticated requests run in mock mode — "
+            "commands are shown but never executed."
+        ),
         version="0.1.0",
         lifespan=lifespan,
     )
@@ -90,6 +95,9 @@ def create_app() -> FastAPI:
         return {
             "service": "quicue-api",
             "version": "0.1.0",
+            "mode": "mock (unauthenticated)",
+            "data_source": "examples/datacenter/ (RFC 5737 TEST-NET)",
+            "explorer": "https://demo.quicue.ca",
             "docs": "/docs",
             "health": "/api/v1/healthz",
             "spec": "/api/v1/spec-info",

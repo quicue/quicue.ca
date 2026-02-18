@@ -24,8 +24,9 @@ class Settings(BaseSettings):
     guacamole_username: str = ""
     guacamole_password: str = ""
 
-    # CORS (for operator UI on a different origin)
-    cors_origins: list[str] = ["https://ops.quicue.ca"]
+    # CORS — public showcase serves example data in mock mode.
+    # Write endpoints (deploy/*) require auth regardless of origin.
+    cors_origins: list[str] = ["*"]
 
     # Semantic data (JSON-LD / Hydra)
     hydra_path: Path = Path("/app/data/hydra.jsonld")

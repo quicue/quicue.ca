@@ -150,7 +150,7 @@ The same graph patterns power projects across different domains:
 
 | Domain | Project | What it models |
 |--------|---------|---------------|
-| IT infrastructure | [datacenter example](examples/datacenter/) | 30 resources, 29 providers, 654 resolved commands |
+| IT infrastructure | [datacenter example](examples/datacenter/) — [live demo](https://demo.quicue.ca/) | 30 resources, 29 providers, 654 resolved commands |
 | Construction | [CMHC Retrofit](https://cmhc-retrofit.quicue.ca/) | Deep retrofit work packages for 270-unit community housing program |
 | Energy efficiency | [Greener Homes](https://cmhc-retrofit.quicue.ca/#greener-homes) | 17-service processing platform for Ontario Greener Homes |
 | Real estate | [maison-613](https://maison613.quicue.ca/) | Transaction, referral, compliance, and onboarding workflows |
@@ -163,7 +163,7 @@ The same graph patterns power projects across different domains:
 - `ci/gitlab/` — Reusable GitLab CI templates
 - `wiki/` — Generate MkDocs sites from resource graphs
 - `ou/` — Role-scoped views (ops/dev/readonly) with W3C Hydra JSON-LD, LDES event streams
-- `server/` — FastAPI execution gateway ([api.quicue.ca](https://api.quicue.ca/docs))
+- `server/` — FastAPI execution gateway ([api.quicue.ca](https://api.quicue.ca/docs) — public, mock mode)
 - `kg/` — Knowledge graph framework ([quicue-kg](https://github.com/quicue/quicue-kg))
 
 ## Knowledge base

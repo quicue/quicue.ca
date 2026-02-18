@@ -378,7 +378,7 @@ Produces MkDocs-compatible markdown from the resource graph: index page, per-lay
 
 ### `server/` — FastAPI gateway
 
-HTTP API for executing resolved commands. Reads the CUE-generated OpenAPI spec and exposes 654 actions across 29 providers as REST endpoints. Live at [api.quicue.ca](https://api.quicue.ca/docs) (mock mode). Serves W3C Hydra JSON-LD and graph data for the [operator](https://ops.quicue.ca/) frontend.
+HTTP API for executing resolved commands. Reads the CUE-generated OpenAPI spec and exposes 654 actions across 29 providers as REST endpoints. Live at [api.quicue.ca](https://api.quicue.ca/docs) (public, mock mode — unauthenticated callers see resolved commands without execution). Serves W3C Hydra JSON-LD and graph data for the [operator dashboard](https://demo.quicue.ca/) which provides D3 graph visualization, execution planner, resource browser, and Hydra explorer.
 
 ### `kg/` — Knowledge graph
 
