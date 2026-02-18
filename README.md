@@ -147,8 +147,8 @@ The same graph patterns power projects across different domains:
 | Domain | Project | What it models |
 |--------|---------|---------------|
 | IT infrastructure | [datacenter example](examples/datacenter/) | 30 resources, 29 providers, 654 resolved commands |
-| Construction | [CJLQ explorer](https://rfam.cc/cjlq/) | Deep retrofit work packages for 270-unit Ottawa Community Housing |
-| Energy efficiency | [Greener Homes](https://rfam.cc/cjlq/#greener-homes) | 17-service processing platform for Ontario Greener Homes |
+| Construction | [CMHC Retrofit](https://quicue.ca/cmhc-retrofit/) | Deep retrofit work packages for 270-unit community housing program |
+| Energy efficiency | [Greener Homes](https://quicue.ca/cmhc-retrofit/#greener-homes) | 17-service processing platform for Ontario Greener Homes |
 | Real estate | [maison-613](https://maison613.quicue.ca/) | Transaction, referral, compliance, and onboarding workflows |
 | Biomedical research | [lacuene](https://lacuene.apercue.ca/) | 95 genes × 16 databases — funding gap analysis for NIDCR |
 

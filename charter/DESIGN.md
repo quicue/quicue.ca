@@ -12,7 +12,7 @@ This is the "scope → unify → find gaps → build → repeat" workflow. The g
 
 - `patterns/` computes over a **finished** graph (blast radius, SPOF, deployment plans)
 - `charter/` computes over an **incomplete** graph (what's missing, what's next, what gates are satisfied)
-- `verify.cue` files in devbox, cjlq, and maison-613 are the prototype — charter generalizes them
+- `verify.cue` files in devbox, cmhc-retrofit, and maison-613 are the prototype — charter generalizes them
 
 ## Definitions to build
 
@@ -87,15 +87,15 @@ milestone: #Milestone & {
 
 Use existing projects as test beds:
 - **devbox** `verify.cue` — simplest case, already works
-- **cjlq/nhcf** — 18 work packages, 8 phases, 4 named gates
+- **cmhc-retrofit/nhcf** — 18 work packages, 8 phases, 4 named gates
 - **maison-613/transaction** — 16 stages, 11 phases, deal milestone gates
 - **Intentionally incomplete graph** — remove 3 resources from NHCF, charter should report exactly those 3 as gaps
 
 ## Reference material
 
 - `examples/devbox/verify.cue` — prototype contract-via-unification
-- `cjlq/nhcf/verify.cue` — NHCF graph invariants
-- `cjlq/greener-homes/verify.cue` — Greener Homes invariants
+- `cmhc-retrofit/nhcf/verify.cue` — NHCF graph invariants
+- `cmhc-retrofit/greener-homes/verify.cue` — Greener Homes invariants
 - `maison-613/transaction/verify.cue` — transaction pipeline invariants
 - `maison-613/compliance/verify.cue` — compliance obligation invariants
 - `patterns/graph.cue` — `#InfraGraph`, `#GraphMetrics`, `#ValidateGraph`

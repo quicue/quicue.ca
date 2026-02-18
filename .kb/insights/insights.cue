@@ -9,7 +9,7 @@ i001: core.#Insight & {
 	evidence: [
 		"NHCF scenario with 25 nodes timed out — but due to wide fan-in, not node count",
 		"Reducing to 18 nodes (merging procurement, simplifying audit deps) brought eval under 4 seconds by reducing fan-in",
-		"CJLQ greener-homes validates 17 nodes/25 edges without issue",
+		"cmhc-retrofit greener-homes validates 17 nodes/25 edges without issue",
 		"Wide fan-in (many deps per node) is the actual bottleneck, not graph size",
 	]
 	method:     "experiment"

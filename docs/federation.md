@@ -62,9 +62,9 @@ downstream: {
         pattern_count: 14
         status:        "active"
     }
-    cjlq: {
-        module:        "rfam.cc/cjlq@v0"
-        description:   "Energy efficiency scenario modeling (NHCF, Greener Homes)"
+    "cmhc-retrofit": {
+        module:        "quicue.ca/cmhc-retrofit@v0"
+        description:   "Construction program management (NHCF, Greener Homes)"
         imports:       ["quicue.ca/patterns@v0"]
         pattern_count: 15
         has_kg:        true

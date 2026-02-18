@@ -131,15 +131,18 @@ import (
 	}
 
 	// ── Depth check ──────────────────────────────────────────────
-	_depths: [for _, r in Graph.resources {r._depth}]
-	_max_depth: *0 | int
-	if len(_depths) > 0 {
-		_max_depth: list.Max(_depths)
+	// Uses topology (public) instead of _depth (hidden/package-scoped)
+	_max_depth: len(Graph.topology) - 1
+	depth_satisfied: true
+	if Charter.scope.min_depth != _|_ {
+		depth_satisfied: _max_depth >= Charter.scope.min_depth
 	}
-	depth_satisfied: Charter.scope.min_depth == _|_ || _max_depth >= Charter.scope.min_depth
 
 	// ── Resource count check ─────────────────────────────────────
-	count_satisfied: Charter.scope.total_resources == _|_ || resource_count >= Charter.scope.total_resources
+	count_satisfied: true
+	if Charter.scope.total_resources != _|_ {
+		count_satisfied: resource_count >= Charter.scope.total_resources
+	}
 
 	// ── Gate status ──────────────────────────────────────────────
 	gate_status: {
@@ -212,18 +215,17 @@ import (
 	_present: {for name, _ in Graph.resources {(name): true}}
 
 	// Missing resources for this gate
-	missing: {
+	_missing: {
 		for rname, _ in _gate.requires
 		if _present[rname] == _|_ {(rname): true}
 	}
-	satisfied: len([for _, _ in missing {1}]) == 0
+	missing:   _missing
+	satisfied: len([for _, _ in _missing {1}]) == 0
 
 	// Blockers: for each missing resource, check if its expected
 	// dependencies are also missing (compounding the gap)
-	blockers: {
-		for rname, _ in missing {
-			// If the resource exists anywhere in required_resources,
-			// note it as a blocker
+	_blockers: {
+		for rname, _ in _missing {
 			if Charter.scope.required_resources != _|_ {
 				if Charter.scope.required_resources[rname] != _|_ {
 					(rname): true
@@ -231,12 +233,19 @@ import (
 			}
 		}
 	}
+	blockers: _blockers
+
+	// Use hidden intermediaries to avoid self-referencing field names
+	_is_satisfied:  len([for _, _ in _missing {1}]) == 0
+	_missing_count: len([for _, _ in _missing {1}])
+	_blocker_count: len([for _, _ in _blockers {1}])
 
 	summary: {
-		gate:           Gate
-		phase:          *_gate.phase | null
-		satisfied:      satisfied
-		missing_count:  len([for _, _ in missing {1}])
-		blocker_count:  len([for _, _ in blockers {1}])
+		gate:          Gate
+		phase:         *_gate.phase | null
+		satisfied:     _is_satisfied
+		missing_count: _missing_count
+		blocker_count: _blocker_count
+		...
 	}
 }

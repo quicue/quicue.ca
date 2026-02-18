@@ -82,12 +82,12 @@ check-downstream:
 	@cd ~/homelab && cue vet .
 	@echo "=== homelab .kb/ ==="
 	@cd ~/homelab/.kb && cue vet .
-	@echo "=== cjlq (nhcf) ==="
-	@cd ~/cjlq/nhcf && cue vet .
-	@echo "=== cjlq (greener-homes) ==="
-	@cd ~/cjlq/greener-homes && cue vet .
-	@echo "=== cjlq .kb/ ==="
-	@cd ~/cjlq/.kb && cue vet .
+	@echo "=== cmhc-retrofit (nhcf) ==="
+	@cd ~/cmhc-retrofit/nhcf && cue vet .
+	@echo "=== cmhc-retrofit (greener-homes) ==="
+	@cd ~/cmhc-retrofit/greener-homes && cue vet .
+	@echo "=== cmhc-retrofit .kb/ ==="
+	@cd ~/cmhc-retrofit/.kb && cue vet .
 	@echo "=== maison-613 (transaction) ==="
 	@cd ~/maison-613/transaction && cue vet .
 	@echo "=== maison-613 (compliance) ==="
