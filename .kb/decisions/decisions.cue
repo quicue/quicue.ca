@@ -118,3 +118,68 @@ d007: core.#Decision & {
 	]
 	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
 }
+
+d008: core.#Decision & {
+	id:        "ADR-008"
+	title:     "Domain-general framing: 'things that depend on other things'"
+	status:    "accepted"
+	date:      "2026-02-18"
+	context:   "Public surfaces (GitHub profile, repo descriptions, docs) originally framed quicue.ca as 'infrastructure as typed dependency graphs.' This undersells the framework — the same patterns serve 4 domains (IT, construction, energy, real estate). 'Infrastructure' anchors perception to one domain and obscures the core abstraction."
+	decision:  "Frame as 'CUE framework for modeling any domain where things depend on other things.' The entry point is two fields: @type (what it is) and depends_on (what it needs). Everything else is a projection."
+	rationale: "The core requirement is: typed nodes with directed dependency edges. That's domain-independent. The downstream table (4 domains, same patterns) proves it generalizes. Leading with 'infrastructure' makes construction PMs and energy efficiency engineers think it's not for them."
+	consequences: [
+		"GitHub profile, repo descriptions, and docs all use domain-general language",
+		"Downstream table replaces domain-specific prose as the credibility signal",
+		"'Infrastructure' appears only when describing the IT infrastructure domain specifically",
+	]
+	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
+}
+
+d009: core.#Decision & {
+	id:        "ADR-009"
+	title:     "SPARQL is external federation only — CUE comprehensions are the query layer"
+	status:    "accepted"
+	date:      "2026-02-18"
+	context:   "Docs and profile README framed SPARQL as a primary query mechanism ('A SPARQL query can join infrastructure state with decisions'). This misrepresents the architecture. Inside CUE, comprehensions precompute every query at eval time — #ImpactQuery, #BlastRadius, #CriticalityRank, etc. The W3C exports (JSON-LD, N-Triples, Turtle) are projections, not inputs to a query engine."
+	decision:  "SPARQL is for external federation only — when exports leave the CUE closed world and join external systems via a triplestore. Inside CUE, comprehensions ARE the query layer. Docs say: 'Inside CUE, comprehensions precompute every query at eval time.'"
+	rationale: "CUE unification IS a query engine for the closed world. Claiming SPARQL is needed misrepresents the architecture and implies a runtime dependency that doesn't exist. The W3C formats are first-class projections (like deployment plans), not an exit ramp."
+	consequences: [
+		"Oxigraph reclassified from 'optional infrastructure' to 'external federation only'",
+		"Docs distinguish 'inside CUE' (comprehensions) from 'outside CUE' (SPARQL/triplestore)",
+		"Profile README no longer implies SPARQL is the primary query method",
+	]
+	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
+}
+
+d010: core.#Decision & {
+	id:        "ADR-010"
+	title:     "Game design projects tracked separately from quicue.ca"
+	status:    "accepted"
+	date:      "2026-02-18"
+	context:   "mud-futurama and fing-mod use quicue.ca/kg for knowledge graph features. Listing them as downstream consumers alongside IT infrastructure and construction PM projects dilutes the message — game design is distracting when communicating the framework's value to the CUE community, leadership, or technical peers."
+	decision:  "Remove game design projects from quicue.ca's downstream registry and all public documentation. The MUD repos continue to exist independently and import kg on their own terms. quicue.ca's public surface focuses on the 4 core domains: IT infrastructure, construction PM, energy efficiency, real estate."
+	rationale: "The game projects are real and use kg legitimately. But including them in the same downstream list as CMHC retrofit and production datacenter management undermines credibility. Different audiences, different contexts."
+	consequences: [
+		"mud-futurama and fing-mod removed from .kb/downstream.cue",
+		"Downstream count: 4 projects across 4 domains",
+		"Game projects maintain their own .kb/ and import kg independently",
+		"No game/MUD references on any quicue.ca public surface",
+	]
+	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
+}
+
+d011: core.#Decision & {
+	id:        "ADR-011"
+	title:     "lacuene is not a downstream consumer"
+	status:    "accepted"
+	date:      "2026-02-18"
+	context:   "lacuene was listed in docs and README as a downstream project ('Biomedical research — 95 genes x 16 databases'). However, lacuene does not import quicue.ca/patterns or quicue.ca/vocab. It has its own graph structure but doesn't use the framework."
+	decision:  "Remove lacuene from all downstream claims. Only projects that import quicue.ca/patterns or quicue.ca/vocab are listed as downstream consumers."
+	rationale: "Listing a project that doesn't use the framework as a consumer is inaccurate. The downstream registry should reflect actual import relationships, not conceptual similarity."
+	consequences: [
+		"lacuene removed from README, docs/index.md, and all ~/.mthdn/ docs",
+		"Downstream criteria: must import quicue.ca/patterns or quicue.ca/vocab",
+		"'Biomedical research' removed from domain list",
+	]
+	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
+}

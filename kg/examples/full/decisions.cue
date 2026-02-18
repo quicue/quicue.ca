@@ -9,7 +9,7 @@ decisions: {
 		status: "accepted"
 		date:   "2026-02-15"
 
-		context:   "The framework must serve projects from infrastructure to bioinformatics to game development."
+		context:   "The framework must serve projects across diverse domains — infrastructure, construction, energy, real estate."
 		decision:  "4 core types (Decision, Pattern, Insight, Rejected) plus optional extension types (Derivation, Workspace, Context)."
 		rationale: "Core types are universal. Extensions are domain-specific. Projects import only what they need."
 		consequences: [
