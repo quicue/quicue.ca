@@ -1,18 +1,27 @@
-# quicue.ca/server — FastAPI Execution Gateway
+# quicue.ca/server — Datacenter Operations API
 
-HTTP API for command execution and state management against CUE-generated execution specs.
+Two deployment modes for the same data: a **static build** that pre-computes every API response from CUE, and an optional **FastAPI server** for live command execution.
 
-**Live instance:** [api.quicue.ca](https://api.quicue.ca/) — [Swagger docs](https://api.quicue.ca/docs) | [Hydra JSON-LD](https://api.quicue.ca/api/v1/hydra) | [Graph JSON-LD](https://api.quicue.ca/api/v1/graph.jsonld)
+**Live (static):** [api.quicue.ca](https://api.quicue.ca/) — [Swagger docs](https://api.quicue.ca/docs/) | [Hydra JSON-LD](https://api.quicue.ca/api/v1/hydra) | [Graph JSON-LD](https://api.quicue.ca/api/v1/graph.jsonld)
 
 **Operator dashboard:** [demo.quicue.ca](https://demo.quicue.ca/) — D3 graph, execution planner, resource browser, Hydra explorer
 
 ## Overview
 
-The server exposes 654 resolved commands across 29 providers as REST endpoints. All data comes from the representative datacenter example (`examples/datacenter/`) using RFC 5737 TEST-NET IPs (198.51.100.x) and RFC 2606 hostnames (*.dc.example.com). No production data is served.
+654 resolved commands across 29 providers, all computed from one `cue export`. Data comes from `examples/datacenter/` using RFC 5737 TEST-NET IPs (198.51.100.x) and RFC 2606 hostnames (*.dc.example.com). No production data.
 
-**Unauthenticated callers get mock mode by design** — the API returns the resolved command string without executing anything. This makes the public instance a safe, interactive showcase of compile-time provider binding. Authenticated callers on a trusted subnet get live execution.
+### Static API (default)
 
-The [operator dashboard](https://demo.quicue.ca/) provides 4 interactive views over the same data: dependency graph (D3.js), execution planner, resource browser, and Hydra explorer.
+`build-static-api.sh` pre-generates every API response as a static JSON file — 727 files served from Cloudflare Pages. CUE comprehensions already compute all possible answers at eval time; this script just shapes them for HTTP delivery. No server, no container, no runtime.
+
+```bash
+./build-static-api.sh /tmp/static-api
+wrangler pages deploy /tmp/static-api --project-name quicue-api --branch main
+```
+
+### FastAPI server (optional, for live execution)
+
+The same data powers an optional FastAPI server that can actually execute commands against infrastructure. Unauthenticated callers get mock mode (command shown, not executed). Authenticated callers on a trusted subnet get live execution.
 
 ## Configuration
 
@@ -83,6 +92,7 @@ curl -X POST https://api.quicue.ca/api/v1/resources/router-core/vyos/show_interf
 
 ## Files
 
+- `build-static-api.sh` — **Static API builder** (CUE → 727 JSON files → CF Pages)
 - `app/config.py` — Settings schema
 - `app/main.py` — FastAPI application
 - `app/routers/` — Endpoint handlers (health, actions, deploy, hydra)

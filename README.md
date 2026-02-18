@@ -144,13 +144,36 @@ template/<name>/
 - `wiki-projection/` — Generate MkDocs from resource graphs
 - `toon-export/` — Token-optimized compact notation (~55% smaller than JSON)
 
+## Try it live
+
+The datacenter example (30 resources, 29 providers, 654 resolved commands) is deployed as a fully static showcase — every API response is pre-computed from one `cue export`. No servers, no containers, no runtime dependencies.
+
+| Surface | URL | What you see |
+|---------|-----|-------------|
+| **Operator dashboard** | [demo.quicue.ca](https://demo.quicue.ca) | D3 dependency graph, deployment planner, resource browser, Hydra explorer |
+| **API** | [api.quicue.ca](https://api.quicue.ca) | 654 pre-computed mock responses, Swagger UI, OpenAPI spec |
+| **Swagger docs** | [api.quicue.ca/docs](https://api.quicue.ca/docs/) | Interactive API documentation for all 654 operations |
+| **Hydra JSON-LD** | [api.quicue.ca/api/v1/hydra](https://api.quicue.ca/api/v1/hydra) | W3C Hydra vocabulary — self-describing linked data API |
+| **Infrastructure graph** | [api.quicue.ca/api/v1/graph.jsonld](https://api.quicue.ca/api/v1/graph.jsonld) | Full graph as JSON-LD with typed IRIs |
+| **Provider catalogue** | [cat.quicue.ca](https://cat.quicue.ca) | All 29 providers with architecture diagrams |
+| **KG spec** | [kg.quicue.ca](https://kg.quicue.ca) | W3C ReSpec specification for the knowledge graph framework |
+
+The API is a "universe cheat sheet" — CUE comprehensions compute all possible answers at eval time, then the build script (`server/build-static-api.sh`) shapes them as 727 static JSON files served from Cloudflare Pages. The same pattern that makes SPARQL unnecessary makes a server unnecessary.
+
+```bash
+# Rebuild the static API after CUE changes
+./server/build-static-api.sh /tmp/static-api
+# Deploy
+wrangler pages deploy /tmp/static-api --project-name quicue-api --branch main
+```
+
 ## Live projects
 
 The same graph patterns power projects across different domains:
 
 | Domain | Project | What it models |
 |--------|---------|---------------|
-| IT infrastructure | [datacenter example](examples/datacenter/) — [live demo](https://demo.quicue.ca/) | 30 resources, 29 providers, 654 resolved commands |
+| IT infrastructure | [datacenter](examples/datacenter/) — [dashboard](https://demo.quicue.ca/) — [API](https://api.quicue.ca/docs/) | 30 resources, 29 providers, 654 resolved commands |
 | Construction | [CMHC Retrofit](https://cmhc-retrofit.quicue.ca/) | Deep retrofit work packages for 270-unit community housing program |
 | Energy efficiency | [Greener Homes](https://cmhc-retrofit.quicue.ca/#greener-homes) | 17-service processing platform for Ontario Greener Homes |
 | Real estate | [maison-613](https://maison613.quicue.ca/) | Transaction, referral, compliance, and onboarding workflows |
@@ -163,7 +186,7 @@ The same graph patterns power projects across different domains:
 - `ci/gitlab/` — Reusable GitLab CI templates
 - `wiki/` — Generate MkDocs sites from resource graphs
 - `ou/` — Role-scoped views (ops/dev/readonly) with W3C Hydra JSON-LD, LDES event streams
-- `server/` — FastAPI execution gateway ([api.quicue.ca](https://api.quicue.ca/docs) — public, mock mode)
+- `server/` — Static API build + optional FastAPI execution gateway ([api.quicue.ca](https://api.quicue.ca/docs/))
 - `kg/` — Knowledge graph framework ([quicue-kg](https://github.com/quicue/quicue-kg))
 
 ## Knowledge base
