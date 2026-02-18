@@ -4,7 +4,7 @@
 // facts (.facts), and rules. Unlike Prolog, Datalog always terminates —
 // safe for automated infrastructure queries at scale.
 //
-// Usage (from .kg/index.cue):
+// Usage (from .kb/index.cue):
 //   _index: aggregate.#KGIndex & { ... }
 //   logic: aggregate.#Datalog & { index: _index }
 //   // cue export . -e logic.program --out text

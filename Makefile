@@ -1,11 +1,22 @@
-.PHONY: test validate examples providers charter check-downstream datacenter homelab devbox impact blast spof export jsonld clean
+.PHONY: test validate examples providers charter kb check-downstream datacenter homelab devbox impact blast spof export jsonld clean
 
 # Full test suite — run this before committing
-test: validate examples providers charter
-	@echo "=== .kg/ ==="
-	@cd .kg && cue vet .
+test: validate examples providers charter kb
 	@echo ""
 	@echo "All tests passed."
+
+# Knowledge base — multi-graph validation
+kb:
+	@echo "=== .kb/ manifest ==="
+	@cd .kb && cue vet .
+	@echo "=== .kb/decisions ==="
+	@cd .kb/decisions && cue vet .
+	@echo "=== .kb/patterns ==="
+	@cd .kb/patterns && cue vet .
+	@echo "=== .kb/insights ==="
+	@cd .kb/insights && cue vet .
+	@echo "=== .kb/rejected ==="
+	@cd .kb/rejected && cue vet .
 
 # Charter module
 charter:
@@ -69,23 +80,23 @@ jsonld:
 check-downstream:
 	@echo "=== grdn ==="
 	@cd ~/grdn && cue vet .
-	@echo "=== grdn .kg/ ==="
-	@cd ~/grdn/.kg && cue vet .
+	@echo "=== grdn .kb/ ==="
+	@cd ~/grdn/.kb && cue vet .
 	@echo "=== cjlq (nhcf) ==="
 	@cd ~/cjlq/nhcf && cue vet .
 	@echo "=== cjlq (greener-homes) ==="
 	@cd ~/cjlq/greener-homes && cue vet .
-	@echo "=== cjlq .kg/ ==="
-	@cd ~/cjlq/.kg && cue vet .
+	@echo "=== cjlq .kb/ ==="
+	@cd ~/cjlq/.kb && cue vet .
 	@echo "=== maison-613 (transaction) ==="
 	@cd ~/maison-613/transaction && cue vet .
 	@echo "=== maison-613 (compliance) ==="
 	@cd ~/maison-613/compliance && cue vet .
-	@echo "=== maison-613 .kg/ ==="
-	@cd ~/maison-613/.kg && cue vet .
-	@echo "=== mud-futurama .kg/ ==="
-	@cd ~/qc-eco/mud-futurama/.kg && cue vet .
-	@echo "=== fing-mod derived/.kg/ ==="
-	@cd ~/fing-mod/derived/.kg && cue vet .
+	@echo "=== maison-613 .kb/ ==="
+	@cd ~/maison-613/.kb && cue vet .
+	@echo "=== mud-futurama .kb/ ==="
+	@cd ~/qc-eco/mud-futurama/.kb && cue vet .
+	@echo "=== fing-mod derived/.kb/ ==="
+	@cd ~/fing-mod/derived/.kb && cue vet .
 	@echo ""
 	@echo "All downstream consumers validated."

@@ -13,6 +13,10 @@ package ext
 	status:       "active" | "experimental" | "archived" | "planned"
 	license?:     string
 	cue_version?: string
+	// Knowledge base directory convention.
+	// Default ".kb" — the canonical location for project knowledge.
+	kb_directory?: *".kb" | string
+
 	uses?: [...{...}]
 	knows?: [...{...}]
 }

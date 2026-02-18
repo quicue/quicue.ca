@@ -4,7 +4,7 @@
 // rules for transitive provenance, trust levels, and authority ranking.
 // The facts are data; the rules are computable knowledge.
 //
-// Usage (from .kg/index.cue):
+// Usage (from .kb/index.cue):
 //   _index: aggregate.#KGIndex & { ... }
 //   logic: aggregate.#Prolog & { index: _index }
 //   // cue export . -e logic.program --out text
@@ -18,7 +18,7 @@ import "strings"
 
 	_facts: strings.Join([
 		"% Generated from \(index.project) knowledge graph",
-		"% Facts — one per .kg/ entry",
+		"% Facts — one per .kb/ entry",
 		"",
 
 		"% decision(Id, Title, Status, Date).",

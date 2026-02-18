@@ -4,7 +4,7 @@
 
 Projects accumulate knowledge that lives outside source code: *why* a technology was chosen, *what* approaches failed, *which* patterns recur. This knowledge typically scatters across wikis, chat logs, and individual memory. When it's lost, teams re-explore failed paths and make decisions without context.
 
-quicue-kg stores this knowledge as typed CUE data in a `.kg/` directory alongside your code. CUE's type system enforces structure — every rejected approach must record an alternative, every insight must cite evidence. Validation is `cue vet .kg/`. No database, no server.
+quicue-kg stores this knowledge as typed CUE data in a `.kb/` directory alongside your code. Each knowledge type gets its own subdirectory — decisions, patterns, insights, rejected — each an independent CUE package validated against its kg type. CUE's type system enforces structure — every rejected approach must record an alternative, every insight must cite evidence. Validation is `cue vet .` from each subdirectory. No database, no server.
 
 ## Quick start
 
@@ -93,9 +93,9 @@ All aggregate types produce W3C-compatible linked data. See [Linked Data](linked
 Usage: kg <command> [args...]
 
 Commands:
-  init              Scaffold .kg/ directory with imports
+  init              Scaffold .kb/ directory with imports
   add <type>        Create new entry (decision|pattern|insight|rejected)
-  vet               Validate .kg/ content
+  vet               Validate .kb/ content
   index [--full]    Export aggregated index as JSON
   query <expr>      Query via CUE expression
   lint              Knowledge quality checks
@@ -103,7 +103,7 @@ Commands:
   diff [ref]        Semantic changelog since git ref
   link <a> <b>      Cross-reference two entries
   graph [--dot]     Export relationships as JSON or DOT
-  fed <dirs...>     Federate multiple .kg/ directories
+  fed <dirs...>     Federate multiple .kb/ directories
 ```
 
 ## Specification

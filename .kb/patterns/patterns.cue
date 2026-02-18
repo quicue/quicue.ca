@@ -1,5 +1,5 @@
 // Reusable patterns identified and applied in quicue.ca
-package kg
+package patterns
 
 import "quicue.ca/kg/core@v0"
 
@@ -9,13 +9,13 @@ p_struct_as_set: core.#Pattern & {
 	problem:  "Arrays allow duplicates, require O(n) membership checks, and collide on unification."
 	solution: "Use {[string]: true} for sets. O(1) membership, automatic dedup, clean unification via CUE lattice."
 	context:  "Any field representing membership, tags, categories, or dependency sets."
-	example:  "apercue/.kg/decisions/002-struct-as-set.cue"
+	example:  "apercue/.kb/decisions/002-struct-as-set.cue"
 	used_in: {
-		"apercue":    true
-		"datacenter": true
+		"apercue":     true
+		"datacenter":  true
 		"infra-graph": true
-		"quicue.ca":  true
-		"quicue-kg":  true
+		"quicue.ca":   true
+		"quicue-kg":   true
 	}
 	related: {
 		"bidirectional_deps":    true
@@ -67,15 +67,15 @@ p_contract_via_unification: core.#Pattern & {
 	context:  "Any project with a dependency graph where structural invariants must hold. The verify.cue pattern. Generalized by charter/ into #Charter + #GapAnalysis."
 	example:  "validate: valid: true; infra: roots: {\"docker\": true}; summary: total_resources: 18"
 	used_in: {
-		"quicue.ca":   true
-		"cjlq":        true
-		"maison-613":  true
-		"grdn":        true
+		"quicue.ca":  true
+		"cjlq":       true
+		"maison-613": true
+		"grdn":       true
 	}
 	related: {
-		"struct_as_set":   true
-		"hidden_wrapper":  true
-		"gap_as_backlog":  true
+		"struct_as_set":  true
+		"hidden_wrapper": true
+		"gap_as_backlog": true
 	}
 }
 

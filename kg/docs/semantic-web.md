@@ -115,7 +115,7 @@ All kg projections live in `aggregate/` and share the same input contract:
 }
 ```
 
-CUE comprehensions iterate over the index and emit structured output. Projections are one-way: CUE `.kg/` files are the source of truth. You never edit the RDF — you edit CUE and re-export.
+CUE comprehensions iterate over the index and emit structured output. Projections are one-way: CUE `.kb/` files are the source of truth. You never edit the RDF — you edit CUE and re-export.
 
 ### RDF serializations
 
@@ -129,13 +129,13 @@ Three wire formats for the same RDF data model:
 
 ```bash
 # Greppable RDF — one triple per line, fully expanded IRIs
-cue export .kg/ -e _ntriples.triples --out text | grep 'prov#Activity'
+cue export .kb/ -e _ntriples.triples --out text | grep 'prov#Activity'
 
 # Human-readable RDF with prefixes
-cue export .kg/ -e _turtle.document --out text
+cue export .kb/ -e _turtle.document --out text
 
 # JSON-LD for web consumption
-cue export .kg/ -e _provenance.graph --out json
+cue export .kb/ -e _provenance.graph --out json
 ```
 
 ### Semantic vocabularies
@@ -150,8 +150,8 @@ cue export .kg/ -e _provenance.graph --out json
 **SKOS** maps pattern categories to `skos:Concept` top concepts and patterns to narrower concepts:
 
 ```bash
-cue export .kg/ -e _taxonomy.graph --out json   # JSON-LD
-cue export .kg/ -e _taxonomy.turtle --out text   # Turtle
+cue export .kb/ -e _taxonomy.graph --out json   # JSON-LD
+cue export .kb/ -e _taxonomy.turtle --out text   # Turtle
 ```
 
 ### Logic programming
@@ -167,11 +167,11 @@ Both include 6 inference rules: transitive provenance (`contributed`), trust lev
 
 ```bash
 # Prolog — interactive exploration
-cue export .kg/ -e _prolog.program --out text > kb.pl
+cue export .kb/ -e _prolog.program --out text > kb.pl
 swipl -l kb.pl -g "shared_pattern(P, A, B), format('~w: ~w + ~w~n', [P, A, B]), fail."
 
 # Datalog — guaranteed termination, compiles to C++
-cue export .kg/ -e _datalog.program --out text > kb.dl
+cue export .kb/ -e _datalog.program --out text > kb.dl
 souffle kb.dl
 ```
 

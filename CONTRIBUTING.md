@@ -20,7 +20,7 @@ cab/              Change Advisory Board reports
 wiki/             MkDocs generation
 server/           FastAPI execution gateway
 kg/               Knowledge graph framework (quicue-kg)
-.kg/              Project knowledge graph data
+.kb/              Project knowledge base (multi-graph: decisions, patterns, insights, rejected)
 docs/             Architecture guide, pattern catalog, template guide
 ```
 

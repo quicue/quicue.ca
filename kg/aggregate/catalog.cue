@@ -1,10 +1,10 @@
 // DCAT — W3C Data Catalog Vocabulary projection from knowledge graph metadata.
 //
 // Maps ext.#Context to dcat:Dataset and federation results to dcat:Catalog.
-// Each .kg/-bearing project becomes a cataloged dataset with distributions
+// Each .kb/-bearing project becomes a cataloged dataset with distributions
 // for the CUE source and JSON-LD export formats.
 //
-// Usage (from .kg/index.cue):
+// Usage (from .kb/index.cue):
 //   _index: aggregate.#KGIndex & { ... }
 //   catalog: aggregate.#DatasetEntry & { index: _index, context: project }
 //   // cue export . -e catalog.dataset --out json
@@ -42,7 +42,7 @@ import "quicue.ca/kg/ext@v0"
 		"kg:status":  context.status
 		"kg:entries": index.summary.total
 
-		// Distribution: CUE source (the .kg/ directory)
+		// Distribution: CUE source (the .kb/ directory)
 		"dcat:distribution": [
 			{
 				"@type":          "dcat:Distribution"
@@ -67,7 +67,7 @@ import "quicue.ca/kg/ext@v0"
 }
 
 // #FederatedCatalog — aggregates multiple #DatasetEntry into a dcat:Catalog.
-// Used by `kg fed` to produce a federated catalog of all .kg/ projects.
+// Used by `kg fed` to produce a federated catalog of all .kb/ projects.
 #FederatedCatalog: {
 	datasets: [...{...}]
 

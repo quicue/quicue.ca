@@ -4,7 +4,7 @@
 // existing Turtle files in infra-ontology/ and infra-shacl/. Can be
 // loaded directly into Oxigraph or any SPARQL endpoint.
 //
-// Usage (from .kg/index.cue):
+// Usage (from .kb/index.cue):
 //   _index: aggregate.#KGIndex & { ... }
 //   rdf: aggregate.#Turtle & { index: _index }
 //   // cue export . -e rdf.document --out text

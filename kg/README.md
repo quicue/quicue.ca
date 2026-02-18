@@ -8,7 +8,7 @@ CUE-native knowledge graph framework for tracking architectural decisions, patte
 
 Projects accumulate knowledge that lives outside source code: *why* a technology was chosen, *what* approaches failed, *which* patterns recur. This knowledge typically scatters across wikis, chat logs, and individual memory. When it's lost, teams re-explore failed paths and make decisions without context.
 
-quicue-kg stores this knowledge as typed CUE data in a `.kg/` directory alongside your code. CUE's type system enforces structure — every rejected approach must record an alternative, every insight must cite evidence. Validation is `cue vet .kg/`. No database, no server.
+quicue-kg stores this knowledge as typed CUE data in a `.kb/` directory alongside your code. CUE's type system enforces structure — every rejected approach must record an alternative, every insight must cite evidence. Validation is `cue vet .kb/`. No database, no server.
 
 **Who this is for:** Development teams who want queryable, validated project knowledge that lives in version control.
 
@@ -27,7 +27,7 @@ kg vet
 kg index --summary
 ```
 
-A minimal `.kg/` looks like this:
+A minimal `.kb/` looks like this:
 
 ```cue
 package kg
@@ -141,27 +141,27 @@ The knowledge graph exports to W3C vocabularies and logic programming formats vi
 
 ```bash
 # Export decision audit trail as PROV-O JSON-LD
-cue export .kg/ -e _provenance.graph --out json
+cue export .kb/ -e _provenance.graph --out json
 
 # Register project in a data catalog
-cue export .kg/ -e _catalog.dataset --out json
+cue export .kb/ -e _catalog.dataset --out json
 
 # Greppable RDF for unix pipelines
-cue export .kg/ -e _ntriples.triples --out text
+cue export .kb/ -e _ntriples.triples --out text
 
 # Human-readable RDF for SPARQL endpoints
-cue export .kg/ -e _turtle.document --out text
+cue export .kb/ -e _turtle.document --out text
 
 # Pattern taxonomy as SKOS JSON-LD
-cue export .kg/ -e _taxonomy.graph --out json
+cue export .kb/ -e _taxonomy.graph --out json
 
 # Logic programming (Prolog facts + inference rules)
-cue export .kg/ -e _prolog.program --out text
+cue export .kb/ -e _prolog.program --out text
 ```
 
 ## Go Frontend
 
-The `kg` binary provides a web explorer, terminal UI, and LSP server — all consuming the same `.kg/` data.
+The `kg` binary provides a web explorer, terminal UI, and LSP server — all consuming the same `.kb/` data.
 
 ```bash
 # Build
@@ -177,7 +177,7 @@ kg --dir .kg tui
 kg --dir .kg lsp
 ```
 
-### Federation: multiple .kg/ directories
+### Federation: multiple .kb/ directories
 
 Every command accepts multiple `--dir` flags. Entries from all sources are merged with conflict detection:
 
@@ -185,7 +185,7 @@ Every command accepts multiple `--dir` flags. Entries from all sources are merge
 # Load two projects and search across both
 kg --dir ~/api/.kg --dir ~/web/.kg search "caching"
 
-# Discover all .kg/ under a directory tree
+# Discover all .kb/ under a directory tree
 kg fed ~/projects/
 
 # Start web explorer with federated data
@@ -200,9 +200,9 @@ Remote git URLs are shallow-cloned automatically. See [docs/federation.md](docs/
 Usage: kg <command> [args...]
 
 Commands:
-  init              Scaffold .kg/ directory with imports
+  init              Scaffold .kb/ directory with imports
   add <type>        Create new entry (decision|pattern|insight|rejected)
-  vet               Validate .kg/ content
+  vet               Validate .kb/ content
   lint              Knowledge quality checks (TODOs, stale proposals)
   settle            Check referential integrity, coverage gaps
   index [--full]    Export aggregated index as JSON
@@ -211,11 +211,11 @@ Commands:
   serve [--port]    Start HTTP server with D3.js web explorer
   tui               Launch terminal UI
   lsp               Start LSP server (JSON-RPC over stdio)
-  fed <dirs...>     Discover and federate .kg/ directories
+  fed <dirs...>     Discover and federate .kb/ directories
   export-static     Export JSON for static hosting
 
 Flags:
-  --dir <path>      Path to .kg/ directory (repeatable, supports git URLs)
+  --dir <path>      Path to .kb/ directory (repeatable, supports git URLs)
 ```
 
 ## Specification

@@ -4,7 +4,7 @@
 // to oa:Annotation (motivated by questioning). Related links become
 // oa:hasTarget, evidence/reason becomes oa:hasBody.
 //
-// Usage (from .kg/index.cue):
+// Usage (from .kb/index.cue):
 //   _index: aggregate.#KGIndex & { ... }
 //   annotations: aggregate.#Annotations & { index: _index }
 //   // cue export . -e annotations.graph --out json

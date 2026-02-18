@@ -382,13 +382,13 @@ HTTP API for executing resolved commands. Reads the CUE-generated OpenAPI spec a
 
 ### `kg/` — Knowledge graph
 
-Vendored copy of the [quicue-kg](https://github.com/quicue/quicue-kg) framework. The `.kg/` directory at the repo root tracks project decisions, patterns, insights, and rejected approaches as validated CUE data.
+Vendored copy of the [quicue-kg](https://github.com/quicue/quicue-kg) framework. The `.kb/` directory at the repo root is a multi-graph knowledge base with typed subdirectories (decisions/, patterns/, insights/, rejected/), each an independent CUE package validated against its kg type.
 
 #### Downstream validation
 
-`.kg/downstream.cue` registers known consumers (grdn, cjlq, maison-613, apercue). Each consumer maintains its own `.kg/deps.cue` cataloging which vocab and pattern definitions it imports and where they're used — for example, grdn's deps.cue records 14 pattern and 2 vocab definitions with source, purpose, and consuming files.
+`.kb/downstream.cue` registers known consumers (grdn, cjlq, maison-613, apercue). Each consumer maintains its own `.kb/` with a deps registry cataloging which vocab and pattern definitions it imports and where they're used — for example, grdn's deps.cue records 14 pattern and 2 vocab definitions with source, purpose, and consuming files.
 
-The `make check-downstream` target runs `cue vet` on 8 validation targets across 4 projects — grdn (infrastructure + .kg/), cjlq (2 scenarios + .kg/), and maison-613 (2 scenarios + .kg/). Renaming a field in `#InfraGraph` produces a unification error in any consumer that references it, caught at build time rather than discovered in production. The deps.cue files are documentation; the Makefile target is enforcement.
+The `make check-downstream` target runs `cue vet` on validation targets across downstream projects. Renaming a field in `#InfraGraph` produces a unification error in any consumer that references it, caught at build time rather than discovered in production.
 
 ## Data flow summary
 

@@ -2,20 +2,30 @@
 
 quicue.ca projects can federate their knowledge — decisions, patterns, dependencies — through CUE's type system. No triplestore, no SPARQL, no contract test framework. CUE unification already is one.
 
-## The .kg/ pattern
+## The .kb/ pattern
 
-Each project that uses quicue.ca can maintain a `.kg/` directory — a knowledge graph tracking what the project depends on, what decisions were made, and what was tried and rejected. The directory is a flat CUE package (all files at root, one `package kg`):
+Each project that uses quicue.ca can maintain a `.kb/` directory — a multi-graph knowledge base tracking decisions, patterns, insights, and rejected approaches. Each graph type gets its own subdirectory, each an independent CUE package validated against its kg type:
 
 ```
 your-project/
-  .kg/
-    cue.mod/module.cue    # CUE module declaration
-    project.cue           # Project identity and metadata
-    deps.cue              # Registry of imported definitions
-    index.cue             # Aggregate index (decisions, patterns, insights)
+  .kb/
+    cue.mod/module.cue       # Root module (manifest + metadata)
+    manifest.cue              # #KnowledgeBase — declares graph topology
+    decisions/
+      cue.mod/module.cue      # Independent CUE module
+      decisions.cue           # core.#Decision entries
+    patterns/
+      cue.mod/module.cue
+      patterns.cue            # core.#Pattern entries
+    insights/
+      cue.mod/module.cue
+      insights.cue            # core.#Insight entries
+    rejected/
+      cue.mod/module.cue
+      rejected.cue            # core.#Rejected entries
 ```
 
-The `.kg/` directory validates with `cue vet .` — the knowledge graph is checked at the same time as the code.
+Each subdirectory validates independently with `cue vet .` — directory structure IS the ontology.
 
 ## Dependency tracking
 
@@ -41,7 +51,7 @@ This is documentation. The enforcement comes from CUE itself — if `#InfraGraph
 
 ## Upstream tracking
 
-quicue.ca's `.kg/downstream.cue` registers known consumers:
+quicue.ca's `.kb/downstream.cue` registers known consumers:
 
 ```cue
 downstream: {
@@ -75,7 +85,7 @@ The `make check-downstream` target runs `cue vet` on all registered consumers. R
 
 ## Federation via unification
 
-Multiple teams can maintain independent `.kg/` directories in their own repos. "Federating" them is just importing and letting CUE unify. If two teams assert contradictory values for the same field, `cue vet` produces a unification error. Conflicts are caught at build time, not discovered in a meeting six months later.
+Multiple teams can maintain independent `.kb/` directories in their own repos. "Federating" them is just importing and letting CUE unify. If two teams assert contradictory values for the same field, `cue vet` produces a unification error. Conflicts are caught at build time, not discovered in a meeting six months later.
 
 This works because CUE struct unification is:
 
@@ -104,7 +114,7 @@ rejected_001: core.#Rejected & {
 
 ## Knowledge graph framework
 
-The `.kg/` pattern is powered by [quicue-kg](https://kg.quicue.ca/), a standalone CUE module with:
+The `.kb/` pattern is powered by [quicue-kg](https://kg.quicue.ca/), a standalone CUE module with:
 
 - Four core types, three extension types, six aggregate projections
 - W3C vocabulary projections (PROV-O, DCAT, SHACL, Web Annotations)

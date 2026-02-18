@@ -4,7 +4,7 @@
 // Each line is <subject> <predicate> <object> . Good for bulk loading
 // into any triplestore and for unix-pipeline processing.
 //
-// Usage (from .kg/index.cue):
+// Usage (from .kb/index.cue):
 //   _index: aggregate.#KGIndex & { ... }
 //   rdf: aggregate.#NTriples & { index: _index }
 //   // cue export . -e rdf.triples --out text

@@ -1,4 +1,4 @@
-// Smallest possible .kg/ — one decision, validates with cue vet
+// Smallest possible .kb/ — one decision, validates with cue vet
 package kg
 
 import "quicue.ca/kg/core@v0"

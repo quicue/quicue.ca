@@ -6,7 +6,7 @@
 //
 // Compatible with the existing SKOS taxonomy in infra-ontology/skos.ttl.
 //
-// Usage (from .kg/index.cue):
+// Usage (from .kb/index.cue):
 //   _index: aggregate.#KGIndex & { ... }
 //   taxonomy: aggregate.#SKOSTaxonomy & { index: _index }
 //   // cue export . -e taxonomy.graph --out json

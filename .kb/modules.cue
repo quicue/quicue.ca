@@ -1,5 +1,5 @@
 // Module registry — all modules in this repo and their purpose
-package kg
+package kb
 
 modules: {
 	vocab: {
@@ -31,19 +31,19 @@ modules: {
 		status:      "active"
 		count:       29
 		categories: {
-			compute:        ["proxmox", "govc", "powercli", "kubevirt"]
-			container:      ["docker", "incus", "k3d", "kubectl", "argocd"]
-			cicd:           ["dagger", "gitlab"]
-			networking:     ["vyos", "caddy", "nginx"]
-			dns:            ["cloudflare", "powerdns", "technitium"]
-			identity:       ["vault", "keycloak"]
-			database:       ["postgresql"]
-			dcim:           ["netbox"]
-			provisioning:   ["foreman"]
-			automation:     ["ansible", "awx"]
-			monitoring:     ["zabbix"]
-			iac:            ["terraform", "opentofu"]
-			backup:         ["restic", "pbs"]
+			compute:      ["proxmox", "govc", "powercli", "kubevirt"]
+			container:    ["docker", "incus", "k3d", "kubectl", "argocd"]
+			cicd:         ["dagger", "gitlab"]
+			networking:   ["vyos", "caddy", "nginx"]
+			dns:          ["cloudflare", "powerdns", "technitium"]
+			identity:     ["vault", "keycloak"]
+			database:     ["postgresql"]
+			dcim:         ["netbox"]
+			provisioning: ["foreman"]
+			automation:   ["ansible", "awx"]
+			monitoring:   ["zabbix"]
+			iac:          ["terraform", "opentofu"]
+			backup:       ["restic", "pbs"]
 		}
 	}
 	orche: {

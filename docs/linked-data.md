@@ -61,7 +61,7 @@ cue export -e shapes.graph --out json > shapes.jsonld
 
 ## Knowledge projections
 
-All knowledge projections live in `quicue.ca/kg`'s `aggregate/` package. They share the same input contract — a `#KGIndex` computed from `.kg/` files — and emit structured output.
+All knowledge projections live in `quicue.ca/kg`'s `aggregate/` package. They share the same input contract — a `#KGIndex` computed from `.kb/` files — and emit structured output.
 
 CUE is the source of truth. You never edit the RDF — you edit CUE and re-export.
 
@@ -71,9 +71,9 @@ Three wire formats for the same data model:
 
 | Format | Best for | Export |
 |--------|----------|--------|
-| **N-Triples** | `grep`, `sort`, `diff`, bulk triplestore loading | `cue export .kg/ -e _ntriples.triples --out text` |
-| **Turtle** | Human reading, SPARQL endpoint import | `cue export .kg/ -e _turtle.document --out text` |
-| **JSON-LD** | Web APIs, browser consumption | `cue export .kg/ -e _provenance.graph --out json` |
+| **N-Triples** | `grep`, `sort`, `diff`, bulk triplestore loading | `cue export .kb/ -e _ntriples.triples --out text` |
+| **Turtle** | Human reading, SPARQL endpoint import | `cue export .kb/ -e _turtle.document --out text` |
+| **JSON-LD** | Web APIs, browser consumption | `cue export .kb/ -e _provenance.graph --out json` |
 
 ### Semantic vocabularies
 
@@ -97,11 +97,11 @@ Both include 6 inference rules: transitive provenance, trust levels, authority r
 
 ```bash
 # Prolog — interactive exploration
-cue export .kg/ -e _prolog.program --out text > kb.pl
+cue export .kb/ -e _prolog.program --out text > kb.pl
 swipl -l kb.pl
 
 # Datalog — compiles to C++, guaranteed termination
-cue export .kg/ -e _datalog.program --out text > kb.dl
+cue export .kb/ -e _datalog.program --out text > kb.dl
 souffle kb.dl
 ```
 
