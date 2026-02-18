@@ -11,6 +11,7 @@ _index: aggregate.#KGIndex & {
 		"ADR-002": d002
 		"ADR-003": d003
 		"ADR-004": d004
+		"ADR-005": d005
 	}
 
 	insights: {
@@ -22,12 +23,15 @@ _index: aggregate.#KGIndex & {
 		"REJ-001": r001
 		"REJ-002": r002
 		"REJ-003": r003
+		"REJ-004": r004
 	}
 	patterns: {
-		struct_as_set:        p_struct_as_set
-		three_layer:          p_three_layer
-		compile_time_binding: p_compile_time_binding
-		hidden_wrapper:       p_hidden_wrapper
+		struct_as_set:              p_struct_as_set
+		three_layer:                p_three_layer
+		compile_time_binding:       p_compile_time_binding
+		hidden_wrapper:             p_hidden_wrapper
+		contract_via_unification:   p_contract_via_unification
+		gap_as_backlog:             p_gap_as_backlog
 	}
 }
 

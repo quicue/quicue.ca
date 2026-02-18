@@ -58,3 +58,39 @@ p_hidden_wrapper: core.#Pattern & {
 		"quicue.ca": true
 	}
 }
+
+p_contract_via_unification: core.#Pattern & {
+	name:     "Contract-via-Unification"
+	category: "verification"
+	problem:  "Projects need to verify graph invariants (expected roots, resource counts, deployment ordering) but traditional assertion frameworks add a separate test layer disconnected from the data."
+	solution: "Write CUE constraints as plain struct values that must unify with computed graph output. The constraint IS a CUE value. cue vet failure = invariant violation. No assertion framework needed — the language IS the test harness."
+	context:  "Any project with a dependency graph where structural invariants must hold. The verify.cue pattern. Generalized by charter/ into #Charter + #GapAnalysis."
+	example:  "validate: valid: true; infra: roots: {\"docker\": true}; summary: total_resources: 18"
+	used_in: {
+		"quicue.ca":   true
+		"cjlq":        true
+		"maison-613":  true
+		"grdn":        true
+	}
+	related: {
+		"struct_as_set":   true
+		"hidden_wrapper":  true
+		"gap_as_backlog":  true
+	}
+}
+
+p_gap_as_backlog: core.#Pattern & {
+	name:     "Gap-as-Backlog"
+	category: "planning"
+	problem:  "Project planning tools track work items separately from the system they describe. The backlog drifts from reality because it's maintained by hand."
+	solution: "Declare what 'done' looks like as CUE constraints on an incomplete graph. The gap between constraints and data IS the remaining work. #GapAnalysis computes missing resources, unsatisfied gates, and the next milestone — all derived from unification."
+	context:  "Any project built incrementally where completion criteria can be expressed as graph properties: resource counts, required types, named roots, depth constraints, phase gates."
+	example:  "charter.#GapAnalysis & {Charter: _charter, Graph: _graph} → complete: false, missing_resources: {monitoring: true}"
+	used_in: {
+		"quicue.ca": true
+	}
+	related: {
+		"contract_via_unification": true
+		"struct_as_set":            true
+	}
+}

@@ -28,3 +28,12 @@ r003: core.#Rejected & {
 	alternative: "Keep .kg/ flat: all .cue files at root level. Use separate files per type (decisions.cue, insights.cue) for organization within the single package scope."
 	related: {"ADR-001": true}
 }
+
+r004: core.#Rejected & {
+	id:          "REJ-004"
+	approach:    "Thin charter schema without computed gap analysis (~65 lines, cue vet errors as gap report)"
+	reason:      "Initial design favored #Charter, #Scale, #Gate only — no #GapAnalysis, no #Milestone. The idea was that cue vet failure messages ARE the gap report. In practice, raw cue vet errors are unstructured text unsuitable for programmatic consumption. Downstream tools need typed output (missing_resources, gate_status, next_gate) to drive dashboards, CI gates, and progress tracking."
+	date:        "2026-02-17"
+	alternative: "Full charter with computed gap analysis: #Charter, #Gate, #GapAnalysis, #Milestone (~240 lines). Contract-via-unification remains the enforcement mechanism; gap analysis adds a structured reporting layer on top."
+	related: {"ADR-005": true}
+}

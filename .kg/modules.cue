@@ -98,6 +98,15 @@ modules: {
 		optional:    true
 		notes:       "Standalone. Consumes CUE-generated specs but does not depend on CUE at build time."
 	}
+	charter: {
+		path:        "charter/"
+		module:      "quicue.ca@v0"
+		layer:       "constraint"
+		description: "Constraint-first project planning: declare scope, evaluate gaps, track gates"
+		status:      "active"
+		schemas:     ["#Charter", "#Gate", "#GapAnalysis", "#Milestone"]
+		depends:     ["patterns"]
+	}
 	examples: {
 		path:  "examples/"
 		layer: "value"

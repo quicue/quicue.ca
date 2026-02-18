@@ -68,3 +68,20 @@ d004: core.#Decision & {
 	]
 	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
 }
+
+d005: core.#Decision & {
+	id:        "ADR-005"
+	title:     "Charter: constraint schema with computed gap analysis"
+	status:    "accepted"
+	date:      "2026-02-17"
+	context:   "Downstream projects each have verify.cue files with identical patterns: validate structure, assert roots, assert cardinality. The pattern is ad-hoc — field names vary by domain, there's no shared vocabulary, and no support for intermediate checkpoints. Initial design favored thin constraints only (cue vet errors as gap reports), but structured gap reporting proved more useful for programmatic consumption."
+	decision:  "Charter defines four definitions: #Charter (scope + gates), #Gate (DAG checkpoint), #GapAnalysis (computed missing resources, types, gate status, next gate, completion), and #Milestone (single gate evaluation). ~240 lines total. Gates form a DAG (resources + gate dependencies). Gap analysis produces structured output consumable by downstream tools, not just cue vet error messages."
+	rationale: "Raw cue vet errors report what didn't unify, but they're unstructured text. #GapAnalysis produces typed CUE output (missing_resources, gate_status, next_gate, complete) that downstream projects can consume programmatically. The gap engine doesn't replace cue vet — it adds a structured layer on top. Contract-via-unification remains the enforcement mechanism; gap analysis is the reporting mechanism."
+	consequences: [
+		"Downstream projects use #GapAnalysis to compute structured backlog from charter + graph",
+		"Gate DAG subsumes linear phases — a chain is a degenerate DAG",
+		"#Milestone provides focused per-gate evaluation without full gap analysis",
+		"Gap analysis output (complete, missing_resources, next_gate) is typed and exportable as JSON",
+	]
+	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
+}
