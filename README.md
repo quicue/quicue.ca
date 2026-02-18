@@ -154,7 +154,6 @@ The same graph patterns power projects across different domains:
 | Construction | [CMHC Retrofit](https://cmhc-retrofit.quicue.ca/) | Deep retrofit work packages for 270-unit community housing program |
 | Energy efficiency | [Greener Homes](https://cmhc-retrofit.quicue.ca/#greener-homes) | 17-service processing platform for Ontario Greener Homes |
 | Real estate | [maison-613](https://maison613.quicue.ca/) | Transaction, referral, compliance, and onboarding workflows |
-| Biomedical research | [lacuene](https://lacuene.apercue.ca/) | 95 genes × 16 databases — funding gap analysis for NIDCR |
 
 ## Additional modules
 
