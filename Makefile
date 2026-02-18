@@ -83,5 +83,9 @@ check-downstream:
 	@cd ~/maison-613/compliance && cue vet .
 	@echo "=== maison-613 .kg/ ==="
 	@cd ~/maison-613/.kg && cue vet .
+	@echo "=== mud-futurama .kg/ ==="
+	@cd ~/qc-eco/mud-futurama/.kg && cue vet .
+	@echo "=== fing-mod derived/.kg/ ==="
+	@cd ~/fing-mod/derived/.kg && cue vet .
 	@echo ""
 	@echo "All downstream consumers validated."
