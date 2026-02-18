@@ -1,4 +1,4 @@
-.PHONY: test validate examples providers check-downstream datacenter homelab devbox summary impact clean
+.PHONY: test validate examples providers check-downstream datacenter homelab devbox impact blast spof export jsonld clean
 
 # Full test suite — run this before committing
 test: validate examples providers
