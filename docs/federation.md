@@ -1,6 +1,6 @@
 # Federation
 
-quicue.ca projects can federate their knowledge — decisions, patterns, dependencies — through CUE's type system. No triplestore, no SPARQL, no contract test framework. CUE unification already is one.
+quicue.ca projects can federate their knowledge — decisions, patterns, dependencies — through CUE's type system. No external triplestore, no SPARQL endpoint, no contract test framework. CUE unification already is one.
 
 ## The .kb/ pattern
 

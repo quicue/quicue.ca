@@ -76,7 +76,7 @@ The [Hydra Core Vocabulary](https://www.hydra-cg.com/spec/latest/core/) makes AP
 - Operations carry metadata: HTTP method, provider, action name, idempotent/destructive flags
 - Navigation follows IRI links — clients discover operations by traversing the graph
 
-The operator frontend (`ops.quicue.ca`) consumes this to render an interactive explorer. The API at `api.quicue.ca` serves it as `application/ld+json`.
+The operator frontend consumes this to render an interactive explorer. The API serves it as `application/ld+json`.
 
 ```bash
 cue export ./examples/datacenter/ -e datacenter_hydra --out json

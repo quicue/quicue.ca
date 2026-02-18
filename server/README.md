@@ -2,13 +2,17 @@
 
 HTTP API for command execution and state management against CUE-generated execution specs.
 
-**Live instance:** [api.quicue.ca](https://api.quicue.ca/) (mock mode — [Swagger docs](https://api.quicue.ca/docs))
+**Live instance:** [api.quicue.ca](https://api.quicue.ca/) — [Swagger docs](https://api.quicue.ca/docs) | [Hydra JSON-LD](https://api.quicue.ca/api/v1/hydra) | [Graph JSON-LD](https://api.quicue.ca/api/v1/graph.jsonld)
+
+**Operator dashboard:** [demo.quicue.ca](https://demo.quicue.ca/) — D3 graph, execution planner, resource browser, Hydra explorer
 
 ## Overview
 
-The server module implements a FastAPI gateway that executes commands from CUE-generated execution plans. Supports mock (dry-run), live (execute), and blocked modes. Manages execution history, credentials, and role-based dispatch.
+The server exposes 654 resolved commands across 29 providers as REST endpoints. All data comes from the representative datacenter example (`examples/datacenter/`) using RFC 5737 TEST-NET IPs (198.51.100.x) and RFC 2606 hostnames (*.dc.example.com). No production data is served.
 
-The [operator](https://ops.quicue.ca/) frontend (`exec.js`) connects to this API for interactive command execution.
+**Unauthenticated callers get mock mode by design** — the API returns the resolved command string without executing anything. This makes the public instance a safe, interactive showcase of compile-time provider binding. Authenticated callers on a trusted subnet get live execution.
+
+The [operator dashboard](https://demo.quicue.ca/) provides 4 interactive views over the same data: dependency graph (D3.js), execution planner, resource browser, and Hydra explorer.
 
 ## Configuration
 
@@ -20,7 +24,7 @@ The server is configured via environment variables with `QUICUE_` prefix (pydant
 - **trusted_subnet**: IPv4 network for local auth (default: 198.51.100.0/24)
 - **trusted_proxy_ip**: If set, trust X-Forwarded-For from this IP
 - **guacamole_url**, **guacamole_username**, **guacamole_password**: Guacamole integration
-- **cors_origins**: CORS-allowed origins (default: ["https://ops.quicue.ca"])
+- **cors_origins**: CORS-allowed origins (default: ["*"] — public showcase)
 - **hydra_path**: Path to Hydra JSON-LD (default: /app/data/hydra.jsonld)
 - **graph_jsonld_path**: Path to graph JSON-LD (default: /app/data/graph.jsonld)
 - **deploy_log_path**: Deployment log (JSONL) (default: /app/data/deploy.jsonl)
@@ -31,9 +35,9 @@ The server is configured via environment variables with `QUICUE_` prefix (pydant
 
 ## Modes
 
-- **Mock** (dry-run): Print commands without executing — the default for `api.quicue.ca`
-- **Live**: Execute commands and return output
-- **Blocked**: Reject execution (audit/approval pending)
+- **Mock** (dry-run): Return resolved command without executing. Default for unauthenticated callers — this is what the public API serves.
+- **Live**: Execute commands and return output. Requires valid API token AND trusted subnet.
+- **Blocked**: Reject execution (audit/approval pending).
 
 ## API Endpoints
 
@@ -94,4 +98,5 @@ curl -X POST https://api.quicue.ca/api/v1/resources/router-core/vyos/show_interf
 
 - `ou/` — Hydra API documentation schema
 - `patterns/` — Execution plan generation
-- [ops.quicue.ca](https://ops.quicue.ca/) — Operator frontend (graph explorer, planner, browse)
+- [demo.quicue.ca](https://demo.quicue.ca/) — Operator dashboard (graph explorer, planner, resource browser, Hydra explorer)
+- [cat.quicue.ca](https://cat.quicue.ca/) — Provider catalogue (29 providers, architecture diagrams)
