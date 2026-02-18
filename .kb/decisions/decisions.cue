@@ -85,3 +85,36 @@ d005: core.#Decision & {
 	]
 	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
 }
+
+d006: core.#Decision & {
+	id:        "ADR-006"
+	title:     "Public showcase data sourced exclusively from example datacenter"
+	status:    "accepted"
+	date:      "2026-02-18"
+	context:   "Public surfaces (imp.quicue.ca, api.quicue.ca, cat.quicue.ca) were originally built from production infrastructure data containing real 172.20.x.x IPs. Making these public required regenerating all data from a safe source."
+	decision:  "All public-facing data is generated from examples/datacenter/ which uses RFC 5737 TEST-NET IPs (198.51.100.x). CI validates no real IPs leak into generated artifacts via grep-based checks. Deploy scripts use env vars (DEPLOY_HOST, DEPLOY_CT) instead of hardcoded hostnames."
+	rationale: "A single source of safe data eliminates the risk of production IP leakage. The example datacenter exercises all 28 providers and produces 654 bound commands — the same fidelity as production without the exposure. CI enforcement prevents regression."
+	consequences: [
+		"All public surfaces serve data from examples/datacenter/ only",
+		"CI workflow validates no 172.x.x.x IPs in generated openapi.json or bound_commands.json",
+		"Deploy scripts are parameterized — no hardcoded infrastructure hostnames in version control",
+		"Production data stays behind CF Access on apercue.ca surfaces",
+	]
+	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
+}
+
+d007: core.#Decision & {
+	id:        "ADR-007"
+	title:     "CUE conditional branches for optional charter scope fields"
+	status:    "accepted"
+	date:      "2026-02-18"
+	context:   "Charter #GapAnalysis used count_satisfied: true as a default when total_resources was unset, with a conditional override. In CUE, this is a hard constraint (true), not a default — when the conditional evaluates to false, true & false produces bottom (_|_). The bug was latent because charter tests use hidden fields that cue vet does not fully evaluate."
+	decision:  "Use mutually exclusive conditional branches with a bool type constraint instead of a hard true default. Same pattern already used correctly by _root_satisfied in the same file."
+	rationale: "CUE unification makes foo: true into an immutable constraint. The only way to conditionally set a field to true or false is via mutually exclusive if branches, each setting a concrete value. This is idiomatic CUE — the _root_satisfied field already demonstrated the correct pattern."
+	consequences: [
+		"depth_satisfied and count_satisfied now use bool type + conditional branches",
+		"Charter gap analysis works correctly when the graph has fewer resources than the charter scope requires",
+		"cue vet on public gap analysis fields catches conflicts that hidden-field tests miss",
+	]
+	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
+}
