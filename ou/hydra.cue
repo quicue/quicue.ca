@@ -29,7 +29,7 @@ import (
 // #HydraOperation — a single executable operation on a resource.
 #HydraOperation: {
 	"@type":               "hydra:Operation"
-	"hydra:method":        "POST"
+	"hydra:method":        "GET"
 	"hydra:title":         string
 	"rdfs:comment":        string
 	"quicue:provider":     string
@@ -68,7 +68,7 @@ import (
 
 		"@type":            "hydra:ApiDocumentation"
 		"hydra:title":      "quicue-ou \(ctx.role_name) session"
-		"hydra:entrypoint": "/api/v1/"
+		"hydra:entrypoint": "https://api.quicue.ca/api/v1/"
 		"hydra:description": strings.Join([
 			"Scoped API surface for role '\(ctx.role_name)'.",
 			"Resources: \(ctx.total_resources).",
