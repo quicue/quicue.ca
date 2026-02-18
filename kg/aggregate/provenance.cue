@@ -8,7 +8,7 @@
 // machine-navigable — from raw data sources through pipeline processing
 // to architectural decisions.
 //
-// Usage (from .kg/index.cue):
+// Usage (from .kb/index.cue):
 //   _index: aggregate.#KGIndex & { ... }
 //   provenance: aggregate.#Provenance & { index: _index }
 //   // cue export . -e provenance.graph --out json

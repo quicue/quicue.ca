@@ -1,5 +1,5 @@
 // Validated discoveries from building quicue.ca
-package kg
+package insights
 
 import "quicue.ca/kg/core@v0"
 
@@ -42,15 +42,15 @@ i002: core.#Insight & {
 
 i003: core.#Insight & {
 	id:        "INSIGHT-003"
-	statement: "CUE packages are directory-scoped, not hierarchically scoped"
+	statement: "CUE packages are directory-scoped — multi-graph knowledge bases leverage this for independent validation"
 	evidence: [
-		".kg/ subdirectories create separate package instances even with same package name",
-		"Cannot cross-reference between .kg/project.cue and .kg/decisions/001.cue",
-		"./... recursive pattern does not traverse into .kg/ for validation",
+		".kb/ subdirectories create separate package instances — each graph validates independently",
+		"Directory name IS the routing constraint: agents put decisions in decisions/, patterns in patterns/",
+		"Each graph maps to a W3C vocabulary via #KnowledgeBase manifest",
 	]
 	method:     "experiment"
 	confidence: "high"
 	discovered: "2026-02-15"
-	implication: ".kg/ directories must be flat — all .cue files at root level with one package declaration"
+	implication: "Knowledge bases use typed subdirectories: each graph is an independent CUE package with its own cue.mod/. The root .kb/ holds the manifest (#KnowledgeBase) declaring the topology."
 	related: {"ADR-001": true}
 }

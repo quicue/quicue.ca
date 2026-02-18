@@ -6,7 +6,7 @@ import (
 	"quicue.ca/kg/ext@v0"
 )
 
-// #KGIndex computes summary views from raw .kg/ entries.
+// #KGIndex computes summary views from raw .kb/ entries.
 // All fields in summary, by_status, and by_confidence are derived via comprehensions.
 #KGIndex: {
 	project: string & !=""

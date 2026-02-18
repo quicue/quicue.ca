@@ -1,5 +1,5 @@
 // Approaches tried and abandoned in quicue.ca
-package kg
+package rejected
 
 import "quicue.ca/kg/core@v0"
 
@@ -22,10 +22,10 @@ r002: core.#Rejected & {
 
 r003: core.#Rejected & {
 	id:          "REJ-003"
-	approach:    "Organize .kg/ entries in subdirectories by type (decisions/, insights/, etc.)"
-	reason:      "CUE packages are directory-scoped. Files in .kg/decisions/ are a SEPARATE package instance from .kg/project.cue, even if both declare package kg. Cross-references between them fail."
-	date:        "2026-02-15"
-	alternative: "Keep .kg/ flat: all .cue files at root level. Use separate files per type (decisions.cue, insights.cue) for organization within the single package scope."
+	approach:    "Flat .kg/ directory for all knowledge graph entries"
+	reason:      "A single flat directory conflates graph types. Agent routing requires manual inspection of entry types. The directory name '.kg' collides with the 'kg' framework module, causing persistent confusion across sessions."
+	date:        "2026-02-17"
+	alternative: "Multi-graph .kb/ architecture: each knowledge type gets its own subdirectory (decisions/, patterns/, insights/, rejected/), each an independent CUE package validated against its kg type. Directory structure IS the ontology."
 	related: {"ADR-001": true}
 }
 

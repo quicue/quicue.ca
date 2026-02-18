@@ -163,23 +163,30 @@ The same graph patterns power projects across different domains:
 - `server/` — FastAPI execution gateway ([api.quicue.ca](https://api.quicue.ca/docs))
 - `kg/` — Knowledge graph framework ([quicue-kg](https://github.com/quicue/quicue-kg))
 
-## Knowledge graph
+## Knowledge base
 
-`.kg/` tracks project decisions, patterns, insights, and rejected approaches as validated CUE data. See [quicue-kg](https://github.com/quicue/quicue-kg) for the framework.
+`.kb/` is a multi-graph knowledge base with typed subdirectories. Each graph is an independent CUE package validated against its [quicue-kg](https://github.com/quicue/quicue-kg) type, mapped to a W3C vocabulary:
+
+| Graph | Directory | kg type | W3C vocabulary |
+|-------|-----------|---------|---------------|
+| Decisions | `.kb/decisions/` | `core.#Decision` | PROV-O |
+| Patterns | `.kb/patterns/` | `core.#Pattern` | SKOS |
+| Insights | `.kb/insights/` | `core.#Insight` | Web Annotation |
+| Rejected | `.kb/rejected/` | `core.#Rejected` | PROV-O |
+
+The root `.kb/manifest.cue` declares the topology via `ext.#KnowledgeBase`. Directory structure IS the ontology.
 
 ```bash
-# What decisions does this project track?
-cd .kg && cue export . -e _index.summary --out json
+# Validate all graphs
+make kb
+
+# Validate that downstream consumers still unify with current patterns
+make check-downstream
 ```
 
 ### Downstream tracking
 
-`.kg/downstream.cue` registers known consumers of quicue.ca patterns. Each downstream project maintains its own `.kg/deps.cue` cataloging which definitions it imports and where they're used.
-
-```bash
-# Validate that downstream consumers still unify with current patterns
-make check-downstream
-```
+`.kb/downstream.cue` registers known consumers of quicue.ca patterns. Each downstream project maintains its own `.kb/` with a deps registry cataloging which definitions it imports and where they're used.
 
 This catches breakage early — if you rename a field in `#InfraGraph`, `check-downstream` fails on any consumer that references it.
 

@@ -1,5 +1,5 @@
 // Architecture decisions for quicue.ca
-package kg
+package decisions
 
 import "quicue.ca/kg/core@v0"
 
