@@ -185,6 +185,23 @@ d012: core.#Decision & {
 	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
 }
 
+d013: core.#Decision & {
+	id:        "ADR-013"
+	title:     "Lifecycle management in patterns/, not a separate orche/ package"
+	status:    "accepted"
+	date:      "2026-02-19"
+	context:   "The boot/ package defines #BootstrapResource and credential collection types. The examples/drift-detection/ example imports orche/orchestration for state reconciliation. Both reference an orche/ package that doesn't exist in the repo. Meanwhile, patterns/ already has #ExecutionPlan, #DeploymentPlan, #RollbackPlan, and #HealthStatus — all lifecycle-adjacent."
+	decision:  "Absorb lifecycle management into patterns/lifecycle.cue. #BootstrapPlan, #DriftReport, #SmokeTest, and the composed #DeploymentLifecycle live in patterns/ alongside #ExecutionPlan. The boot/ skeleton types are refactored into patterns/. No separate orche/ package."
+	rationale: "CUE's strength is type composition via unification. #BootstrapPlan needs to compose with #InfraGraph. #DriftReport needs the same resource graph as #ExecutionPlan. Splitting these into separate packages forces import gymnastics rather than direct unification. The principle is: types compose, packages separate. These types compose, so they belong together."
+	consequences: [
+		"patterns/lifecycle.cue created with #BootstrapPlan, #DriftReport, #SmokeTest, #DeploymentLifecycle",
+		"boot/ types refactored into patterns/ (boot/ remains as a thin re-export or is removed)",
+		"examples/drift-detection/ updated to import patterns/ instead of orche/",
+		"No orche/ module to publish or version separately",
+	]
+	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
+}
+
 d011: core.#Decision & {
 	id:        "ADR-011"
 	title:     "lacuene is not a downstream consumer"
