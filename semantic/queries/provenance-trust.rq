@@ -1,0 +1,26 @@
+# provenance-trust.rq — Trust level analysis
+#
+# Categorizes resources by provenance chain completeness:
+#   HIGH    — prov:wasGeneratedBy links to activity with agent + source
+#   MEDIUM  — Has some provenance but incomplete chain
+#   UNKNOWN — No provenance metadata at all
+
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX apercue: <https://apercue.ca/vocab#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?trust_level (COUNT(?resource) AS ?count)
+WHERE {
+    ?resource a apercue:Resource .
+    BIND(
+        IF(EXISTS { ?resource prov:wasGeneratedBy ?act .
+                    ?act prov:wasAssociatedWith ?agent .
+                    ?act prov:used ?src },
+           "HIGH",
+           IF(EXISTS { ?resource prov:wasGeneratedBy ?act2 },
+              "MEDIUM",
+              "UNKNOWN"))
+        AS ?trust_level)
+}
+GROUP BY ?trust_level
+ORDER BY DESC(?count)

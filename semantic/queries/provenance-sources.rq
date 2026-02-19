@@ -1,0 +1,23 @@
+# provenance-sources.rq — List all data sources with authority ranks
+#
+# Returns: source system name, authority rank, collection method,
+#          freshness, and count of known gaps per source.
+
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX apercue: <https://apercue.ca/vocab#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?protocol ?system ?rank ?method ?schedule ?freshness
+       (COUNT(?gap) AS ?known_gaps)
+WHERE {
+    ?protocol a apercue:CollectionProtocol ;
+              rdfs:label ?label ;
+              apercue:sourceSystem ?system ;
+              apercue:authorityRank ?rank .
+    OPTIONAL { ?protocol apercue:collectionMethod ?method }
+    OPTIONAL { ?protocol apercue:collectionSchedule ?schedule }
+    OPTIONAL { ?protocol apercue:dataFreshness ?freshness }
+    OPTIONAL { ?protocol apercue:knownGap ?gap }
+}
+GROUP BY ?protocol ?system ?rank ?method ?schedule ?freshness
+ORDER BY ?rank

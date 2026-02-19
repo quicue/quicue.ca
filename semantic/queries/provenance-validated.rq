@@ -1,0 +1,22 @@
+# provenance-validated.rq — Filter to CUE-validated resources
+#
+# Returns resources with a complete provenance chain back to a
+# pipeline activity. Only shows data that passed through
+# CUE's closed-world validation.
+
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX apercue: <https://apercue.ca/vocab#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?resource ?name ?agent ?sourceSystem ?exportTime
+WHERE {
+    ?resource a apercue:Resource ;
+              apercue:name ?name ;
+              prov:wasGeneratedBy ?activity .
+    ?activity prov:wasAssociatedWith ?agentNode ;
+              prov:used ?source .
+    ?agentNode rdfs:label ?agent .
+    ?source apercue:sourceSystem ?sourceSystem .
+    OPTIONAL { ?source prov:generatedAtTime ?exportTime }
+}
+ORDER BY ?name

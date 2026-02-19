@@ -1,0 +1,98 @@
+# provenance.shacl.ttl — SHACL shapes for provenance validation
+#
+# Validates that infrastructure data carries proper provenance metadata.
+# Uses graduated severity: Violation for broken chains, Warning for
+# missing timestamps, Info for aspirational completeness.
+#
+# Usage: Load into a SHACL-aware triple store or validate with pyshacl.
+
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix apercue: <https://apercue.ca/vocab#> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+
+# ─── Source exports must have a content hash ───
+apercue:SourceExportHashShape a sh:NodeShape ;
+    sh:targetClass apercue:SourceExport ;
+    sh:property [
+        sh:path apercue:contentHash ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:pattern "^[0-9a-f]{64}$" ;
+        sh:message "Source export must have a SHA-256 content hash (64 hex chars)" ;
+        sh:severity sh:Violation ;
+    ] .
+
+# ─── Source exports must identify their source system ───
+apercue:SourceExportSystemShape a sh:NodeShape ;
+    sh:targetClass apercue:SourceExport ;
+    sh:property [
+        sh:path apercue:sourceSystem ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Source export must identify its source system" ;
+        sh:severity sh:Violation ;
+    ] .
+
+# ─── Source exports must have a generation time ───
+apercue:SourceExportTimeShape a sh:NodeShape ;
+    sh:targetClass apercue:SourceExport ;
+    sh:property [
+        sh:path prov:generatedAtTime ;
+        sh:minCount 1 ;
+        sh:message "Source export must have a generation timestamp" ;
+        sh:severity sh:Warning ;
+    ] .
+
+# ─── Pipeline runs must reference at least one source ───
+apercue:PipelineRunSourceShape a sh:NodeShape ;
+    sh:targetClass apercue:PipelineRun ;
+    sh:property [
+        sh:path prov:used ;
+        sh:minCount 1 ;
+        sh:message "Pipeline run must reference at least one source export" ;
+        sh:severity sh:Violation ;
+    ] .
+
+# ─── Pipeline runs must have a start time ───
+apercue:PipelineRunTimeShape a sh:NodeShape ;
+    sh:targetClass apercue:PipelineRun ;
+    sh:property [
+        sh:path prov:startedAtTime ;
+        sh:minCount 1 ;
+        sh:message "Pipeline run must have a start time" ;
+        sh:severity sh:Violation ;
+    ] .
+
+# ─── Pipeline runs must be associated with a software agent ───
+apercue:PipelineRunAgentShape a sh:NodeShape ;
+    sh:targetClass apercue:PipelineRun ;
+    sh:property [
+        sh:path prov:wasAssociatedWith ;
+        sh:minCount 1 ;
+        sh:message "Pipeline run must identify the software agent that executed it" ;
+        sh:severity sh:Violation ;
+    ] .
+
+# ─── Collection protocols must have authority rank ───
+apercue:CollectionProtocolRankShape a sh:NodeShape ;
+    sh:targetClass apercue:CollectionProtocol ;
+    sh:property [
+        sh:path apercue:authorityRank ;
+        sh:minCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 1 ;
+        sh:message "Collection protocol must have an authority rank (1 = highest)" ;
+        sh:severity sh:Violation ;
+    ] .
+
+# ─── Resources should have provenance (aspirational) ───
+apercue:ResourceProvenanceShape a sh:NodeShape ;
+    sh:targetClass apercue:Resource ;
+    sh:property [
+        sh:path prov:wasGeneratedBy ;
+        sh:minCount 1 ;
+        sh:message "Resource should have provenance: prov:wasGeneratedBy linking to the pipeline run that produced it." ;
+        sh:severity sh:Info ;
+    ] .
