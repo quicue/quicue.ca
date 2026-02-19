@@ -1,0 +1,121 @@
+# provenance.ttl — PROV-O extension for infrastructure data lineage
+#
+# Imports W3C PROV-O to track where infrastructure data comes from:
+# which systems exported it, which pipelines processed it, and what
+# authority hierarchy governs conflict resolution.
+#
+# Usage: Load into any triple store alongside your infrastructure data.
+#        See queries/ for ready-to-use SPARQL queries.
+
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix apercue: <https://apercue.ca/vocab#> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# ─────────────────────────────────────────────────
+# Ontology Declaration
+# ─────────────────────────────────────────────────
+
+<https://apercue.ca/vocab/provenance> a owl:Ontology ;
+    rdfs:label "Infrastructure Provenance Extension" ;
+    rdfs:comment "PROV-O extension for infrastructure data lineage. Tracks source systems, collection protocols, pipeline runs, and authority hierarchies. Domain-agnostic — works with any multi-source reconciliation pipeline." ;
+    owl:imports <http://www.w3.org/ns/prov#> ;
+    owl:versionInfo "0.2.0" .
+
+# ─────────────────────────────────────────────────
+# Provenance Classes
+# ─────────────────────────────────────────────────
+
+# Source system data files are prov:Entity — the raw data artifacts
+apercue:SourceExport a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Source Export" ;
+    rdfs:comment "A data file exported from an authoritative source system (hypervisor CSV, CMDB JSON, monitoring API, etc.)." .
+
+# Collection protocols are prov:Plan — the standing procedures
+apercue:CollectionProtocol a owl:Class ;
+    rdfs:subClassOf prov:Plan ;
+    rdfs:label "Collection Protocol" ;
+    rdfs:comment "A standing procedure for collecting data from a source system. Specifies method, schedule, authority rank, and known gaps." .
+
+# Pipeline runs are prov:Activity — execution events
+apercue:PipelineRun a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Pipeline Run" ;
+    rdfs:comment "A single execution of the data pipeline, consuming source exports and producing canonical infrastructure data." .
+
+# Normalizer scripts are prov:SoftwareAgent
+apercue:NormalizerAgent a owl:Class ;
+    rdfs:subClassOf prov:SoftwareAgent ;
+    rdfs:label "Normalizer Agent" ;
+    rdfs:comment "A script that transforms source data into CUE for lattice unification." .
+
+# CUE lattice evaluation is a special kind of activity
+apercue:LatticeUnification a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Lattice Unification" ;
+    rdfs:comment "CUE lattice evaluation that unifies per-source files into a single typed model. The lattice enforces schema constraints at compile time." .
+
+# ─────────────────────────────────────────────────
+# Provenance Properties
+# ─────────────────────────────────────────────────
+
+apercue:sourceSystem a owl:DatatypeProperty ;
+    rdfs:label "source system" ;
+    rdfs:comment "The name of the system that produced this data." ;
+    rdfs:domain apercue:SourceExport ;
+    rdfs:range xsd:string .
+
+apercue:contentHash a owl:DatatypeProperty ;
+    rdfs:label "content hash" ;
+    rdfs:comment "SHA-256 content hash of the source file for change detection and integrity verification." ;
+    rdfs:domain apercue:SourceExport ;
+    rdfs:range xsd:string .
+
+apercue:authorityRank a owl:DatatypeProperty ;
+    rdfs:label "authority rank" ;
+    rdfs:comment "Position in the authority hierarchy (1 = highest). Used for conflict resolution: lower rank wins." ;
+    rdfs:domain apercue:CollectionProtocol ;
+    rdfs:range xsd:integer .
+
+apercue:collectionMethod a owl:DatatypeProperty ;
+    rdfs:label "collection method" ;
+    rdfs:comment "How data is collected: api_pull, manual_export, scheduled_export, file_drop." ;
+    rdfs:domain apercue:CollectionProtocol ;
+    rdfs:range xsd:string .
+
+apercue:collectionSchedule a owl:DatatypeProperty ;
+    rdfs:label "collection schedule" ;
+    rdfs:comment "How often data is collected: daily, weekly, monthly, on_demand." ;
+    rdfs:domain apercue:CollectionProtocol ;
+    rdfs:range xsd:string .
+
+apercue:dataFreshness a owl:DatatypeProperty ;
+    rdfs:label "data freshness" ;
+    rdfs:comment "Expected maximum age of data (e.g., '< 7 days')." ;
+    rdfs:domain apercue:CollectionProtocol ;
+    rdfs:range xsd:string .
+
+apercue:knownGap a owl:DatatypeProperty ;
+    rdfs:label "known gap" ;
+    rdfs:comment "A documented limitation or gap in this data source." ;
+    rdfs:domain apercue:CollectionProtocol ;
+    rdfs:range xsd:string .
+
+# ─── Linking infrastructure data to provenance ───
+
+apercue:wasExportedFrom a owl:ObjectProperty ;
+    rdfs:subPropertyOf prov:wasDerivedFrom ;
+    rdfs:label "was exported from" ;
+    rdfs:comment "Links a canonical resource to the source export it was derived from." ;
+    rdfs:domain apercue:Resource ;
+    rdfs:range apercue:SourceExport .
+
+apercue:followsProtocol a owl:ObjectProperty ;
+    rdfs:label "follows protocol" ;
+    rdfs:comment "Links a pipeline run to the collection protocol it followed." ;
+    rdfs:domain apercue:PipelineRun ;
+    rdfs:range apercue:CollectionProtocol .

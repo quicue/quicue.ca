@@ -1,0 +1,24 @@
+# provenance-pipeline.rq — Pipeline execution history
+#
+# Lists all pipeline runs with their timing, source count,
+# and associated software agent.
+
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX apercue: <https://apercue.ca/vocab#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?run ?label ?startTime ?endTime ?agent
+       (COUNT(DISTINCT ?source) AS ?sources_used)
+       (COUNT(DISTINCT ?output) AS ?outputs_produced)
+WHERE {
+    ?run a apercue:PipelineRun ;
+         rdfs:label ?label ;
+         prov:startedAtTime ?startTime ;
+         prov:wasAssociatedWith ?agentNode .
+    ?agentNode rdfs:label ?agent .
+    OPTIONAL { ?run prov:endedAtTime ?endTime }
+    OPTIONAL { ?run prov:used ?source }
+    OPTIONAL { ?run prov:generated ?output }
+}
+GROUP BY ?run ?label ?startTime ?endTime ?agent
+ORDER BY DESC(?startTime)
