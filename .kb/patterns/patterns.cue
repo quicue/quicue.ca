@@ -117,7 +117,7 @@ p_safe_deploy: core.#Pattern & {
 	problem:  "Public surfaces built from production data leak real IPs, hostnames, and internal topology. Deploying safe replacements over contaminated files misses old artifacts with different naming conventions."
 	solution: "Source all public data from a single safe example (RFC 5737 TEST-NET IPs). Delete all existing files before deploying. Verify with grep -rl for real IP patterns as the final step. CI enforces no real IPs in generated artifacts."
 	context:  "Any project deploying generated artifacts to public web surfaces where the source data may have originated from production infrastructure."
-	example:  "cue export ./examples/datacenter/ -e _bulk | split → deploy to imp.quicue.ca; grep -rl 172.20 → must be empty"
+	example:  "bash operator/build.sh → cue export + split + IP safety check; wrangler pages deploy operator/public → demo.quicue.ca; check-ips.sh blocks RFC 1918"
 	used_in: {
 		"quicue.ca": true
 	}
