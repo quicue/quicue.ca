@@ -9,6 +9,7 @@ build/
 .venv/
 node_modules/
 .claude/
+.wrangler/
 docs/plans/
 .kg/cue.mod/pkg/
 site/
