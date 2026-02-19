@@ -125,3 +125,94 @@ p_safe_deploy: core.#Pattern & {
 		"compile_time_binding": true
 	}
 }
+
+// --- Deployment Lifecycle Principles ---
+// The following patterns codify the deployment philosophy
+// derived from the quicue.ca ecosystem and validated by the
+// airgapped E2E proof on VM 201 (2026-02-19).
+
+p_everything_is_projection: core.#Pattern & {
+	name:     "Everything-is-a-Projection"
+	category: "architecture"
+	problem:  "Adding new output formats (Rundeck, Jupyter, OpenAPI, justfile, DCAT, N-Triples) requires writing new code in each target language, duplicating graph traversal logic and risking divergence between outputs."
+	solution: "Maintain one canonical CUE graph. Every output format is a CUE comprehension over that graph. Adding bash, Rundeck, Jupyter, or JSON-LD output requires zero Python, zero bash — just a new CUE expression. All projections are structurally identical because they derive from the same data."
+	context:  "Any CUE project that produces multiple output formats from the same source data. The #ExecutionPlan already demonstrates 7 projections (script, notebook, rundeck, http, wiki, ops, OpenAPI) from one graph."
+	example:  "#ExecutionPlan.notebook, .rundeck, .script, .wiki, .http — all derived from the same resolved command graph. Also: #DCAT3Catalog, #NTriplesExport, #OpenAPISpec."
+	used_in: {
+		"quicue.ca": true
+		"apercue":   true
+	}
+	related: {
+		"compile_time_binding": true
+		"universe_cheatsheet":  true
+		"hidden_wrapper":       true
+	}
+}
+
+p_idempotent_by_construction: core.#Pattern & {
+	name:     "Idempotent-by-Construction"
+	category: "operations"
+	problem:  "Deployment scripts accumulate state: environment variables, conditional branches, error recovery paths. Re-running a partially-failed deployment is risky because the script's behavior depends on the current system state."
+	solution: "CUE evaluation is deterministic — same inputs always produce identical outputs. The deployment script is a pure function of the declared state. There is no system state to read, no conditional logic to diverge on. Running cue export twice produces byte-identical output. The deployment artifact is immutable once generated."
+	context:  "Any deployment pipeline where re-runnability matters. The #DeploymentPlan layer-gated script is idempotent because each layer's commands are fully resolved at compile time — they don't check 'current state' to decide what to do."
+	example:  "cue export -e execution.script produces identical bash output on every run. The operator confirms each layer gate, but the commands themselves are fixed."
+	used_in: {
+		"quicue.ca": true
+	}
+	related: {
+		"compile_time_binding":      true
+		"contract_via_unification":  true
+		"everything_is_projection":  true
+	}
+}
+
+p_types_compose: core.#Pattern & {
+	name:     "Types-Compose-Scripts-Don't"
+	category: "architecture"
+	problem:  "Adding new deployment capabilities (drift detection, bootstrap, smoke testing) typically means writing new bash scripts or Python modules that duplicate graph traversal and resource handling logic."
+	solution: "Express new capabilities as CUE types that compose with existing types via unification. #BootstrapPlan composes with #InfraGraph. #DriftReport composes with #ExecutionPlan. #SmokeTest composes with #Bundle. The composition is automatic — CUE's lattice semantics merge the types. Bash and Python exist only as thin execution layers over fully-resolved CUE output."
+	context:  "Any extension to the deployment lifecycle where the new capability needs access to the resource graph, resolved commands, or topology data."
+	example:  "#DeploymentLifecycle: { execution: #ExecutionPlan & {...}, drift: #DriftReport & {declared: execution.cluster.resources}, verify: #SmokeTest & {checks: [...]} }"
+	used_in: {
+		"quicue.ca": true
+	}
+	related: {
+		"three_layer":              true
+		"everything_is_projection": true
+	}
+}
+
+p_static_first: core.#Pattern & {
+	name:     "Static-First"
+	category: "architecture"
+	problem:  "Web servers introduce failure modes (process crashes, memory leaks, port conflicts, dependency rot) even when serving read-only data that changes only at build time."
+	solution: "Pre-compute everything possible at cue export time. Read-only API surfaces are directories of JSON files served by a CDN. The FastAPI server exists only for live command execution (SSH, API calls) where runtime interaction is inherently required. Every piece of data that CAN be pre-computed SHOULD be."
+	context:  "Deployment dashboards, API documentation, graph visualization, risk reports — anything that reads from the CUE graph without modifying it."
+	example:  "demo.quicue.ca serves 727 pre-computed JSON files from CF Pages. The server at api.quicue.ca handles only live execution. Zero overlap."
+	used_in: {
+		"quicue.ca": true
+	}
+	related: {
+		"universe_cheatsheet":       true
+		"everything_is_projection":  true
+		"safe_deploy":               true
+	}
+}
+
+p_airgapped_bundle: core.#Pattern & {
+	name:     "Airgapped Bundle"
+	category: "operations"
+	problem:  "Deploying to air-gapped or restricted networks fails because package managers (apt, pip, docker pull) require internet access. Partial offline solutions miss transitive dependencies or version conflicts."
+	solution: "Define a #Bundle CUE schema declaring all artifacts needed for offline deployment: git repos, Docker images (app + base), Python wheels (including pip bootstrap), static binaries, and system packages with recursive dependencies. A #Gotcha registry captures known deployment traps with tested workarounds. bundle.sh reads the manifest and collects everything. install-airgapped.sh deploys on the target."
+	context:  "Any deployment to networks with restricted internet access: institutional data centers, classified environments, factory floors, or POC demonstrations that must work reliably without external dependencies."
+	example:  "operator/airgap-bundle.cue defines #Bundle + #Gotcha. E2E proven: 284MB bundle → fresh Ubuntu 24.04 VM → 37/37 smoke tests on completely airgapped machine."
+	used_in: {
+		"quicue.ca": true
+		"downstream-instance":      true
+	}
+	related: {
+		"idempotent_by_construction": true
+		"types_compose":              true
+		"safe_deploy":                true
+	}
+}

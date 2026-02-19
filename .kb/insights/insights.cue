@@ -156,3 +156,29 @@ i007: core.#Insight & {
 	]
 	related: {"INSIGHT-006": true}
 }
+
+i009: core.#Insight & {
+	id:        "INSIGHT-009"
+	statement: "Airgapped deployment has 8 reproducible traps — each is a gap between package manager assumptions and offline reality"
+	evidence: [
+		"E2E deployment on fresh Ubuntu 24.04 VM (VM 201 on clover, 172.20.1.32) hit all 8 traps",
+		"ensurepip stripped from cloud images — python3 -m ensurepip returns 'No module named ensurepip'",
+		"typing_extensions installed by debian apt — pip cannot uninstall (no RECORD file) without --ignore-installed",
+		"raptor2-utils depends on libyajl2 — not visible from apt-cache depends without --recurse",
+		"CUE module resolution via cue.mod/pkg/ symlinks not preserved in git clone — must recreate post-clone",
+		"Docker bind-mount of newer app.py over older image causes ImportError when image scripts are stale",
+		"Caddy tls internal generates cert for SITE_ADDRESS hostname — curl to localhost fails TLS verification",
+		"CUE export on datacenter example OOM-killed on 8GB VM — must generate specs on build host",
+		"grep with pipefail returns exit 1 on no match, killing bash scripts — use { grep || true; }",
+	]
+	method:     "experiment"
+	confidence: "high"
+	discovered: "2026-02-19"
+	implication: "Every package manager assumes internet access. Airgapped deployment is not 'deployment minus internet' — it's a different environment with its own failure modes. The #Gotcha registry in operator/airgap-bundle.cue captures these systematically so install scripts can check proactively rather than fail reactively."
+	action_items: [
+		"Maintain #Gotcha registry in operator/airgap-bundle.cue as new traps are discovered",
+		"install-airgapped.sh should check for each gotcha before attempting the corresponding install step",
+		"CI should verify bundle completeness: all transitive deps present, all Docker base images included",
+	]
+	related: {"ADR-013": true}
+}
