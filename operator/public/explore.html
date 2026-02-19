@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explore — demo.quicue.ca</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&family=Atkinson+Hyperlegible+Mono:wght@400;700&display=swap');
+:root {
+  --bg: #0d1117; --surface: #161b22; --elevated: #21262d; --border: #30363d;
+  --text: #e6edf3; --text-sec: #8b949e; --text-dim: #6e7681;
+  --accent: #58a6ff; --green: #3fb950; --red: #f85149; --warning: #d29922; --purple: #a371f7;
+  --font-ui: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  --font-mono: 'Atkinson Hyperlegible Mono', monospace;
+  --radius: 8px;
+  --nav-height: 48px;
+  --layer-0: #f85149; --layer-1: #d29922; --layer-2: #3fb950; --layer-3: #58a6ff;
+  --layer-4: #a371f7; --layer-5: #f0883e; --layer-6: #db61a2;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-ui); background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+a { color: var(--accent); text-decoration: none; cursor: pointer; }
+a:hover { text-decoration: underline; }
+
+nav {
+  height: var(--nav-height);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+nav .site-name { font-weight: 700; font-size: 0.95rem; margin-right: 1.5rem; color: var(--text); }
+nav a { padding: 0.4rem 0.75rem; border-radius: var(--radius); font-size: 0.85rem; color: var(--text-sec); transition: background 0.15s, color 0.15s; }
+nav a:hover { background: var(--elevated); color: var(--text); text-decoration: none; }
+nav a.active { background: var(--elevated); color: var(--accent); font-weight: 700; }
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.panel { overflow-y: auto; border-right: 1px solid var(--border); padding: 1rem; }
+.panel:last-child { border-right: none; }
+.panel h2 { font-size: 0.8rem; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
+
+/* Left panel - resource list */
+.search-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+.search-input:focus { outline: none; border-color: var(--accent); }
+
+.type-group { margin-bottom: 1rem; }
+.type-label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.25rem;
+}
+.resource-item {
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.resource-item:hover { background: var(--elevated); }
+.resource-item.selected { background: var(--elevated); color: var(--accent); }
+.layer-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Center panel - detail */
+.detail-header { margin-bottom: 1.5rem; }
+.detail-header h1 { font-size: 1.4rem; font-weight: 700; font-family: var(--font-mono); }
+.detail-iri { font-size: 0.8rem; color: var(--text-dim); font-family: var(--font-mono); word-break: break-all; }
+.detail-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  border: 1px solid var(--border);
+}
+.badge-type { border-color: var(--purple); color: var(--purple); }
+.badge-layer { border-color: var(--accent); color: var(--accent); }
+.badge-ip { border-color: var(--green); color: var(--green); }
+
+.section { margin-bottom: 1.5rem; }
+.section h3 {
+  font-size: 0.8rem;
+  color: var(--text-sec);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.dep-link {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  margin: 0.15rem 0.15rem 0.15rem 0;
+}
+.dep-link:hover { border-color: var(--accent); text-decoration: none; }
+
+.cmd-group { margin-bottom: 0.75rem; }
+.cmd-provider {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-sec);
+  margin-bottom: 0.25rem;
+}
+.cmd-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+}
+.cmd-name { font-family: var(--font-mono); color: var(--text); }
+.cmd-cat { font-size: 0.7rem; color: var(--text-dim); }
+.cmd-cat.destructive { color: var(--red); }
+.cmd-copy {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-sec);
+  cursor: pointer;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.75rem;
+}
+.cmd-copy:hover { border-color: var(--accent); color: var(--accent); }
+.cmd-copy.copied { border-color: var(--green); color: var(--green); }
+.cmd-full {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-sec);
+  word-break: break-all;
+  padding: 0.3rem 0.6rem;
+  background: var(--bg);
+  border-radius: 0 0 var(--radius) var(--radius);
+  margin-top: -0.25rem;
+  margin-bottom: 0.25rem;
+  border: 1px solid var(--border);
+  border-top: none;
+}
+
+/* Right panel - context */
+.stat-row { display: flex; justify-content: space-between; padding: 0.3rem 0; border-bottom: 1px solid var(--border); }
+.stat-label { font-size: 0.8rem; color: var(--text-sec); }
+.stat-value { font-size: 0.8rem; font-family: var(--font-mono); color: var(--accent); }
+.dep-tree { padding-left: 1rem; }
+.dep-tree-item { font-size: 0.8rem; font-family: var(--font-mono); padding: 0.15rem 0; }
+.dep-tree-item a { cursor: pointer; }
+.dep-tree-item::before { content: '\2192 '; color: var(--text-dim); }
+.dep-tree-root::before { content: '\25CF '; color: var(--green); }
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.jsonld-meta { margin-top: 1.5rem; }
+.jsonld-meta pre {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-sec);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  overflow-x: auto;
+  max-height: 300px;
+}
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <span class="site-name">demo.quicue.ca</span>
+  <a href="index.html">Index</a>
+  <a href="graph.html">Graph</a>
+  <a href="planner.html">Planner</a>
+  <a href="browse.html">Browse</a>
+  <a href="explore.html" class="active">Explore</a>
+</nav>
+
+<div class="layout">
+  <!-- Left: resource list grouped by primary type -->
+  <div class="panel" id="left-panel">
+    <h2>Resources</h2>
+    <input type="text" class="search-input" id="search" placeholder="Filter resources...">
+    <div id="resource-list"></div>
+  </div>
+
+  <!-- Center: resource detail -->
+  <div class="panel" id="center-panel">
+    <div class="empty-state" id="empty-detail">Select a resource to explore</div>
+    <div id="detail" style="display:none"></div>
+  </div>
+
+  <!-- Right: graph context -->
+  <div class="panel" id="right-panel">
+    <h2>Graph Context</h2>
+    <div id="context-stats"></div>
+    <div id="dep-chain" style="margin-top:1rem"></div>
+    <div class="jsonld-meta" id="jsonld-section" style="display:none">
+      <h2>JSON-LD</h2>
+      <pre id="jsonld-raw"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+(async function() {
+  // Load data
+  const [graphResp, planResp, cmdsResp, hydraResp] = await Promise.all([
+    fetch('graph.jsonld').then(r => r.ok ? r.json() : null),
+    fetch('plan.json').then(r => r.ok ? r.json() : null),
+    fetch('.bound_commands.json').then(r => r.ok ? r.json() : null),
+    fetch('hydra.jsonld').then(r => r.ok ? r.json() : null),
+  ]);
+
+  if (!graphResp || !graphResp['@graph']) {
+    document.getElementById('empty-detail').textContent = 'Failed to load graph.jsonld';
+    return;
+  }
+
+  const graph = graphResp['@graph'];
+  const context = graphResp['@context'] || {};
+  const plan = planResp || { layers: [] };
+  const commands = cmdsResp || {};
+  const hydra = hydraResp || {};
+
+  // Index resources by name
+  const byName = {};
+  graph.forEach(r => { byName[r.name] = r; });
+
+  // Build layer map from plan
+  const layerOf = {};
+  (plan.layers || []).forEach(l => {
+    (l.resources || []).forEach(rname => { layerOf[rname] = l.layer; });
+  });
+
+  // Build reverse deps (who depends on me)
+  const dependents = {};
+  graph.forEach(r => {
+    (r.depends_on || []).forEach(dep => {
+      if (!dependents[dep]) dependents[dep] = [];
+      dependents[dep].push(r.name);
+    });
+  });
+
+  // Group by primary type
+  const byType = {};
+  graph.forEach(r => {
+    const types = r['@type'] || [];
+    const primary = types[0] || 'Unknown';
+    if (!byType[primary]) byType[primary] = [];
+    byType[primary].push(r);
+  });
+
+  // Layer color
+  function layerColor(n) {
+    const colors = ['var(--layer-0)','var(--layer-1)','var(--layer-2)','var(--layer-3)','var(--layer-4)','var(--layer-5)','var(--layer-6)'];
+    return colors[n] || 'var(--text-dim)';
+  }
+
+  // Render resource list
+  function renderList(filter = '') {
+    const el = document.getElementById('resource-list');
+    el.innerHTML = '';
+    const lf = filter.toLowerCase();
+    const sortedTypes = Object.keys(byType).sort();
+
+    sortedTypes.forEach(type => {
+      const resources = byType[type].filter(r =>
+        !lf || r.name.includes(lf) || type.toLowerCase().includes(lf) ||
+        (r['@type'] || []).some(t => t.toLowerCase().includes(lf))
+      );
+      if (!resources.length) return;
+
+      const group = document.createElement('div');
+      group.className = 'type-group';
+      group.innerHTML = `<div class="type-label">${type} (${resources.length})</div>`;
+
+      resources.sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'resource-item';
+        const layer = layerOf[r.name];
+        item.innerHTML = `<span class="layer-dot" style="background:${layerColor(layer ?? -1)}"></span>${r.name}`;
+        item.onclick = () => selectResource(r.name);
+        group.appendChild(item);
+      });
+      el.appendChild(group);
+    });
+  }
+
+  // Select and display resource
+  function selectResource(name) {
+    const r = byName[name];
+    if (!r) return;
+
+    // Update selection state
+    document.querySelectorAll('.resource-item').forEach(el => {
+      el.classList.toggle('selected', el.textContent.trim() === name);
+    });
+
+    document.getElementById('empty-detail').style.display = 'none';
+    const detail = document.getElementById('detail');
+    detail.style.display = '';
+
+    const types = r['@type'] || [];
+    const layer = layerOf[name];
+    const deps = r.depends_on || [];
+    const revDeps = dependents[name] || [];
+    const resCmds = commands[name] || {};
+
+    // Header
+    let html = `<div class="detail-header">
+      <h1>${r.name}</h1>
+      <div class="detail-iri">${r['@id']}</div>
+      <div class="detail-meta">
+        ${types.map(t => `<span class="badge badge-type">${t}</span>`).join('')}
+        ${layer !== undefined ? `<span class="badge badge-layer">Layer ${layer}</span>` : ''}
+        ${r.ip ? `<span class="badge badge-ip">${r.ip}</span>` : ''}
+      </div>
+    </div>`;
+
+    // Description
+    if (r.description) {
+      html += `<div class="section"><p style="color:var(--text-sec);font-size:0.9rem">${r.description}</p></div>`;
+    }
+
+    // Properties
+    const props = Object.entries(r).filter(([k]) =>
+      !['@id','@type','name','depends_on','description','ip'].includes(k)
+    );
+    if (props.length) {
+      html += `<div class="section"><h3>Properties</h3>`;
+      props.forEach(([k,v]) => {
+        html += `<div class="stat-row"><span class="stat-label">${k}</span><span class="stat-value">${typeof v === 'object' ? JSON.stringify(v) : v}</span></div>`;
+      });
+      html += `</div>`;
+    }
+
+    // Dependencies (clickable)
+    if (deps.length) {
+      html += `<div class="section"><h3>Depends On (${deps.length})</h3>`;
+      deps.forEach(d => {
+        html += `<a class="dep-link" onclick="window._selectResource('${d}')">${d}</a>`;
+      });
+      html += `</div>`;
+    }
+
+    // Dependents (who depends on me)
+    if (revDeps.length) {
+      html += `<div class="section"><h3>Depended On By (${revDeps.length})</h3>`;
+      revDeps.forEach(d => {
+        html += `<a class="dep-link" onclick="window._selectResource('${d}')">${d}</a>`;
+      });
+      html += `</div>`;
+    }
+
+    // Bound commands
+    const cmdEntries = Object.entries(resCmds);
+    if (cmdEntries.length) {
+      html += `<div class="section"><h3>Operations (${cmdEntries.length})</h3>`;
+
+      // Group by provider
+      const byProvider = {};
+      cmdEntries.forEach(([key, cmd]) => {
+        const [prov, ...rest] = key.split('/');
+        const action = rest.join('/');
+        if (!byProvider[prov]) byProvider[prov] = [];
+        byProvider[prov].push({ action, cmd, key });
+      });
+
+      Object.entries(byProvider).sort().forEach(([prov, actions]) => {
+        html += `<div class="cmd-group"><div class="cmd-provider">${prov} (${actions.length})</div>`;
+        actions.sort((a,b) => a.action.localeCompare(b.action)).forEach(({action, cmd, key}) => {
+          const isDestructive = cmd.includes('destroy') || cmd.includes('delete') || cmd.includes('remove') || cmd.includes('power_off_hard') || cmd.includes('--force');
+          html += `<div class="cmd-item">
+            <span class="cmd-name">${action}</span>
+            <span>
+              ${isDestructive ? '<span class="cmd-cat destructive">destructive</span> ' : ''}
+              <button class="cmd-copy" onclick="navigator.clipboard.writeText('${cmd.replace(/'/g,"\\'")}').then(()=>{this.textContent='copied';this.classList.add('copied');setTimeout(()=>{this.textContent='copy';this.classList.remove('copied')},1500)})">copy</button>
+            </span>
+          </div>
+          <div class="cmd-full">${cmd}</div>`;
+        });
+        html += `</div>`;
+      });
+      html += `</div>`;
+    }
+
+    detail.innerHTML = html;
+
+    // Right panel: context
+    renderContext(name, r, layer, deps, revDeps, cmdEntries.length);
+  }
+  window._selectResource = selectResource;
+
+  // Render right panel context
+  function renderContext(name, r, layer, deps, revDeps, cmdCount) {
+    // Stats
+    const stats = document.getElementById('context-stats');
+    stats.innerHTML = `
+      <div class="stat-row"><span class="stat-label">Layer</span><span class="stat-value">${layer !== undefined ? layer : '-'}</span></div>
+      <div class="stat-row"><span class="stat-label">Types</span><span class="stat-value">${(r['@type']||[]).length}</span></div>
+      <div class="stat-row"><span class="stat-label">Dependencies</span><span class="stat-value">${deps.length}</span></div>
+      <div class="stat-row"><span class="stat-label">Dependents</span><span class="stat-value">${revDeps.length}</span></div>
+      <div class="stat-row"><span class="stat-label">Operations</span><span class="stat-value">${cmdCount}</span></div>
+    `;
+
+    // Dependency chain (walk up to root)
+    const chain = document.getElementById('dep-chain');
+    chain.innerHTML = '<h2>Dependency Chain</h2>';
+    const tree = document.createElement('div');
+    tree.className = 'dep-tree';
+
+    function walkUp(rname, visited = new Set()) {
+      if (visited.has(rname)) return;
+      visited.add(rname);
+      const res = byName[rname];
+      if (!res) return;
+      const parentDeps = res.depends_on || [];
+      if (parentDeps.length === 0) {
+        const item = document.createElement('div');
+        item.className = 'dep-tree-item dep-tree-root';
+        item.innerHTML = `<a onclick="window._selectResource('${rname}')">${rname}</a>`;
+        tree.appendChild(item);
+      }
+      parentDeps.forEach(d => walkUp(d, visited));
+    }
+
+    // Show chain from roots down to selected
+    const ancestors = new Set();
+    function collectAncestors(rname) {
+      const res = byName[rname];
+      if (!res) return;
+      (res.depends_on || []).forEach(d => {
+        ancestors.add(d);
+        collectAncestors(d);
+      });
+    }
+    collectAncestors(name);
+
+    // Show roots
+    const roots = graph.filter(r => !(r.depends_on || []).length).map(r => r.name);
+    const relevantRoots = roots.filter(r => ancestors.has(r) || r === name);
+
+    function renderChain(rname, depth = 0) {
+      const item = document.createElement('div');
+      item.className = 'dep-tree-item';
+      item.style.paddingLeft = (depth * 1) + 'rem';
+      const isCurrent = rname === name;
+      item.innerHTML = isCurrent
+        ? `<strong style="color:var(--accent)">${rname}</strong>`
+        : `<a onclick="window._selectResource('${rname}')">${rname}</a>`;
+      tree.appendChild(item);
+
+      // Find children that are ancestors of current or current itself
+      const children = (dependents[rname] || []).filter(c => ancestors.has(c) || c === name || c === rname);
+      children.forEach(c => {
+        if (c !== rname) renderChain(c, depth + 1);
+      });
+    }
+
+    relevantRoots.forEach(r => renderChain(r));
+    if (!relevantRoots.length && name) {
+      const item = document.createElement('div');
+      item.className = 'dep-tree-item dep-tree-root';
+      item.innerHTML = `<strong style="color:var(--accent)">${name}</strong> (root)`;
+      tree.appendChild(item);
+    }
+    chain.appendChild(tree);
+
+    // JSON-LD raw
+    const jsonldSection = document.getElementById('jsonld-section');
+    jsonldSection.style.display = '';
+    document.getElementById('jsonld-raw').textContent = JSON.stringify(r, null, 2);
+  }
+
+  // Search
+  document.getElementById('search').addEventListener('input', e => {
+    renderList(e.target.value);
+  });
+
+  // Initial render
+  renderList();
+
+  // Global stats in right panel
+  const stats = document.getElementById('context-stats');
+  stats.innerHTML = `
+    <div class="stat-row"><span class="stat-label">Total Resources</span><span class="stat-value">${graph.length}</span></div>
+    <div class="stat-row"><span class="stat-label">Total Layers</span><span class="stat-value">${plan.summary?.total_layers || plan.layers?.length || 0}</span></div>
+    <div class="stat-row"><span class="stat-label">Total Types</span><span class="stat-value">${Object.keys(byType).length}</span></div>
+    <div class="stat-row"><span class="stat-label">JSON-LD Context</span><span class="stat-value">${Object.keys(context).length} terms</span></div>
+    <div class="stat-row"><span class="stat-label">Hydra Classes</span><span class="stat-value">${(hydra['hydra:supportedClass'] || []).length}</span></div>
+    <div class="stat-row"><span class="stat-label">API Entrypoint</span><span class="stat-value"><a href="https://api.quicue.ca/api/v1/" target="_blank">api.quicue.ca</a></span></div>
+    <div class="stat-row"><span class="stat-label">SKOS Types</span><span class="stat-value"><a href="https://api.quicue.ca/api/v1/types" target="_blank">types</a></span></div>
+  `;
+})();
+</script>
+</body>
+</html>

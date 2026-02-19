@@ -95,13 +95,37 @@ jobs:
           print('All bindings resolved, no placeholders')
           "
 
-      - name: Validate no real IPs leaked into spec
+      - name: Validate no private IPs leaked into spec
         run: |
-          if grep -q '172\.20\.' /tmp/openapi.json /tmp/bound_commands.json; then
-            echo "FAIL: Real infrastructure IPs found in generated files"
-            exit 1
-          fi
-          echo "No real IPs in generated files"
+          # Block ALL RFC 1918 private ranges, not just 172.20
+          for f in /tmp/openapi.json /tmp/bound_commands.json; do
+            if grep -qP '172\.(1[6-9]|2[0-9]|3[01])\.\d+\.\d+' "$f"; then
+              echo "FAIL: RFC 1918 172.16-31.x.x IPs found in $f"
+              exit 1
+            fi
+            if grep -qP '192\.168\.\d+\.\d+' "$f"; then
+              echo "FAIL: RFC 1918 192.168.x.x IPs found in $f"
+              exit 1
+            fi
+          done
+          echo "No private IPs in generated files"
+
+  operator:
+    runs-on: ubuntu-latest
+    needs: cue-vet
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install CUE
+        uses: cue-lang/setup-cue@v1.0.1
+        with:
+          version: v0.15.4
+
+      - name: Build operator dashboard
+        run: bash operator/build.sh
+
+      - name: IP safety check on built output
+        run: bash operator/check-ips.sh operator/public
 
   server:
     runs-on: ubuntu-latest

@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graph — demo.quicue.ca</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="exec.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&family=Atkinson+Hyperlegible+Mono:wght@400;700&display=swap');
+:root {
+  --bg: #0d1117; --surface: #161b22; --elevated: #21262d; --border: #30363d;
+  --text: #e6edf3; --text-sec: #8b949e; --text-dim: #6e7681;
+  --accent: #58a6ff; --green: #3fb950; --red: #f85149; --warning: #d29922; --purple: #a371f7;
+  --font-ui: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  --font-mono: 'Atkinson Hyperlegible Mono', monospace;
+  --radius: 8px;
+  --nav-height: 48px;
+  --layer-0: #f85149; --layer-1: #d29922; --layer-2: #3fb950; --layer-3: #58a6ff;
+  --layer-4: #a371f7; --layer-5: #f0883e; --layer-6: #db61a2;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-ui); background: var(--bg); color: var(--text); line-height: 1.6; overflow: hidden; height: 100vh; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Nav bar */
+nav {
+  height: var(--nav-height);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+nav .site-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-right: 1.5rem;
+  color: var(--text);
+}
+nav a {
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  color: var(--text-sec);
+  transition: background 0.15s, color 0.15s;
+}
+nav a:hover { background: var(--elevated); color: var(--text); text-decoration: none; }
+nav a.active { background: var(--elevated); color: var(--accent); font-weight: 700; }
+
+/* Toolbar */
+.toolbar {
+  height: 44px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.toolbar .sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  margin: 0 0.25rem;
+}
+.toolbar label {
+  font-size: 0.75rem;
+  color: var(--text-sec);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.25rem;
+}
+.layer-btn {
+  width: 32px; height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  cursor: pointer;
+  color: #fff;
+  transition: opacity 0.15s, box-shadow 0.15s;
+}
+.layer-btn.off { opacity: 0.3; }
+.layer-btn:hover { box-shadow: 0 0 0 2px rgba(255,255,255,0.15); }
+.layout-btn {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--elevated);
+  color: var(--text-sec);
+  font-size: 0.8rem;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.layout-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,0.1); }
+.layout-btn:hover { color: var(--text); }
+.reset-btn {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--elevated);
+  color: var(--text-sec);
+  font-size: 0.8rem;
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+.reset-btn:hover { color: var(--text); border-color: var(--text-sec); }
+
+/* Main layout */
+.main {
+  display: flex;
+  height: calc(100vh - var(--nav-height) - 44px);
+  overflow: hidden;
+}
+
+/* SVG area */
+.graph-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.graph-area svg { width: 100%; height: 100%; display: block; }
+
+/* Tooltip */
+.tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  max-width: 280px;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.12s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.tooltip.visible { opacity: 1; }
+.tooltip .tt-name { font-weight: 700; font-family: var(--font-mono); margin-bottom: 0.25rem; }
+.tooltip .tt-types { color: var(--text-sec); font-size: 0.75rem; margin-bottom: 0.15rem; }
+.tooltip .tt-ip { color: var(--green); font-family: var(--font-mono); font-size: 0.75rem; }
+.tooltip .tt-layer { font-size: 0.7rem; margin-top: 0.15rem; }
+.tooltip .tt-desc { color: var(--text-sec); font-size: 0.75rem; margin-top: 0.15rem; font-style: italic; }
+
+/* Detail panel */
+.detail-panel {
+  width: 0;
+  min-width: 0;
+  background: var(--surface);
+  border-left: 1px solid transparent;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  transition: width 0.25s ease, min-width 0.25s ease, padding 0.25s ease, border-color 0.25s ease;
+  flex-shrink: 0;
+}
+.detail-panel.open {
+  width: 340px;
+  min-width: 340px;
+  padding: 1.25rem;
+  border-left-color: var(--border);
+}
+.detail-panel h2 {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  word-break: break-all;
+}
+.detail-section {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.detail-section:last-child { border-bottom: none; }
+.detail-section h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-sec);
+  margin-bottom: 0.4rem;
+}
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  margin: 0.1rem 0.15rem 0.1rem 0;
+  border: 1px solid var(--border);
+  background: var(--elevated);
+  color: var(--text-sec);
+}
+.badge-layer {
+  color: #fff;
+  border: none;
+  font-weight: 700;
+}
+.detail-meta {
+  font-size: 0.85rem;
+  color: var(--text-sec);
+}
+.detail-meta span { color: var(--text); font-family: var(--font-mono); }
+.dep-link {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  margin: 0.1rem 0.15rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+.dep-link:hover { background: rgba(88,166,255,0.1); border-color: var(--accent); }
+.impact-box {
+  background: rgba(248,81,73,0.08);
+  border: 1px solid rgba(248,81,73,0.25);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
+}
+.impact-box strong { color: var(--red); font-family: var(--font-mono); }
+
+/* Command groups in detail */
+.cmd-group { margin-bottom: 0.75rem; }
+.cmd-group-header {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-sec);
+  font-family: var(--font-mono);
+  margin-bottom: 0.3rem;
+  text-transform: lowercase;
+}
+.cmd-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+.cmd-action {
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  min-width: 0;
+  white-space: nowrap;
+}
+.cmd-text {
+  flex: 1;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  word-break: break-all;
+  line-height: 1.4;
+}
+.cmd-copy {
+  flex-shrink: 0;
+  width: 24px; height: 24px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--elevated);
+  color: var(--text-sec);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  transition: border-color 0.12s, color 0.12s;
+}
+.cmd-copy:hover { border-color: var(--accent); color: var(--accent); }
+.cmd-copy.copied { border-color: var(--green); color: var(--green); }
+
+/* Close button */
+.panel-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 28px; height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--elevated);
+  color: var(--text-sec);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+.panel-close:hover { color: var(--text); border-color: var(--text-sec); }
+.detail-panel { position: relative; }
+
+/* Loading */
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-sec);
+  font-size: 0.9rem;
+}
+
+/* Scrollbar */
+.detail-panel::-webkit-scrollbar { width: 6px; }
+.detail-panel::-webkit-scrollbar-track { background: transparent; }
+.detail-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.detail-panel::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="site-name">demo.quicue.ca</span>
+  <a href="index.html">Index</a>
+  <a href="graph.html" class="active">Graph</a>
+  <a href="planner.html">Planner</a>
+  <a href="browse.html">Browse</a>
+  <a href="explore.html">Explore</a>
+</nav>
+
+<div class="toolbar" id="toolbar">
+  <label>Layers</label>
+  <button class="layer-btn" data-layer="0" style="background:var(--layer-0)">L0</button>
+  <button class="layer-btn" data-layer="1" style="background:var(--layer-1)">L1</button>
+  <button class="layer-btn" data-layer="2" style="background:var(--layer-2)">L2</button>
+  <button class="layer-btn" data-layer="3" style="background:var(--layer-3)">L3</button>
+  <button class="layer-btn" data-layer="4" style="background:var(--layer-4)">L4</button>
+  <button class="layer-btn" data-layer="5" style="background:var(--layer-5)">L5</button>
+  <button class="layer-btn" data-layer="6" style="background:var(--layer-6)">L6</button>
+  <div class="sep"></div>
+  <label>Layout</label>
+  <button class="layout-btn active" data-layout="force">Force</button>
+  <button class="layout-btn" data-layout="layered">Layered</button>
+  <div class="sep"></div>
+  <button class="reset-btn" id="zoom-reset">Reset Zoom</button>
+</div>
+
+<div class="main">
+  <div class="graph-area" id="graph-area">
+    <div class="loading" id="loading">Loading graph data...</div>
+    <svg id="graph-svg"></svg>
+  </div>
+  <div class="detail-panel" id="detail-panel">
+    <button class="panel-close" id="panel-close" title="Close">&times;</button>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// Graph explorer — supports local plan.json and external data sources.
+// Usage: graph.html              → loads plan.json + .bound_commands.json
+//        graph.html?source=URL   → loads from external URL (CORS required)
+// Text values are escaped via DOM construction methods, not innerHTML.
+(async function() {
+  // -- Parse URL parameters --
+  const params = new URLSearchParams(window.location.search);
+  const sourceUrl = params.get('source');
+
+  // -- Data loading --
+  // Detect format: plan.json (Graph.resources dict) vs VizData (nodes array)
+  let rawData, commandsData;
+
+  if (sourceUrl) {
+    // External source — fetch graph data, no bound commands
+    rawData = await fetch(sourceUrl).then(r => r.json());
+    commandsData = {};
+    document.title = 'Graph — ' + new URL(sourceUrl).hostname;
+  } else {
+    // Local mode — plan.json + bound commands
+    [rawData, commandsData] = await Promise.all([
+      fetch('plan.json').then(r => r.json()),
+      fetch('.bound_commands.json').then(r => r.json()).catch(() => ({}))
+    ]);
+  }
+
+  // -- Format normalization --
+  // Accepts two formats:
+  //   plan.json:  { Graph: { resources: {name: {depends_on: {dep: true}, "@type": {T: true}}}, topology: {layer_N: {name: true}} } }
+  //   VizData:    { nodes: [{id, types, depth, ...}], edges: [{source, target}], topology: {layer_N: [...]} }
+  let resources, topology;
+
+  if (rawData.Graph && rawData.Graph.resources) {
+    // plan.json format — use directly
+    resources = rawData.Graph.resources;
+    topology = rawData.Graph.topology;
+  } else if (rawData.nodes) {
+    // VizData / infra-graph format — normalize to plan.json shape
+    resources = {};
+    // Pre-index edges by source for O(1) lookup per node
+    const edgesBySource = {};
+    for (const edge of (rawData.edges || [])) {
+      (edgesBySource[edge.source] ??= []).push(edge.target);
+    }
+    for (const node of rawData.nodes) {
+      const id = node.id;
+      // Reconstruct depends_on as struct-as-set from pre-indexed edges
+      const depsOn = {};
+      for (const target of (edgesBySource[id] || [])) depsOn[target] = true;
+      // Reconstruct @type as struct-as-set from types array
+      const typeSet = {};
+      for (const t of (node.types || [])) typeSet[t] = true;
+
+      resources[id] = {
+        name: node._name || node.name || id,
+        '@type': typeSet,
+        depends_on: depsOn,
+        _depth: node.depth ?? 0,
+        _ancestors: node.ancestors || [],
+        description: node.description,
+        ip: node.ip,
+        host: node.host,
+        container_id: node.container_id,
+      };
+    }
+
+    // Normalize topology: convert arrays to struct-as-set dicts
+    topology = {};
+    for (const [layerKey, members] of Object.entries(rawData.topology || {})) {
+      if (Array.isArray(members)) {
+        const set = {};
+        for (const m of members) set[m] = true;
+        topology[layerKey] = set;
+      } else {
+        topology[layerKey] = members;
+      }
+    }
+  } else {
+    document.getElementById('loading').textContent = 'Unrecognized data format';
+    return;
+  }
+
+  document.getElementById('loading').remove();
+
+  // -- Build layer map (resource name -> layer number) --
+  const layerMap = {};
+  for (const [layerKey, members] of Object.entries(topology)) {
+    const num = parseInt(layerKey.replace('layer_', ''), 10);
+    for (const name of Object.keys(members)) {
+      layerMap[name] = num;
+    }
+  }
+
+  // -- Layer colors (supports negative indices from external data) --
+  const layerColors = ['#f85149', '#d29922', '#3fb950', '#58a6ff', '#a371f7', '#f0883e', '#db61a2'];
+  function layerColor(n) { return layerColors[((n % layerColors.length) + layerColors.length) % layerColors.length]; }
+
+  // -- Build dependents map (reverse of depends_on) --
+  const directDependents = {};
+  for (const [name, r] of Object.entries(resources)) {
+    for (const dep of Object.keys(r.depends_on || {})) {
+      (directDependents[dep] ??= []).push(name);
+    }
+  }
+
+  // -- Transitive impact (BFS through dependents) --
+  function getImpact(name) {
+    const visited = new Set();
+    const queue = [name];
+    while (queue.length) {
+      const n = queue.shift();
+      for (const d of (directDependents[n] || [])) {
+        if (!visited.has(d)) { visited.add(d); queue.push(d); }
+      }
+    }
+    return visited;
+  }
+
+  // -- Count bound commands per resource --
+  const cmdCounts = {};
+  for (const [name, cmds] of Object.entries(commandsData)) {
+    cmdCounts[name] = Object.keys(cmds).length;
+  }
+  const hasCmds = Object.keys(cmdCounts).length > 0;
+  const maxCmds = Math.max(...Object.values(cmdCounts), 1);
+
+  // -- Dependent counts for sizing when no commands available --
+  const depCounts = {};
+  if (!hasCmds) {
+    for (const [name, r] of Object.entries(resources)) {
+      for (const dep of Object.keys(r.depends_on || {})) {
+        depCounts[dep] = (depCounts[dep] || 0) + 1;
+      }
+    }
+  }
+  const maxDeps = Math.max(...Object.values(depCounts), 1);
+
+  // -- Build D3 nodes and links --
+  const nodeNames = Object.keys(resources);
+  const nodes = nodeNames.map(name => {
+    const sizeMetric = hasCmds
+      ? (cmdCounts[name] || 0) / maxCmds
+      : (depCounts[name] || 0) / maxDeps;
+    return {
+      id: name,
+      layer: layerMap[name] ?? 0,
+      resource: resources[name],
+      cmdCount: cmdCounts[name] || 0,
+      radius: 8 + sizeMetric * 16
+    };
+  });
+
+  const links = [];
+  for (const [name, r] of Object.entries(resources)) {
+    for (const dep of Object.keys(r.depends_on || {})) {
+      if (resources[dep]) {
+        links.push({ source: dep, target: name });
+      }
+    }
+  }
+
+  // -- SVG setup --
+  const svgEl = document.getElementById('graph-svg');
+  const svg = d3.select(svgEl);
+  const graphArea = document.getElementById('graph-area');
+  let width = graphArea.clientWidth;
+  let height = graphArea.clientHeight;
+
+  // -- Arrow markers --
+  // refX=10 (marker tip at marker coordinate 10); actual offset handled by
+  // shortening lines in ticked() so arrows sit at the circle boundary.
+  const defs = svg.append('defs');
+  defs.append('marker')
+    .attr('id', 'arrow')
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 10)
+    .attr('refY', 0)
+    .attr('markerWidth', 6)
+    .attr('markerHeight', 6)
+    .attr('orient', 'auto')
+    .append('path')
+    .attr('d', 'M0,-4L10,0L0,4')
+    .attr('fill', '#6e7681');
+
+  defs.append('marker')
+    .attr('id', 'arrow-hl')
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 10)
+    .attr('refY', 0)
+    .attr('markerWidth', 6)
+    .attr('markerHeight', 6)
+    .attr('orient', 'auto')
+    .append('path')
+    .attr('d', 'M0,-4L10,0L0,4')
+    .attr('fill', '#58a6ff');
+
+  // -- Zoom --
+  const g = svg.append('g');
+  const zoom = d3.zoom()
+    .scaleExtent([0.2, 5])
+    .on('zoom', (event) => g.attr('transform', event.transform));
+  svg.call(zoom);
+
+  // -- Links --
+  const linkG = g.append('g').attr('class', 'links');
+  const linkSelection = linkG.selectAll('line')
+    .data(links)
+    .join('line')
+    .attr('stroke', '#6e7681')
+    .attr('stroke-width', 1)
+    .attr('stroke-opacity', 0.4)
+    .attr('marker-end', 'url(#arrow)');
+
+  // -- Nodes --
+  const nodeG = g.append('g').attr('class', 'nodes');
+  const nodeSelection = nodeG.selectAll('g')
+    .data(nodes)
+    .join('g')
+    .attr('class', 'node')
+    .style('cursor', 'pointer')
+    .call(d3.drag()
+      .on('start', dragStarted)
+      .on('drag', dragged)
+      .on('end', dragEnded)
+    );
+
+  nodeSelection.append('circle')
+    .attr('r', d => d.radius)
+    .attr('fill', d => layerColor(d.layer))
+    .attr('stroke', 'transparent')
+    .attr('stroke-width', 2.5)
+    .style('transition', 'r 0.15s, stroke 0.15s');
+
+  nodeSelection.append('text')
+    .text(d => d.id)
+    .attr('dy', d => d.radius + 13)
+    .attr('text-anchor', 'middle')
+    .attr('font-family', "'Atkinson Hyperlegible Mono', monospace")
+    .attr('font-size', '9px')
+    .attr('fill', '#8b949e')
+    .attr('pointer-events', 'none');
+
+  // -- Force simulation --
+  const simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id(d => d.id).distance(90).strength(0.5))
+    .force('charge', d3.forceManyBody().strength(-300))
+    .force('center', d3.forceCenter(width / 2, height / 2))
+    .force('collision', d3.forceCollide().radius(d => d.radius + 8))
+    .force('x', d3.forceX(width / 2).strength(0.03))
+    .force('y', d3.forceY(height / 2).strength(0.03))
+    .on('tick', ticked);
+
+  function ticked() {
+    // Shorten lines so arrows sit at circle boundary
+    linkSelection.each(function(d) {
+      const dx = d.target.x - d.source.x;
+      const dy = d.target.y - d.source.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const tr = d.target.radius || 12; // target node radius
+      const offsetX = (dx / dist) * tr;
+      const offsetY = (dy / dist) * tr;
+      d3.select(this)
+        .attr('x1', d.source.x)
+        .attr('y1', d.source.y)
+        .attr('x2', d.target.x - offsetX)
+        .attr('y2', d.target.y - offsetY);
+    });
+
+    nodeSelection.attr('transform', d => `translate(${d.x},${d.y})`);
+  }
+
+  // -- Drag --
+  function dragStarted(event, d) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+  function dragged(event, d) {
+    d.fx = event.x;
+    d.fy = event.y;
+  }
+  function dragEnded(event, d) {
+    if (!event.active) simulation.alphaTarget(0);
+    if (currentLayout === 'force') {
+      d.fx = null;
+      d.fy = null;
+    }
+  }
+
+  // -- Tooltip --
+  const tooltip = document.getElementById('tooltip');
+
+  nodeSelection.on('mouseenter', (event, d) => {
+    const r = d.resource;
+    const types = Object.keys(r['@type'] || {}).join(', ');
+
+    // Build tooltip with safe text
+    tooltip.textContent = ''; // clear
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'tt-name';
+    nameDiv.textContent = d.id;
+    tooltip.appendChild(nameDiv);
+
+    if (types) {
+      const typesDiv = document.createElement('div');
+      typesDiv.className = 'tt-types';
+      typesDiv.textContent = types;
+      tooltip.appendChild(typesDiv);
+    }
+    if (r.ip) {
+      const ipDiv = document.createElement('div');
+      ipDiv.className = 'tt-ip';
+      ipDiv.textContent = r.ip;
+      tooltip.appendChild(ipDiv);
+    }
+    const layerDiv = document.createElement('div');
+    layerDiv.className = 'tt-layer';
+    layerDiv.style.color = layerColor(d.layer);
+    layerDiv.textContent = 'Layer ' + d.layer;
+    tooltip.appendChild(layerDiv);
+
+    if (r.description) {
+      const descDiv = document.createElement('div');
+      descDiv.className = 'tt-desc';
+      descDiv.textContent = r.description;
+      tooltip.appendChild(descDiv);
+    }
+
+    tooltip.classList.add('visible');
+
+    // Enlarge
+    d3.select(event.currentTarget).select('circle')
+      .transition().duration(120)
+      .attr('r', d.radius * 1.2);
+  })
+  .on('mousemove', (event) => {
+    tooltip.style.left = (event.clientX + 14) + 'px';
+    tooltip.style.top = (event.clientY - 10) + 'px';
+  })
+  .on('mouseleave', (event, d) => {
+    tooltip.classList.remove('visible');
+    d3.select(event.currentTarget).select('circle')
+      .transition().duration(120)
+      .attr('r', d.radius);
+  });
+
+  // -- Node click -> select + detail panel --
+  let selectedNode = null;
+
+  nodeSelection.on('click', (event, d) => {
+    event.stopPropagation();
+    selectNode(d);
+  });
+
+  svg.on('click', () => {
+    deselectNode();
+  });
+
+  function selectNode(d) {
+    selectedNode = d.id;
+
+    // Connected set: direct deps + direct dependents
+    const deps = new Set(Object.keys(d.resource.depends_on || {}));
+    const depnts = new Set(directDependents[d.id] || []);
+    const connected = new Set([d.id, ...deps, ...depnts]);
+
+    // Dim non-connected
+    nodeSelection.transition().duration(200)
+      .style('opacity', n => connected.has(n.id) ? 1 : 0.15);
+
+    linkSelection.transition().duration(200)
+      .attr('stroke-opacity', l => {
+        const sid = typeof l.source === 'object' ? l.source.id : l.source;
+        const tid = typeof l.target === 'object' ? l.target.id : l.target;
+        return (sid === d.id || tid === d.id) ? 0.9 : 0.05;
+      })
+      .attr('stroke-width', l => {
+        const sid = typeof l.source === 'object' ? l.source.id : l.source;
+        const tid = typeof l.target === 'object' ? l.target.id : l.target;
+        return (sid === d.id || tid === d.id) ? 2.5 : 1;
+      })
+      .attr('stroke', l => {
+        const sid = typeof l.source === 'object' ? l.source.id : l.source;
+        const tid = typeof l.target === 'object' ? l.target.id : l.target;
+        return (sid === d.id || tid === d.id) ? '#58a6ff' : '#6e7681';
+      })
+      .attr('marker-end', l => {
+        const sid = typeof l.source === 'object' ? l.source.id : l.source;
+        const tid = typeof l.target === 'object' ? l.target.id : l.target;
+        return (sid === d.id || tid === d.id) ? 'url(#arrow-hl)' : 'url(#arrow)';
+      });
+
+    // Accent stroke on selected node
+    nodeSelection.select('circle')
+      .attr('stroke', n => n.id === d.id ? '#58a6ff' : 'transparent');
+
+    // Show detail panel
+    showDetail(d);
+  }
+
+  function deselectNode() {
+    if (!selectedNode) return;
+    selectedNode = null;
+
+    nodeSelection.transition().duration(200).style('opacity', 1);
+    nodeSelection.select('circle').attr('stroke', 'transparent');
+
+    linkSelection.transition().duration(200)
+      .attr('stroke-opacity', 0.4)
+      .attr('stroke-width', 1)
+      .attr('stroke', '#6e7681')
+      .attr('marker-end', 'url(#arrow)');
+
+    document.getElementById('detail-panel').classList.remove('open');
+  }
+
+  function navigateToNode(name) {
+    const node = nodes.find(n => n.id === name);
+    if (!node) return;
+    selectNode(node);
+
+    // Center on node
+    const transform = d3.zoomTransform(svgEl);
+    const tx = width / 2 - node.x * transform.k;
+    const ty = height / 2 - node.y * transform.k;
+    svg.transition().duration(500)
+      .call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(transform.k));
+  }
+
+  // -- Detail panel (built with DOM methods, not innerHTML) --
+  const panelEl = document.getElementById('detail-panel');
+  const detailContent = document.getElementById('detail-content');
+
+  document.getElementById('panel-close').addEventListener('click', (e) => {
+    e.stopPropagation();
+    deselectNode();
+  });
+
+  function showDetail(d) {
+    const r = d.resource;
+    const types = Object.keys(r['@type'] || {});
+    const deps = Object.keys(r.depends_on || {});
+    const depnts = directDependents[d.id] || [];
+    const impact = getImpact(d.id);
+    const cmds = commandsData[d.id] || {};
+
+    // Clear previous content
+    detailContent.textContent = '';
+
+    // Title
+    const h2 = document.createElement('h2');
+    h2.textContent = d.id;
+    detailContent.appendChild(h2);
+
+    // -- Types section --
+    const typesSection = makeSection('Types');
+    for (const t of types) {
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = t;
+      typesSection.appendChild(badge);
+    }
+    detailContent.appendChild(typesSection);
+
+    // -- Details section --
+    const detailsSection = makeSection('Details');
+    if (r.description) {
+      const p = document.createElement('p');
+      p.className = 'detail-meta';
+      p.textContent = r.description;
+      detailsSection.appendChild(p);
+    }
+    if (r.ip) {
+      const p = document.createElement('p');
+      p.className = 'detail-meta';
+      p.textContent = 'IP: ';
+      const s = document.createElement('span');
+      s.textContent = r.ip;
+      p.appendChild(s);
+      detailsSection.appendChild(p);
+    }
+    if (r.host) {
+      const p = document.createElement('p');
+      p.className = 'detail-meta';
+      p.textContent = 'Host: ';
+      const s = document.createElement('span');
+      s.textContent = r.host;
+      p.appendChild(s);
+      detailsSection.appendChild(p);
+    }
+    if (r.container_id !== undefined) {
+      const p = document.createElement('p');
+      p.className = 'detail-meta';
+      p.textContent = 'Container: ';
+      const s = document.createElement('span');
+      s.textContent = r.container_id;
+      p.appendChild(s);
+      detailsSection.appendChild(p);
+    }
+    // Layer badge
+    const layerP = document.createElement('p');
+    layerP.className = 'detail-meta';
+    layerP.style.marginTop = '0.3rem';
+    layerP.textContent = 'Layer: ';
+    const layerBadge = document.createElement('span');
+    layerBadge.className = 'badge badge-layer';
+    layerBadge.style.background = layerColor(d.layer);
+    layerBadge.textContent = d.layer;
+    layerP.appendChild(layerBadge);
+    detailsSection.appendChild(layerP);
+    detailContent.appendChild(detailsSection);
+
+    // -- Dependencies section --
+    const depsSection = makeSection('Dependencies (' + deps.length + ')');
+    if (deps.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'detail-meta';
+      p.style.fontStyle = 'italic';
+      p.textContent = 'None (root node)';
+      depsSection.appendChild(p);
+    } else {
+      for (const name of deps) {
+        depsSection.appendChild(makeDepLink(name));
+      }
+    }
+    detailContent.appendChild(depsSection);
+
+    // -- Dependents section --
+    const depntsSection = makeSection('Dependents (' + depnts.length + ')');
+    if (depnts.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'detail-meta';
+      p.style.fontStyle = 'italic';
+      p.textContent = 'None (leaf node)';
+      depntsSection.appendChild(p);
+    } else {
+      for (const name of depnts) {
+        depntsSection.appendChild(makeDepLink(name));
+      }
+    }
+    detailContent.appendChild(depntsSection);
+
+    // -- Impact section --
+    const impactSection = makeSection(null);
+    const impactBox = document.createElement('div');
+    impactBox.className = 'impact-box';
+    impactBox.textContent = 'If ';
+    const impactName = document.createElement('strong');
+    impactName.textContent = d.id;
+    impactBox.appendChild(impactName);
+    impactBox.appendChild(document.createTextNode(' fails, '));
+    const impactCount = document.createElement('strong');
+    impactCount.textContent = impact.size;
+    impactBox.appendChild(impactCount);
+    impactBox.appendChild(document.createTextNode(
+      ' resource' + (impact.size === 1 ? ' is' : 's are') + ' affected'
+    ));
+    impactSection.appendChild(impactBox);
+    detailContent.appendChild(impactSection);
+
+    // -- Commands section --
+    const cmdEntries = Object.entries(cmds);
+    if (cmdEntries.length > 0) {
+      // Group by provider
+      const grouped = {};
+      for (const [key, cmd] of cmdEntries) {
+        const slash = key.indexOf('/');
+        const provider = slash > 0 ? key.substring(0, slash) : 'other';
+        const action = slash > 0 ? key.substring(slash + 1) : key;
+        (grouped[provider] ??= []).push({ action, cmd, key });
+      }
+
+      const cmdSection = makeSection('Commands (' + cmdEntries.length + ')');
+      const sortedProviders = Object.entries(grouped).sort((a, b) => a[0].localeCompare(b[0]));
+
+      for (const [provider, actions] of sortedProviders) {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'cmd-group';
+
+        const header = document.createElement('div');
+        header.className = 'cmd-group-header';
+        header.textContent = provider;
+        groupDiv.appendChild(header);
+
+        for (const { action, cmd } of actions) {
+          const row = document.createElement('div');
+          row.className = 'cmd-row';
+
+          const actionSpan = document.createElement('span');
+          actionSpan.className = 'cmd-action';
+          actionSpan.textContent = action;
+          row.appendChild(actionSpan);
+
+          const cmdSpan = document.createElement('span');
+          cmdSpan.className = 'cmd-text';
+          cmdSpan.textContent = cmd;
+          row.appendChild(cmdSpan);
+
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'cmd-copy';
+          copyBtn.title = 'Copy command';
+          copyBtn.textContent = '\u2398';
+          copyBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            try {
+              await navigator.clipboard.writeText(cmd);
+            } catch (err) {
+              const ta = document.createElement('textarea');
+              ta.value = cmd;
+              ta.style.position = 'fixed';
+              ta.style.left = '-9999px';
+              document.body.appendChild(ta);
+              ta.select();
+              document.execCommand('copy');
+              ta.remove();
+            }
+            copyBtn.classList.add('copied');
+            copyBtn.textContent = '\u2713';
+            setTimeout(() => {
+              copyBtn.classList.remove('copied');
+              copyBtn.textContent = '\u2398';
+            }, 1500);
+          });
+          row.appendChild(copyBtn);
+
+          // Execute button
+          const resultContainer = document.createElement('div');
+          const actionInfo = ((r.actions || {})[provider] || {})[action];
+          const isDestructive = actionInfo ? !!actionInfo.destructive : false;
+          const execBtn = Exec.createBtn(d.id, provider, action, {
+            destructive: isDestructive,
+            command: cmd,
+            onResult: function(data) {
+              resultContainer.textContent = '';
+              resultContainer.appendChild(Exec.createResultEl(data));
+            }
+          });
+          row.appendChild(execBtn);
+
+          groupDiv.appendChild(row);
+          groupDiv.appendChild(resultContainer);
+        }
+        cmdSection.appendChild(groupDiv);
+      }
+      detailContent.appendChild(cmdSection);
+    }
+
+    panelEl.classList.add('open');
+  }
+
+  function makeSection(title) {
+    const section = document.createElement('div');
+    section.className = 'detail-section';
+    if (title) {
+      const h3 = document.createElement('h3');
+      h3.textContent = title;
+      section.appendChild(h3);
+    }
+    return section;
+  }
+
+  function makeDepLink(name) {
+    const span = document.createElement('span');
+    span.className = 'dep-link';
+    span.textContent = name;
+    span.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navigateToNode(name);
+    });
+    return span;
+  }
+
+  // -- Layer toggles --
+  const layerVisibility = [true, true, true, true, true, true, true];
+
+  document.querySelectorAll('.layer-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const layer = parseInt(btn.dataset.layer, 10);
+      layerVisibility[layer] = !layerVisibility[layer];
+      btn.classList.toggle('off', !layerVisibility[layer]);
+      applyVisibility();
+    });
+  });
+
+  function applyVisibility() {
+    nodeSelection.style('display', d => layerVisibility[d.layer] ? null : 'none');
+    linkSelection.style('display', l => {
+      const sl = typeof l.source === 'object' ? l.source.layer : layerMap[l.source];
+      const tl = typeof l.target === 'object' ? l.target.layer : layerMap[l.target];
+      return (layerVisibility[sl] && layerVisibility[tl]) ? null : 'none';
+    });
+  }
+
+  // -- Layout switch --
+  let currentLayout = 'force';
+
+  document.querySelectorAll('.layout-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const layout = btn.dataset.layout;
+      if (layout === currentLayout) return;
+      currentLayout = layout;
+      document.querySelectorAll('.layout-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.layout === layout)
+      );
+      applyLayout();
+    });
+  });
+
+  function applyLayout() {
+    if (currentLayout === 'layered') {
+      simulation.stop();
+      const padding = 80;
+      const usableW = width - padding * 2;
+      const usableH = height - padding * 2;
+      const colWidth = usableW / 6; // 7 layers, 0-6
+
+      // Count per layer for vertical spacing
+      const layerCounts = {};
+      for (const n of nodes) {
+        layerCounts[n.layer] = (layerCounts[n.layer] || 0) + 1;
+      }
+      const layerIndex = {};
+
+      for (const n of nodes) {
+        const li = n.layer;
+        layerIndex[li] = (layerIndex[li] || 0);
+        const count = layerCounts[li];
+        const ySpacing = usableH / (count + 1);
+
+        n.fx = padding + li * colWidth;
+        n.fy = padding + (layerIndex[li] + 1) * ySpacing;
+        layerIndex[li]++;
+      }
+
+      // Update internal positions for link interpolation
+      for (const n of nodes) {
+        n.x = n.fx;
+        n.y = n.fy;
+      }
+
+      // Smooth transition for both nodes and links simultaneously
+      simulation.alphaTarget(0).alpha(0);
+      nodeSelection.transition().duration(500)
+        .attr('transform', d => `translate(${d.x},${d.y})`);
+
+      linkSelection.transition().duration(500)
+        .attr('x1', d => d.source.x)
+        .attr('y1', d => d.source.y)
+        .attr('x2', d => {
+          const dx = d.target.x - d.source.x;
+          const dy = d.target.y - d.source.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          return d.target.x - (dx / dist) * (d.target.radius || 12);
+        })
+        .attr('y2', d => {
+          const dx = d.target.x - d.source.x;
+          const dy = d.target.y - d.source.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          return d.target.y - (dy / dist) * (d.target.radius || 12);
+        });
+
+    } else {
+      // Release fixed positions
+      for (const n of nodes) {
+        n.fx = null;
+        n.fy = null;
+      }
+      simulation.alpha(0.6).restart();
+    }
+  }
+
+  // -- Zoom reset --
+  document.getElementById('zoom-reset').addEventListener('click', () => {
+    svg.transition().duration(400)
+      .call(zoom.transform, d3.zoomIdentity);
+  });
+
+  // -- Resize handling (covers both window resize and panel open/close) --
+  const resizeObserver = new ResizeObserver(() => {
+    const newW = graphArea.clientWidth;
+    const newH = graphArea.clientHeight;
+    if (newW === width && newH === height) return;
+    width = newW;
+    height = newH;
+    simulation.force('center', d3.forceCenter(width / 2, height / 2));
+    simulation.force('x', d3.forceX(width / 2).strength(0.03));
+    simulation.force('y', d3.forceY(height / 2).strength(0.03));
+    if (currentLayout === 'force') {
+      simulation.alpha(0.15).restart();
+    } else {
+      applyLayout();
+    }
+  });
+  resizeObserver.observe(graphArea);
+
+})();
+</script>
+</body>
+</html>
