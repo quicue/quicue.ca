@@ -45,6 +45,16 @@ apercue:SourceExportTimeShape a sh:NodeShape ;
         sh:severity sh:Warning ;
     ] .
 
+# ─── Source exports should be attributed to an agent ───
+apercue:SourceExportAgentShape a sh:NodeShape ;
+    sh:targetClass apercue:SourceExport ;
+    sh:property [
+        sh:path prov:wasAttributedTo ;
+        sh:minCount 1 ;
+        sh:message "Source export should identify who produced it (prov:wasAttributedTo)" ;
+        sh:severity sh:Info ;
+    ] .
+
 # ─── Pipeline runs must reference at least one source ───
 apercue:PipelineRunSourceShape a sh:NodeShape ;
     sh:targetClass apercue:PipelineRun ;
@@ -84,6 +94,17 @@ apercue:CollectionProtocolRankShape a sh:NodeShape ;
         sh:datatype xsd:integer ;
         sh:minInclusive 1 ;
         sh:message "Collection protocol must have an authority rank (1 = highest)" ;
+        sh:severity sh:Violation ;
+    ] .
+
+# ─── Collection protocols must identify their source system ───
+apercue:CollectionProtocolSystemShape a sh:NodeShape ;
+    sh:targetClass apercue:CollectionProtocol ;
+    sh:property [
+        sh:path apercue:sourceSystem ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Collection protocol must identify the source system" ;
         sh:severity sh:Violation ;
     ] .
 
