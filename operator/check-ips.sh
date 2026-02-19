@@ -49,14 +49,15 @@ if [ -n "$FOUND" ]; then
 fi
 
 # Summary of what IS present (informational)
-TEST_NET=$(grep -rlP '198\.51\.100\.\d+' "$DIR" 2>/dev/null | wc -l)
+# Note: { grep || true; } prevents pipefail from killing the script when grep finds no matches
+TEST_NET=$({ grep -rlP '198\.51\.100\.\d+' "$DIR" 2>/dev/null || true; } | wc -l)
 echo "  TEST-NET-2 (198.51.100.x): ${TEST_NET:-0} files (allowed)"
 
-TEST_NET3=$(grep -rlP '203\.0\.113\.\d+' "$DIR" 2>/dev/null | wc -l)
+TEST_NET3=$({ grep -rlP '203\.0\.113\.\d+' "$DIR" 2>/dev/null || true; } | wc -l)
 echo "  TEST-NET-3 (203.0.113.x): ${TEST_NET3:-0} files (allowed)"
 
 # 10.x.x.x in served output is suspicious but may come from templates
-TENNET=$(grep -rlP '\b10\.\d+\.\d+\.\d+' "$DIR" 2>/dev/null | wc -l)
+TENNET=$({ grep -rlP '\b10\.\d+\.\d+\.\d+' "$DIR" 2>/dev/null || true; } | wc -l)
 if [ "${TENNET:-0}" -gt 0 ]; then
     echo "  WARNING: 10.x.x.x found in $TENNET files (review if these are example or real)"
 fi
