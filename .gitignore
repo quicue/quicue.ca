@@ -12,3 +12,15 @@ node_modules/
 docs/plans/
 .kg/cue.mod/pkg/
 site/
+
+# Operator dashboard — generated files (only hand-crafted HTML + build tooling committed)
+operator/public/*.json
+operator/public/*.jsonld
+operator/public/*.yaml
+operator/public/*.ipynb
+operator/public/*.sh
+!operator/public/exec.js
+operator/public/index.html
+operator/public/wiki/
+operator/public/.build-stats.json
+operator/public/.bound_commands.json

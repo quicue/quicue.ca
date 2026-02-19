@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planner — demo.quicue.ca</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&family=Atkinson+Hyperlegible+Mono:wght@400;700&display=swap');
+:root {
+  --bg: #0d1117; --surface: #161b22; --elevated: #21262d; --border: #30363d;
+  --text: #e6edf3; --text-sec: #8b949e; --text-dim: #6e7681;
+  --accent: #58a6ff; --green: #3fb950; --red: #f85149; --warning: #d29922; --purple: #a371f7;
+  --font-ui: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  --font-mono: 'Atkinson Hyperlegible Mono', monospace;
+  --radius: 8px;
+  --nav-height: 48px;
+  --layer-0: #f85149; --layer-1: #d29922; --layer-2: #3fb950; --layer-3: #58a6ff;
+  --layer-4: #a371f7; --layer-5: #f0883e; --layer-6: #db61a2;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Nav bar — matches graph.html */
+nav {
+  height: var(--nav-height);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+nav .site-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-right: 1.5rem;
+  color: var(--text);
+}
+nav a {
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  color: var(--text-sec);
+  transition: background 0.15s, color 0.15s;
+}
+nav a:hover { background: var(--elevated); color: var(--text); text-decoration: none; }
+nav a.active { background: var(--elevated); color: var(--accent); font-weight: 700; }
+
+/* Main content */
+.content {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Stats bar */
+.stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.stat-num {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  line-height: 1.2;
+}
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text-sec);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.stats-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.btn {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--elevated);
+  color: var(--text-sec);
+  font-size: 0.8rem;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { color: var(--text); border-color: var(--text-sec); }
+.btn-accent { border-color: var(--accent); color: var(--accent); }
+.btn-accent:hover { background: rgba(88,166,255,0.1); }
+
+/* Section headings */
+.section-title {
+  font-size: 1.1rem;
+  margin: 1.5rem 0 0.75rem;
+  color: var(--text-sec);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.section-title:first-of-type { margin-top: 0; }
+
+/* Resource selector */
+.selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.selector-layer-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+}
+.selector-layer-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.layer-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #fff;
+}
+.selector-layer-header .layer-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-sec);
+}
+.resource-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.resource-checkbox.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.resource-checkbox input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  background: var(--elevated);
+  cursor: pointer;
+  position: relative;
+  margin-top: 3px;
+  transition: background 0.12s, border-color 0.12s;
+}
+.resource-checkbox input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.resource-checkbox input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.resource-checkbox.disabled input[type="checkbox"] {
+  cursor: not-allowed;
+}
+.resource-info {
+  flex: 1;
+  min-width: 0;
+}
+.resource-name {
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.resource-types {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  line-height: 1.3;
+  word-break: break-word;
+}
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 10px;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  margin: 0.1rem 0.1rem 0.1rem 0;
+  border: 1px solid var(--border);
+  background: var(--elevated);
+  color: var(--text-sec);
+  white-space: nowrap;
+}
+
+/* Cascade pulse animation */
+@keyframes cascade-pulse {
+  0% { background-color: rgba(88,166,255,0.2); }
+  100% { background-color: transparent; }
+}
+.cascade-pulse {
+  animation: cascade-pulse 0.6s ease-out;
+}
+
+/* Plan layer cards */
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.layer-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.layer-card.entering {
+  animation: card-enter 0.35s ease-out;
+}
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.layer-card-header {
+  padding: 1rem 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  transition: background 0.15s;
+  user-select: none;
+}
+.layer-card-header:hover {
+  background: var(--elevated);
+}
+.layer-card-header .layer-num {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  line-height: 1;
+  min-width: 32px;
+}
+.layer-card-meta {
+  flex: 1;
+  min-width: 0;
+}
+.layer-card-meta .gate-text {
+  font-size: 0.8rem;
+  color: var(--warning);
+  font-family: var(--font-mono);
+  line-height: 1.3;
+}
+.layer-card-meta .card-stats {
+  font-size: 0.75rem;
+  color: var(--text-sec);
+  margin-top: 0.15rem;
+}
+.layer-card-meta .card-resources-preview {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  margin-top: 0.25rem;
+  word-break: break-word;
+}
+.layer-card-expand-icon {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  transition: transform 0.2s;
+  margin-top: 0.3rem;
+}
+.layer-card.expanded .layer-card-expand-icon {
+  transform: rotate(90deg);
+}
+.layer-card-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.layer-card.expanded .layer-card-body {
+  max-height: 5000px;
+}
+.layer-card-body-inner {
+  padding: 0 1.2rem 1rem;
+  border-top: 1px solid var(--border);
+}
+.resource-detail {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.resource-detail:last-child {
+  border-bottom: none;
+}
+.resource-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.resource-detail-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+.resource-detail-ip {
+  font-size: 0.75rem;
+  color: var(--green);
+  font-family: var(--font-mono);
+}
+.cmd-group {
+  margin-top: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+.cmd-group-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-sec);
+  font-family: var(--font-mono);
+  margin-bottom: 0.2rem;
+  text-transform: lowercase;
+}
+.cmd-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+.cmd-action {
+  font-size: 0.7rem;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  min-width: 0;
+  white-space: nowrap;
+}
+.cmd-text {
+  flex: 1;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  word-break: break-all;
+  line-height: 1.4;
+}
+.cmd-copy {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--elevated);
+  color: var(--text-sec);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  transition: border-color 0.12s, color 0.12s;
+}
+.cmd-copy:hover { border-color: var(--accent); color: var(--accent); }
+.cmd-copy.copied { border-color: var(--green); color: var(--green); }
+
+/* Export section */
+.export-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+.export-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+}
+.export-card h3 {
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+.export-card p {
+  color: var(--text-sec);
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+  flex: 1;
+}
+.export-btn {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+  text-decoration: none;
+}
+.export-btn:hover { border-color: var(--accent); background: rgba(88,166,255,0.08); text-decoration: none; }
+.export-btn.copied { border-color: var(--green); color: var(--green); }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-sec);
+  font-size: 0.95rem;
+}
+
+/* Deploy layer button */
+.deploy-layer-btn {
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--green);
+  border-radius: 4px;
+  background: rgba(63,185,80,0.1);
+  color: var(--green);
+  font-size: 0.8rem;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.deploy-layer-btn:hover { background: rgba(63,185,80,0.2); }
+.deploy-layer-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.deploy-layer-btn.running {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(88,166,255,0.1);
+}
+.deploy-layer-btn.done {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(63,185,80,0.15);
+}
+.deploy-layer-btn.failed {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(248,81,73,0.1);
+}
+
+/* Gate checkpoint */
+.gate-checkpoint {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--warning);
+  border-radius: var(--radius);
+  background: rgba(210,153,34,0.06);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.gate-checkpoint .gate-icon {
+  font-size: 1.2rem;
+  color: var(--warning);
+  flex-shrink: 0;
+}
+.gate-checkpoint .gate-msg {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text-sec);
+}
+.gate-proceed-btn {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--green);
+  border-radius: 4px;
+  background: rgba(63,185,80,0.1);
+  color: var(--green);
+  font-size: 0.8rem;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.gate-proceed-btn:hover { background: rgba(63,185,80,0.2); }
+
+/* Command execution status markers in planner */
+.cmd-status {
+  flex-shrink: 0;
+  width: 16px;
+  font-size: 0.7rem;
+  text-align: center;
+}
+.cmd-status.pending { color: var(--text-dim); }
+.cmd-status.running { color: var(--accent); }
+.cmd-status.success { color: var(--green); }
+.cmd-status.failed { color: var(--red); }
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--text-sec);
+  font-size: 0.95rem;
+}
+
+/* Footer */
+footer {
+  margin-top: 2rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+@media (max-width: 600px) {
+  .stats-bar { gap: 1rem; }
+  .selector-grid { grid-template-columns: 1fr; }
+  .plan-grid { grid-template-columns: 1fr; }
+  .export-grid { grid-template-columns: 1fr; }
+  .stats-actions { margin-left: 0; width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="site-name">demo.quicue.ca</span>
+  <a href="index.html">Index</a>
+  <a href="graph.html">Graph</a>
+  <a href="planner.html" class="active">Planner</a>
+  <a href="browse.html">Browse</a>
+  <a href="explore.html">Explore</a>
+</nav>
+
+<div class="content">
+  <div class="loading" id="loading">Loading plan data...</div>
+  <div id="app" style="display:none"></div>
+</div>
+
+<script src="exec.js"></script>
+<script>
+(async function() {
+  const layerColors = ['#f85149', '#d29922', '#3fb950', '#58a6ff', '#a371f7', '#f0883e', '#db61a2'];
+
+  // -- Load data --
+  let planData, commandsData;
+  try {
+    [planData, commandsData] = await Promise.all([
+      fetch('plan.json').then(r => r.json()),
+      fetch('.bound_commands.json').then(r => r.json())
+    ]);
+  } catch (e) {
+    document.getElementById('loading').textContent = 'Failed to load plan data.';
+    return;
+  }
+
+  const resources = planData.Graph.resources;
+  const originalLayers = planData.layers;
+  const topology = planData.Graph.topology;
+  const allNames = Object.keys(resources);
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = '';
+
+  // -- Build original layer map --
+  const origLayerMap = {};
+  for (const [layerKey, members] of Object.entries(topology)) {
+    const num = parseInt(layerKey.replace('layer_', ''), 10);
+    for (const name of Object.keys(members)) {
+      origLayerMap[name] = num;
+    }
+  }
+
+  // -- Build dependents map --
+  const directDependents = {};
+  for (const [name, r] of Object.entries(resources)) {
+    for (const dep of Object.keys(r.depends_on || {})) {
+      (directDependents[dep] = directDependents[dep] || []).push(name);
+    }
+  }
+
+  // -- Transitive dependencies (BFS upstream) --
+  function getTransitiveDeps(name) {
+    const visited = new Set();
+    const queue = Object.keys(resources[name].depends_on || {});
+    while (queue.length) {
+      const n = queue.shift();
+      if (visited.has(n) || !resources[n]) continue;
+      visited.add(n);
+      for (const dep of Object.keys(resources[n].depends_on || {})) {
+        queue.push(dep);
+      }
+    }
+    return visited;
+  }
+
+  // -- Transitive dependents (BFS downstream) --
+  function getTransitiveDependents(name) {
+    const visited = new Set();
+    const queue = (directDependents[name] || []).slice();
+    while (queue.length) {
+      const n = queue.shift();
+      if (visited.has(n)) continue;
+      visited.add(n);
+      for (const d of (directDependents[n] || [])) {
+        queue.push(d);
+      }
+    }
+    return visited;
+  }
+
+  // -- Re-layering logic --
+  function computeLayers(selected, resources) {
+    const depth = {};
+    function getDepth(name) {
+      if (depth[name] !== undefined) return depth[name];
+      const r = resources[name];
+      const deps = Object.keys(r.depends_on || {}).filter(function(d) { return selected.has(d); });
+      if (deps.length === 0) { depth[name] = 0; return 0; }
+      depth[name] = -1; // cycle guard
+      var d = Math.max.apply(null, deps.map(getDepth)) + 1;
+      depth[name] = d;
+      return d;
+    }
+    for (const name of selected) getDepth(name);
+    const layers = {};
+    for (const [name, d] of Object.entries(depth)) {
+      if (d < 0) continue; // skip cycle-guarded
+      (layers[d] = layers[d] || []).push(name);
+    }
+    return Object.entries(layers).sort(function(a, b) { return a[0] - b[0]; })
+      .map(function(entry) { return { layer: +entry[0], resources: entry[1] }; });
+  }
+
+  // -- Count bound commands --
+  function countCommands(selected) {
+    let total = 0;
+    for (const name of selected) {
+      const cmds = commandsData[name];
+      if (cmds) total += Object.keys(cmds).length;
+    }
+    return total;
+  }
+
+  // -- State --
+  const selected = new Set(allNames);
+  let computedPlan = computeLayers(selected, resources);
+
+  // -- Build DOM --
+  const app = document.getElementById('app');
+
+  // Stats bar
+  const statsBar = document.createElement('div');
+  statsBar.className = 'stats-bar';
+  app.appendChild(statsBar);
+
+  const statSelected = createStat('0', 'Selected');
+  const statLayers = createStat('0', 'Layers');
+  const statCommands = createStat('0', 'Commands');
+  statsBar.appendChild(statSelected);
+  statsBar.appendChild(statLayers);
+  statsBar.appendChild(statCommands);
+
+  const statsActions = document.createElement('div');
+  statsActions.className = 'stats-actions';
+  const selectAllBtn = createBtn('Select All', 'btn');
+  const deselectAllBtn = createBtn('Deselect All', 'btn');
+  statsActions.appendChild(selectAllBtn);
+  statsActions.appendChild(deselectAllBtn);
+  statsBar.appendChild(statsActions);
+
+  selectAllBtn.addEventListener('click', function() {
+    for (const name of allNames) selected.add(name);
+    syncCheckboxes();
+    recomputeAndRender();
+  });
+  deselectAllBtn.addEventListener('click', function() {
+    selected.clear();
+    syncCheckboxes();
+    recomputeAndRender();
+  });
+
+  // Resource selector section
+  const selectorTitle = document.createElement('h2');
+  selectorTitle.className = 'section-title';
+  selectorTitle.textContent = 'Resource Selector';
+  app.appendChild(selectorTitle);
+
+  const selectorGrid = document.createElement('div');
+  selectorGrid.className = 'selector-grid';
+  app.appendChild(selectorGrid);
+
+  // Build selector grouped by original layers
+  const checkboxMap = {}; // name -> input element
+  const checkboxRowMap = {}; // name -> row element
+
+  for (const layerData of originalLayers) {
+    const group = document.createElement('div');
+    group.className = 'selector-layer-group';
+
+    const header = document.createElement('div');
+    header.className = 'selector-layer-header';
+
+    const badge = document.createElement('span');
+    badge.className = 'layer-badge';
+    badge.style.background = layerColors[layerData.layer] || layerColors[0];
+    badge.textContent = 'L' + layerData.layer;
+    header.appendChild(badge);
+
+    const label = document.createElement('span');
+    label.className = 'layer-label';
+    label.textContent = 'Layer ' + layerData.layer + ' (' + layerData.resources.length + ')';
+    header.appendChild(label);
+
+    // Layer toggle-all button
+    const toggleLayerBtn = createBtn('toggle', 'btn');
+    toggleLayerBtn.style.marginLeft = 'auto';
+    toggleLayerBtn.style.fontSize = '0.7rem';
+    toggleLayerBtn.style.padding = '0.15rem 0.5rem';
+    toggleLayerBtn.addEventListener('click', function() {
+      var layerResources = layerData.resources;
+      var allSelected = layerResources.every(function(n) { return selected.has(n); });
+      if (allSelected) {
+        for (var i = 0; i < layerResources.length; i++) {
+          deselectWithCascade(layerResources[i]);
+        }
+      } else {
+        for (var i = 0; i < layerResources.length; i++) {
+          selectWithCascade(layerResources[i]);
+        }
+      }
+      syncCheckboxes();
+      recomputeAndRender();
+    });
+    header.appendChild(toggleLayerBtn);
+
+    group.appendChild(header);
+
+    for (const name of layerData.resources) {
+      const r = resources[name];
+      const row = document.createElement('label');
+      row.className = 'resource-checkbox';
+
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.checked = true;
+      checkboxMap[name] = input;
+      checkboxRowMap[name] = row;
+
+      input.addEventListener('change', function() {
+        if (input.checked) {
+          selectWithCascade(name);
+        } else {
+          deselectWithCascade(name);
+        }
+        syncCheckboxes();
+        recomputeAndRender();
+      });
+
+      row.appendChild(input);
+
+      const info = document.createElement('div');
+      info.className = 'resource-info';
+
+      const nameSpan = document.createElement('div');
+      nameSpan.className = 'resource-name';
+      nameSpan.textContent = name;
+      info.appendChild(nameSpan);
+
+      const types = Object.keys(r['@type'] || {});
+      if (types.length > 0) {
+        const typesDiv = document.createElement('div');
+        typesDiv.className = 'resource-types';
+        for (const t of types) {
+          const b = document.createElement('span');
+          b.className = 'badge';
+          b.textContent = t;
+          typesDiv.appendChild(b);
+        }
+        info.appendChild(typesDiv);
+      }
+
+      row.appendChild(info);
+      group.appendChild(row);
+    }
+
+    selectorGrid.appendChild(group);
+  }
+
+  // Plan section
+  var planTitle = document.createElement('h2');
+  planTitle.className = 'section-title';
+  planTitle.textContent = 'Computed Execution Plan';
+  app.appendChild(planTitle);
+
+  var planContainer = document.createElement('div');
+  planContainer.className = 'plan-grid';
+  planContainer.id = 'plan-container';
+  app.appendChild(planContainer);
+
+  // Export section
+  var exportTitle = document.createElement('h2');
+  exportTitle.className = 'section-title';
+  exportTitle.textContent = 'Export';
+  app.appendChild(exportTitle);
+
+  var exportGrid = document.createElement('div');
+  exportGrid.className = 'export-grid';
+  app.appendChild(exportGrid);
+
+  // Copy as JSON
+  var jsonCard = createExportCard(
+    'Copy as JSON',
+    'Subset plan with selected resources, recomputed layers, and bound commands.',
+    'Copy to clipboard'
+  );
+  jsonCard.btn.addEventListener('click', function() {
+    var plan = buildExportPlan();
+    copyToClipboard(JSON.stringify(plan, null, 2), jsonCard.btn);
+  });
+  exportGrid.appendChild(jsonCard.card);
+
+  // Copy startup
+  var startupCard = createExportCard(
+    'Copy Startup Sequence',
+    'Ordered resource names from layer 0 upward.',
+    'Copy to clipboard'
+  );
+  startupCard.btn.addEventListener('click', function() {
+    var seq = [];
+    for (var i = 0; i < computedPlan.length; i++) {
+      for (var j = 0; j < computedPlan[i].resources.length; j++) {
+        seq.push(computedPlan[i].resources[j]);
+      }
+    }
+    copyToClipboard(seq.join('\n'), startupCard.btn);
+  });
+  exportGrid.appendChild(startupCard.card);
+
+  // Copy shutdown
+  var shutdownCard = createExportCard(
+    'Copy Shutdown Sequence',
+    'Reverse ordered resource names from highest layer downward.',
+    'Copy to clipboard'
+  );
+  shutdownCard.btn.addEventListener('click', function() {
+    var seq = [];
+    for (var i = computedPlan.length - 1; i >= 0; i--) {
+      for (var j = computedPlan[i].resources.length - 1; j >= 0; j--) {
+        seq.push(computedPlan[i].resources[j]);
+      }
+    }
+    copyToClipboard(seq.join('\n'), shutdownCard.btn);
+  });
+  exportGrid.appendChild(shutdownCard.card);
+
+  // Download links
+  var linksCard = document.createElement('div');
+  linksCard.className = 'export-card';
+  var linksH3 = document.createElement('h3');
+  linksH3.textContent = 'Full Exports';
+  linksCard.appendChild(linksH3);
+  var linksP = document.createElement('p');
+  linksP.textContent = 'Download complete execution artifacts (all 30 resources).';
+  linksCard.appendChild(linksP);
+
+  var linksList = [
+    { href: 'notebook.ipynb', text: 'notebook.ipynb' },
+    { href: 'rundeck-jobs.yaml', text: 'rundeck-jobs.yaml' },
+    { href: 'https://docs.quicue.ca', text: 'docs' }
+  ];
+  for (var li = 0; li < linksList.length; li++) {
+    var a = document.createElement('a');
+    a.className = 'export-btn';
+    a.href = linksList[li].href;
+    a.textContent = linksList[li].text;
+    a.style.marginBottom = '0.3rem';
+    a.style.display = 'block';
+    linksCard.appendChild(a);
+  }
+  exportGrid.appendChild(linksCard);
+
+  // Footer
+  var footer = document.createElement('footer');
+  var footerP = document.createElement('p');
+  footerP.textContent = 'Interactive planner for demo.quicue.ca execution plans';
+  footer.appendChild(footerP);
+  app.after(footer);
+
+  // -- Cascade helpers --
+  function selectWithCascade(name) {
+    var deps = getTransitiveDeps(name);
+    var cascaded = [];
+    selected.add(name);
+    for (var d of deps) {
+      if (!selected.has(d)) {
+        selected.add(d);
+        cascaded.push(d);
+      }
+    }
+    // Pulse cascaded
+    for (var i = 0; i < cascaded.length; i++) {
+      pulseRow(cascaded[i]);
+    }
+  }
+
+  function deselectWithCascade(name) {
+    var depnts = getTransitiveDependents(name);
+    var cascaded = [];
+    selected.delete(name);
+    for (var d of depnts) {
+      if (selected.has(d)) {
+        selected.delete(d);
+        cascaded.push(d);
+      }
+    }
+    // Pulse cascaded
+    for (var i = 0; i < cascaded.length; i++) {
+      pulseRow(cascaded[i]);
+    }
+  }
+
+  function pulseRow(name) {
+    var row = checkboxRowMap[name];
+    if (!row) return;
+    row.classList.remove('cascade-pulse');
+    // Force reflow to restart animation
+    void row.offsetWidth;
+    row.classList.add('cascade-pulse');
+  }
+
+  function syncCheckboxes() {
+    for (var name of allNames) {
+      checkboxMap[name].checked = selected.has(name);
+    }
+  }
+
+  function recomputeAndRender() {
+    computedPlan = computeLayers(selected, resources);
+    updateStats();
+    renderPlan();
+  }
+
+  function updateStats() {
+    statSelected.querySelector('.stat-num').textContent = selected.size + ' / ' + allNames.length;
+    statLayers.querySelector('.stat-num').textContent = computedPlan.length;
+    statCommands.querySelector('.stat-num').textContent = countCommands(selected);
+  }
+
+  // -- Render plan --
+  var expandedLayers = new Set();
+
+  function renderPlan() {
+    // Clear
+    while (planContainer.firstChild) planContainer.removeChild(planContainer.firstChild);
+
+    if (computedPlan.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = 'No resources selected. Use the selector above to build a plan.';
+      planContainer.appendChild(empty);
+      return;
+    }
+
+    for (var i = 0; i < computedPlan.length; i++) {
+      var layerData = computedPlan[i];
+      var card = buildLayerCard(layerData, i);
+      planContainer.appendChild(card);
+    }
+  }
+
+  // -- Deploy orchestration state --
+  var deployState = {}; // layerNum -> { status, commandResults }
+
+  function buildLayerCard(layerData, index) {
+    var layerNum = layerData.layer;
+    var color = layerColors[layerNum % layerColors.length];
+    var resNames = layerData.resources;
+    var cmdCount = 0;
+    for (var j = 0; j < resNames.length; j++) {
+      var cmds = commandsData[resNames[j]];
+      if (cmds) cmdCount += Object.keys(cmds).length;
+    }
+
+    var card = document.createElement('div');
+    card.className = 'layer-card entering';
+    card.style.borderLeftWidth = '3px';
+    card.style.borderLeftColor = color;
+    setTimeout(function() { card.classList.remove('entering'); }, 400);
+
+    if (expandedLayers.has(layerNum)) card.classList.add('expanded');
+
+    // Header
+    var header = document.createElement('div');
+    header.className = 'layer-card-header';
+
+    var numSpan = document.createElement('span');
+    numSpan.className = 'layer-num';
+    numSpan.style.color = color;
+    numSpan.textContent = layerNum;
+    header.appendChild(numSpan);
+
+    var meta = document.createElement('div');
+    meta.className = 'layer-card-meta';
+
+    var gateText = document.createElement('div');
+    gateText.className = 'gate-text';
+    gateText.textContent = 'Gate: Layer ' + layerNum + ' complete';
+    meta.appendChild(gateText);
+
+    var cardStats = document.createElement('div');
+    cardStats.className = 'card-stats';
+    cardStats.textContent = resNames.length + ' resource' + (resNames.length === 1 ? '' : 's') + ', ' + cmdCount + ' command' + (cmdCount === 1 ? '' : 's');
+    meta.appendChild(cardStats);
+
+    var preview = document.createElement('div');
+    preview.className = 'card-resources-preview';
+    preview.textContent = resNames.join(', ');
+    meta.appendChild(preview);
+
+    header.appendChild(meta);
+
+    // Deploy Layer button
+    var deployBtn = document.createElement('button');
+    deployBtn.className = 'deploy-layer-btn';
+    deployBtn.textContent = 'Deploy L' + layerNum;
+    deployBtn.title = 'Execute all admin commands in this layer sequentially';
+    header.appendChild(deployBtn);
+
+    var expandIcon = document.createElement('span');
+    expandIcon.className = 'layer-card-expand-icon';
+    expandIcon.textContent = '\u25B6';
+    header.appendChild(expandIcon);
+
+    header.addEventListener('click', function(e) {
+      // Don't toggle when clicking deploy button
+      if (e.target === deployBtn) return;
+      var isExpanded = card.classList.contains('expanded');
+      if (isExpanded) {
+        card.classList.remove('expanded');
+        expandedLayers.delete(layerNum);
+      } else {
+        card.classList.add('expanded');
+        expandedLayers.add(layerNum);
+      }
+    });
+
+    card.appendChild(header);
+
+    // Body (expanded content)
+    var body = document.createElement('div');
+    body.className = 'layer-card-body';
+
+    var bodyInner = document.createElement('div');
+    bodyInner.className = 'layer-card-body-inner';
+
+    // Collect all commands in this layer for deploy-all
+    var allLayerCmds = [];
+
+    for (var k = 0; k < resNames.length; k++) {
+      var resName = resNames[k];
+      var r = resources[resName];
+      var cmds = commandsData[resName] || {};
+
+      var detail = document.createElement('div');
+      detail.className = 'resource-detail';
+
+      var detailHeader = document.createElement('div');
+      detailHeader.className = 'resource-detail-header';
+
+      var detailName = document.createElement('span');
+      detailName.className = 'resource-detail-name';
+      detailName.textContent = resName;
+      detailHeader.appendChild(detailName);
+
+      if (r.ip) {
+        var ipSpan = document.createElement('span');
+        ipSpan.className = 'resource-detail-ip';
+        ipSpan.textContent = r.ip;
+        detailHeader.appendChild(ipSpan);
+      }
+
+      var types = Object.keys(r['@type'] || {});
+      for (var t = 0; t < types.length; t++) {
+        var typeBadge = document.createElement('span');
+        typeBadge.className = 'badge';
+        typeBadge.textContent = types[t];
+        detailHeader.appendChild(typeBadge);
+      }
+
+      detail.appendChild(detailHeader);
+
+      // Commands grouped by provider
+      var cmdEntries = Object.entries(cmds);
+      if (cmdEntries.length > 0) {
+        var grouped = {};
+        for (var c = 0; c < cmdEntries.length; c++) {
+          var key = cmdEntries[c][0];
+          var cmd = cmdEntries[c][1];
+          var slash = key.indexOf('/');
+          var provider = slash > 0 ? key.substring(0, slash) : 'other';
+          var action = slash > 0 ? key.substring(slash + 1) : key;
+          (grouped[provider] = grouped[provider] || []).push({ action: action, cmd: cmd });
+        }
+
+        var providers = Object.entries(grouped).sort(function(a, b) { return a[0].localeCompare(b[0]); });
+        for (var p = 0; p < providers.length; p++) {
+          var provGroup = document.createElement('div');
+          provGroup.className = 'cmd-group';
+
+          var provHeader = document.createElement('div');
+          provHeader.className = 'cmd-group-header';
+          provHeader.textContent = providers[p][0];
+          provGroup.appendChild(provHeader);
+
+          var actions = providers[p][1];
+          for (var a = 0; a < actions.length; a++) {
+            var cmdRow = document.createElement('div');
+            cmdRow.className = 'cmd-row';
+
+            // Status marker for deploy-all
+            var statusEl = document.createElement('span');
+            statusEl.className = 'cmd-status pending';
+            statusEl.textContent = '\u25CB';
+            cmdRow.appendChild(statusEl);
+
+            var actionSpan = document.createElement('span');
+            actionSpan.className = 'cmd-action';
+            actionSpan.textContent = actions[a].action;
+            cmdRow.appendChild(actionSpan);
+
+            var cmdTextSpan = document.createElement('span');
+            cmdTextSpan.className = 'cmd-text';
+            cmdTextSpan.textContent = actions[a].cmd;
+            cmdRow.appendChild(cmdTextSpan);
+
+            var copyBtn = document.createElement('button');
+            copyBtn.className = 'cmd-copy';
+            copyBtn.title = 'Copy command';
+            copyBtn.textContent = '\u2398';
+            (function(cmdStr, btn) {
+              btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                copyToClipboard(cmdStr, btn);
+              });
+            })(actions[a].cmd, copyBtn);
+            cmdRow.appendChild(copyBtn);
+
+            // Execute button per command
+            var resultContainer = document.createElement('div');
+            (function(rn, prov, act, cmdStr, statusMarker, resultCont) {
+              var actionMeta = ((resources[rn].actions || {})[prov] || {})[act];
+              var isDestructive = actionMeta ? !!actionMeta.destructive : false;
+              var execBtn = Exec.createBtn(rn, prov, act, {
+                destructive: isDestructive,
+                command: cmdStr,
+                onResult: function(data) {
+                  resultCont.textContent = '';
+                  resultCont.appendChild(Exec.createResultEl(data));
+                }
+              });
+              cmdRow.appendChild(execBtn);
+
+              // Track for deploy-all
+              allLayerCmds.push({
+                resource: rn,
+                provider: prov,
+                action: act,
+                command: cmdStr,
+                destructive: isDestructive,
+                statusEl: statusMarker,
+                resultContainer: resultCont
+              });
+            })(resName, providers[p][0], actions[a].action, actions[a].cmd, statusEl, resultContainer);
+
+            provGroup.appendChild(cmdRow);
+            provGroup.appendChild(resultContainer);
+          }
+
+          detail.appendChild(provGroup);
+        }
+      }
+
+      bodyInner.appendChild(detail);
+    }
+
+    // Gate checkpoint area (shown after deploy completes)
+    var gateArea = document.createElement('div');
+    gateArea.style.display = 'none';
+    bodyInner.appendChild(gateArea);
+
+    body.appendChild(bodyInner);
+    card.appendChild(body);
+
+    // -- Deploy Layer button handler --
+    (function(cmdsForLayer, layerN, dBtn, gArea, layerCard) {
+      dBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+
+        if (!Exec.config.apiBase) {
+          dBtn.textContent = 'Configure server first';
+          dBtn.style.borderColor = 'var(--warning)';
+          dBtn.style.color = 'var(--warning)';
+          setTimeout(function() {
+            dBtn.textContent = 'Deploy L' + layerN;
+            dBtn.style.borderColor = '';
+            dBtn.style.color = '';
+          }, 2000);
+          return;
+        }
+
+        if (dBtn.classList.contains('running') || dBtn.classList.contains('done')) return;
+
+        // Expand the card to show progress
+        layerCard.classList.add('expanded');
+        expandedLayers.add(layerN);
+
+        dBtn.classList.add('running');
+        dBtn.textContent = 'Running...';
+
+        // Execute commands sequentially
+        var idx = 0;
+        var hadFailure = false;
+
+        function runNext() {
+          if (idx >= cmdsForLayer.length) {
+            // All done
+            if (hadFailure) {
+              dBtn.classList.remove('running');
+              dBtn.classList.add('failed');
+              dBtn.textContent = 'Failed';
+            } else {
+              dBtn.classList.remove('running');
+              dBtn.classList.add('done');
+              dBtn.textContent = 'Done';
+
+              // Show gate checkpoint
+              showGateCheckpoint(gArea, layerN);
+            }
+            return;
+          }
+
+          var entry = cmdsForLayer[idx];
+          entry.statusEl.className = 'cmd-status running';
+          entry.statusEl.textContent = '\u25CB';
+
+          // Skip destructive commands in bulk deploy (require individual execution)
+          if (entry.destructive) {
+            entry.statusEl.className = 'cmd-status pending';
+            entry.statusEl.textContent = '\u26A0';
+            entry.statusEl.title = 'Destructive — execute individually';
+            entry.resultContainer.textContent = '';
+            var skipEl = document.createElement('div');
+            skipEl.className = 'exec-result blocked';
+            var skipMeta = document.createElement('div');
+            skipMeta.className = 'exec-meta';
+            var skipBadge = document.createElement('span');
+            skipBadge.className = 'exec-badge mode-blocked';
+            skipBadge.textContent = 'skipped';
+            skipMeta.appendChild(skipBadge);
+            skipEl.appendChild(skipMeta);
+            var skipMsg = document.createElement('div');
+            skipMsg.textContent = 'Destructive action — execute individually with confirmation';
+            skipEl.appendChild(skipMsg);
+            entry.resultContainer.appendChild(skipEl);
+            idx++;
+            runNext();
+            return;
+          }
+
+          Exec.execCommand(entry.resource, entry.provider, entry.action, {})
+            .then(function(data) {
+              entry.resultContainer.textContent = '';
+              entry.resultContainer.appendChild(Exec.createResultEl(data));
+
+              if (data.mode === 'live' && (data.returncode === 0 || data.returncode === null)) {
+                entry.statusEl.className = 'cmd-status success';
+                entry.statusEl.textContent = '\u2713';
+              } else {
+                entry.statusEl.className = 'cmd-status failed';
+                entry.statusEl.textContent = '\u2717';
+                hadFailure = true;
+              }
+
+              idx++;
+              runNext();
+            })
+            .catch(function(err) {
+              entry.statusEl.className = 'cmd-status failed';
+              entry.statusEl.textContent = '\u2717';
+              entry.resultContainer.textContent = '';
+              entry.resultContainer.appendChild(Exec.createResultEl({
+                mode: 'error',
+                output: 'Connection failed: ' + err.message,
+                returncode: -1
+              }));
+              hadFailure = true;
+              idx++;
+              runNext();
+            });
+        }
+
+        runNext();
+      });
+    })(allLayerCmds, layerNum, deployBtn, gateArea, card);
+
+    return card;
+  }
+
+  function showGateCheckpoint(gateArea, layerNum) {
+    gateArea.style.display = '';
+    gateArea.textContent = '';
+
+    // Find resources in this layer for health checks
+    var layerResources = [];
+    for (var i = 0; i < computedPlan.length; i++) {
+      if (computedPlan[i].layer === layerNum) {
+        layerResources = computedPlan[i].resources;
+        break;
+      }
+    }
+
+    var checkpoint = document.createElement('div');
+    checkpoint.className = 'gate-checkpoint';
+
+    var icon = document.createElement('span');
+    icon.className = 'gate-icon';
+    icon.textContent = '\u2696';
+    checkpoint.appendChild(icon);
+
+    var msg = document.createElement('span');
+    msg.className = 'gate-msg';
+    msg.textContent = 'Layer ' + layerNum + ' deployment complete. Verify services are healthy before proceeding.';
+    checkpoint.appendChild(msg);
+
+    // Health check button
+    var healthBtn = document.createElement('button');
+    healthBtn.className = 'gate-proceed-btn';
+    healthBtn.style.borderColor = 'var(--accent)';
+    healthBtn.style.color = 'var(--accent)';
+    healthBtn.style.background = 'rgba(88,166,255,0.1)';
+    healthBtn.textContent = 'Run Health Checks';
+    checkpoint.appendChild(healthBtn);
+
+    // Health results area
+    var healthResults = document.createElement('div');
+    healthResults.style.display = 'none';
+    healthResults.style.marginTop = '0.5rem';
+    healthResults.style.fontSize = '0.8rem';
+    healthResults.style.fontFamily = 'var(--font-mono)';
+
+    // Find the next layer
+    var nextLayerNum = -1;
+    for (var i = 0; i < computedPlan.length; i++) {
+      if (computedPlan[i].layer === layerNum && i + 1 < computedPlan.length) {
+        nextLayerNum = computedPlan[i + 1].layer;
+        break;
+      }
+    }
+
+    // Proceed button (hidden until health checks pass or manual override)
+    var proceedBtn = null;
+    if (nextLayerNum >= 0) {
+      proceedBtn = document.createElement('button');
+      proceedBtn.className = 'gate-proceed-btn';
+      proceedBtn.textContent = 'Proceed to L' + nextLayerNum;
+      proceedBtn.style.display = 'none';
+      proceedBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        checkpoint.style.borderColor = 'var(--green)';
+        msg.textContent = 'Gate passed — proceeding to Layer ' + nextLayerNum;
+        icon.textContent = '\u2713';
+        icon.style.color = 'var(--green)';
+        healthBtn.style.display = 'none';
+        proceedBtn.remove();
+        healthResults.style.display = 'none';
+      });
+      checkpoint.appendChild(proceedBtn);
+    }
+
+    // Health check handler
+    healthBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+
+      if (!Exec.config.apiBase) {
+        healthBtn.textContent = 'Configure server first';
+        setTimeout(function() { healthBtn.textContent = 'Run Health Checks'; }, 2000);
+        return;
+      }
+
+      healthBtn.textContent = 'Checking...';
+      healthBtn.style.pointerEvents = 'none';
+      healthResults.style.display = 'block';
+      healthResults.textContent = '';
+
+      var url = Exec.config.apiBase + '/api/v1/deploy/gate/check';
+      var headers = { 'Content-Type': 'application/json' };
+      if (Exec.config.token) {
+        headers['Authorization'] = 'Bearer ' + Exec.config.token;
+      }
+
+      fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({ resources: layerResources })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        healthBtn.style.pointerEvents = '';
+        healthResults.textContent = '';
+
+        if (data.gate_pass) {
+          healthBtn.textContent = 'All Healthy';
+          healthBtn.style.borderColor = 'var(--green)';
+          healthBtn.style.color = 'var(--green)';
+          healthBtn.style.background = 'rgba(63,185,80,0.1)';
+          icon.textContent = '\u2713';
+          icon.style.color = 'var(--green)';
+          checkpoint.style.borderColor = 'var(--green)';
+          msg.textContent = 'Layer ' + layerNum + ' health checks passed.';
+
+          if (proceedBtn) proceedBtn.style.display = '';
+          else {
+            msg.textContent = 'All layers deployed and healthy. Deployment complete.';
+          }
+        } else {
+          healthBtn.textContent = 'Retry Health Checks';
+          healthBtn.style.borderColor = 'var(--red)';
+          healthBtn.style.color = 'var(--red)';
+          healthBtn.style.background = 'rgba(248,81,73,0.1)';
+          msg.textContent = 'Layer ' + layerNum + ' health checks failed. Fix issues and retry.';
+
+          // Show manual override
+          if (proceedBtn) {
+            proceedBtn.style.display = '';
+            proceedBtn.textContent = 'Override: Proceed to L' + nextLayerNum;
+            proceedBtn.style.borderColor = 'var(--warning)';
+            proceedBtn.style.color = 'var(--warning)';
+          }
+        }
+
+        // Render per-resource results
+        for (var resName in data.results) {
+          var res = data.results[resName];
+          var resLine = document.createElement('div');
+          resLine.style.padding = '0.15rem 0';
+
+          var statusIcon = document.createElement('span');
+          statusIcon.style.marginRight = '0.35rem';
+          if (res.healthy === true) {
+            statusIcon.textContent = '\u2713';
+            statusIcon.style.color = 'var(--green)';
+          } else if (res.healthy === false) {
+            statusIcon.textContent = '\u2717';
+            statusIcon.style.color = 'var(--red)';
+          } else {
+            statusIcon.textContent = '\u2014';
+            statusIcon.style.color = 'var(--text-dim)';
+          }
+          resLine.appendChild(statusIcon);
+
+          var resNameSpan = document.createElement('span');
+          resNameSpan.textContent = resName;
+          resNameSpan.style.color = 'var(--text)';
+          resLine.appendChild(resNameSpan);
+
+          var checkCount = document.createElement('span');
+          checkCount.textContent = ' (' + res.check_count + ' checks)';
+          checkCount.style.color = 'var(--text-dim)';
+          resLine.appendChild(checkCount);
+
+          healthResults.appendChild(resLine);
+        }
+
+        if (data.resources_skipped > 0) {
+          var skipped = document.createElement('div');
+          skipped.style.color = 'var(--text-dim)';
+          skipped.style.fontStyle = 'italic';
+          skipped.style.marginTop = '0.25rem';
+          skipped.textContent = data.resources_skipped + ' resources have no monitor actions';
+          healthResults.appendChild(skipped);
+        }
+      })
+      .catch(function(err) {
+        healthBtn.style.pointerEvents = '';
+        healthBtn.textContent = 'Check Failed';
+        healthBtn.style.borderColor = 'var(--red)';
+        healthBtn.style.color = 'var(--red)';
+        healthResults.textContent = 'Connection error: ' + err.message;
+        healthResults.style.color = 'var(--red)';
+        healthResults.style.display = 'block';
+
+        if (proceedBtn) {
+          proceedBtn.style.display = '';
+          proceedBtn.textContent = 'Override: Proceed to L' + nextLayerNum;
+          proceedBtn.style.borderColor = 'var(--warning)';
+          proceedBtn.style.color = 'var(--warning)';
+        }
+      });
+    });
+
+    gateArea.appendChild(checkpoint);
+    gateArea.appendChild(healthResults);
+  }
+
+  // -- Export plan builder --
+  function buildExportPlan() {
+    var plan = {
+      selected: Array.from(selected),
+      total_resources: selected.size,
+      total_layers: computedPlan.length,
+      total_commands: countCommands(selected),
+      layers: []
+    };
+    for (var i = 0; i < computedPlan.length; i++) {
+      var l = computedPlan[i];
+      var layerExport = {
+        layer: l.layer,
+        resources: l.resources,
+        gate: 'Layer ' + l.layer + ' complete',
+        commands: {}
+      };
+      for (var j = 0; j < l.resources.length; j++) {
+        var name = l.resources[j];
+        var cmds = commandsData[name];
+        if (cmds) layerExport.commands[name] = cmds;
+      }
+      plan.layers.push(layerExport);
+    }
+    return plan;
+  }
+
+  // -- Clipboard helper --
+  function copyToClipboard(text, btn) {
+    var success = function() {
+      btn.classList.add('copied');
+      var origText = btn.textContent;
+      btn.textContent = '\u2713 Copied';
+      setTimeout(function() {
+        btn.classList.remove('copied');
+        btn.textContent = origText;
+      }, 1500);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(success).catch(function() {
+        fallbackCopy(text);
+        success();
+      });
+    } else {
+      fallbackCopy(text);
+      success();
+    }
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  }
+
+  // -- Helper: create stat element --
+  function createStat(num, label) {
+    var stat = document.createElement('div');
+    stat.className = 'stat';
+    var numEl = document.createElement('span');
+    numEl.className = 'stat-num';
+    numEl.textContent = num;
+    stat.appendChild(numEl);
+    var labelEl = document.createElement('span');
+    labelEl.className = 'stat-label';
+    labelEl.textContent = label;
+    stat.appendChild(labelEl);
+    return stat;
+  }
+
+  function createBtn(text, cls) {
+    var btn = document.createElement('button');
+    btn.className = cls;
+    btn.textContent = text;
+    return btn;
+  }
+
+  function createExportCard(title, desc, btnText) {
+    var card = document.createElement('div');
+    card.className = 'export-card';
+    var h3 = document.createElement('h3');
+    h3.textContent = title;
+    card.appendChild(h3);
+    var p = document.createElement('p');
+    p.textContent = desc;
+    card.appendChild(p);
+    var btn = document.createElement('button');
+    btn.className = 'export-btn';
+    btn.textContent = btnText;
+    card.appendChild(btn);
+    return { card: card, btn: btn };
+  }
+
+  // -- Initial render --
+  updateStats();
+  renderPlan();
+
+})();
+</script>
+</body>
+</html>

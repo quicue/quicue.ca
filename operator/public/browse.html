@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Browse — demo.quicue.ca</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&family=Atkinson+Hyperlegible+Mono:wght@400;700&display=swap');
+:root {
+  --bg: #0d1117; --surface: #161b22; --elevated: #21262d; --border: #30363d;
+  --text: #e6edf3; --text-sec: #8b949e; --text-dim: #6e7681;
+  --accent: #58a6ff; --green: #3fb950; --red: #f85149; --warning: #d29922; --purple: #a371f7;
+  --font-ui: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  --font-mono: 'Atkinson Hyperlegible Mono', monospace;
+  --radius: 8px;
+  --nav-height: 48px;
+  --layer-0: #f85149; --layer-1: #d29922; --layer-2: #3fb950; --layer-3: #58a6ff;
+  --layer-4: #a371f7; --layer-5: #f0883e; --layer-6: #db61a2;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-ui); background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Nav bar — matches graph.html exactly */
+nav {
+  height: var(--nav-height);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+nav .site-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-right: 1.5rem;
+  color: var(--text);
+}
+nav a {
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  color: var(--text-sec);
+  transition: background 0.15s, color 0.15s;
+}
+nav a:hover { background: var(--elevated); color: var(--text); text-decoration: none; }
+nav a.active { background: var(--elevated); color: var(--accent); font-weight: 700; }
+
+/* Content container */
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 3rem;
+}
+
+/* Search */
+.search-wrap {
+  position: relative;
+  margin-bottom: 1rem;
+}
+.search-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  padding: 0.65rem 0.85rem 0.65rem 2.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input::placeholder { color: var(--text-dim); }
+.search-input:focus { border-color: var(--accent); }
+
+/* Filter section */
+.filters {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.filter-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  margin-right: 0.35rem;
+  flex-shrink: 0;
+  min-width: 60px;
+}
+.chip {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-sec);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  user-select: none;
+}
+.chip:hover {
+  background: var(--elevated);
+  color: var(--text);
+}
+.chip.active {
+  border-color: var(--accent);
+  background: rgba(88, 166, 255, 0.1);
+  color: var(--accent);
+}
+.chip-layer {
+  color: #fff;
+  font-weight: 700;
+}
+.chip-layer.active {
+  box-shadow: 0 0 0 1px currentColor;
+}
+
+/* Stats bar */
+.stats-bar {
+  padding: 0.5rem 0;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.stats-bar .clear-btn {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  transition: color 0.12s, border-color 0.12s;
+}
+.stats-bar .clear-btn:hover {
+  color: var(--text);
+  border-color: var(--text-sec);
+}
+
+/* Resource cards */
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.card:hover {
+  border-color: var(--text-dim);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  gap: 0.75rem;
+  user-select: none;
+}
+.card-header:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.card-expand {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  transition: transform 0.2s;
+}
+.card.open .card-expand {
+  transform: rotate(90deg);
+}
+
+.card-name {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  border: 1px solid var(--border);
+  background: var(--elevated);
+  color: var(--text-sec);
+  white-space: nowrap;
+}
+.badge-layer {
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.6rem;
+  padding: 0.1rem 0.5rem;
+}
+
+.card-meta {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-align: right;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.card-ip {
+  font-family: var(--font-mono);
+  color: var(--green);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.card-desc {
+  font-size: 0.75rem;
+  color: var(--text-sec);
+  font-style: italic;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Card body (expanded) */
+.card-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.card.open .card-body {
+  max-height: 5000px;
+}
+
+.card-body-inner {
+  padding: 0 1rem 0.75rem 1rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Command table within card */
+.cmd-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+.cmd-table th {
+  text-align: left;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+}
+.cmd-table td {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  vertical-align: top;
+}
+.cmd-table tr:last-child td {
+  border-bottom: none;
+}
+.cmd-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+.cmd-provider {
+  color: var(--text-sec);
+  white-space: nowrap;
+  width: 1%;
+}
+.cmd-action {
+  color: var(--accent);
+  white-space: nowrap;
+  width: 1%;
+}
+.cmd-text {
+  color: var(--text-dim);
+  word-break: break-all;
+  line-height: 1.4;
+}
+.cmd-copy-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+.cmd-copy {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--elevated);
+  color: var(--text-sec);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+  vertical-align: middle;
+}
+.cmd-copy:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.cmd-copy.copied {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(63, 185, 80, 0.08);
+}
+
+/* Provider group header in table */
+.provider-group-row td {
+  padding-top: 0.65rem;
+  border-bottom: none;
+}
+.provider-group-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-sec);
+  text-transform: lowercase;
+}
+
+/* No results */
+.no-results {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--text-sec);
+  font-size: 0.9rem;
+}
+
+/* Scrollbar */
+body::-webkit-scrollbar { width: 8px; }
+body::-webkit-scrollbar-track { background: var(--bg); }
+body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+body::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .content { padding: 0.75rem; }
+  nav { padding: 0 0.75rem; }
+  nav .site-name { margin-right: 0.75rem; font-size: 0.85rem; }
+  nav a { padding: 0.3rem 0.5rem; font-size: 0.8rem; }
+  .card-header { padding: 0.6rem 0.75rem; flex-wrap: wrap; gap: 0.4rem; }
+  .card-name { font-size: 0.85rem; }
+  .card-badges { order: 5; width: 100%; }
+  .card-ip, .card-desc, .card-meta { font-size: 0.7rem; }
+  .cmd-table td { font-size: 0.65rem; padding: 0.25rem 0.35rem; }
+  .filter-row { gap: 0.25rem; }
+  .chip { font-size: 0.65rem; padding: 0.15rem 0.4rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="site-name">demo.quicue.ca</span>
+  <a href="index.html">Index</a>
+  <a href="graph.html">Graph</a>
+  <a href="planner.html">Planner</a>
+  <a href="browse.html" class="active">Browse</a>
+  <a href="explore.html">Explore</a>
+</nav>
+
+<div class="content">
+  <div id="loading" class="loading">Loading data...</div>
+  <div id="app" style="display:none;">
+    <div class="search-wrap">
+      <span class="search-icon">&#x1F50D;</span>
+      <input type="text" class="search-input" id="search" placeholder="Search resources, providers, actions, commands..." autocomplete="off" spellcheck="false">
+    </div>
+    <div class="filters" id="filters"></div>
+    <div class="stats-bar" id="stats-bar">
+      <span id="stats-text"></span>
+      <button class="clear-btn" id="clear-filters" style="display:none;">Clear filters</button>
+    </div>
+    <div class="card-list" id="card-list"></div>
+    <div class="no-results" id="no-results" style="display:none;">No resources match the current filters.</div>
+  </div>
+</div>
+
+<script src="exec.js"></script>
+<script>
+(async function() {
+  // -- Data loading --
+  const [planData, commandsData] = await Promise.all([
+    fetch('plan.json').then(r => r.json()),
+    fetch('.bound_commands.json').then(r => r.json())
+  ]);
+
+  const resources = planData.Graph.resources;
+  const layers = planData.layers;
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = '';
+
+  // -- Layer colors --
+  const layerColors = ['#f85149', '#d29922', '#3fb950', '#58a6ff', '#a371f7', '#f0883e', '#db61a2'];
+
+  // -- Build layer map (resource -> layer number) --
+  const layerMap = {};
+  for (const layerObj of layers) {
+    for (const name of layerObj.resources) {
+      layerMap[name] = layerObj.layer;
+    }
+  }
+
+  // -- Extract all @types --
+  const allTypes = new Set();
+  for (const r of Object.values(resources)) {
+    for (const t of Object.keys(r['@type'] || {})) {
+      allTypes.add(t);
+    }
+  }
+  const sortedTypes = Array.from(allTypes).sort();
+
+  // -- Extract all providers from bound commands --
+  const allProviders = new Set();
+  for (const cmds of Object.values(commandsData)) {
+    for (const key of Object.keys(cmds)) {
+      const slash = key.indexOf('/');
+      if (slash > 0) allProviders.add(key.substring(0, slash));
+    }
+  }
+  const sortedProviders = Array.from(allProviders).sort();
+
+  // -- Total command count --
+  let totalCommands = 0;
+  for (const cmds of Object.values(commandsData)) {
+    totalCommands += Object.keys(cmds).length;
+  }
+  const totalResources = Object.keys(resources).length;
+
+  // -- Build enriched resource list --
+  const resourceList = Object.keys(resources).map(name => {
+    const r = resources[name];
+    const cmds = commandsData[name] || {};
+    const cmdEntries = Object.entries(cmds);
+    const types = Object.keys(r['@type'] || {});
+    const layer = layerMap[name] !== undefined ? layerMap[name] : -1;
+
+    // providers for this resource
+    const resProviders = new Set();
+    for (const key of Object.keys(cmds)) {
+      const slash = key.indexOf('/');
+      if (slash > 0) resProviders.add(key.substring(0, slash));
+    }
+
+    // Build searchable text (lowercase)
+    const searchParts = [name];
+    searchParts.push(...types);
+    if (r.ip) searchParts.push(r.ip);
+    if (r.description) searchParts.push(r.description);
+    for (const [key, cmd] of cmdEntries) {
+      searchParts.push(key, cmd);
+    }
+    const searchText = searchParts.join(' ').toLowerCase();
+
+    return {
+      name,
+      resource: r,
+      types,
+      layer,
+      providers: resProviders,
+      cmds,
+      cmdEntries,
+      cmdCount: cmdEntries.length,
+      searchText
+    };
+  });
+
+  // Sort by layer then name
+  resourceList.sort((a, b) => a.layer - b.layer || a.name.localeCompare(b.name));
+
+  // -- Filter state --
+  const activeTypes = new Set();
+  const activeLayers = new Set();
+  const activeProviders = new Set();
+  let searchQuery = '';
+
+  // -- Build filter chips --
+  const filtersEl = document.getElementById('filters');
+
+  // Type chips
+  const typeRow = document.createElement('div');
+  typeRow.className = 'filter-row';
+  const typeLabel = document.createElement('span');
+  typeLabel.className = 'filter-label';
+  typeLabel.textContent = 'Type';
+  typeRow.appendChild(typeLabel);
+
+  for (const t of sortedTypes) {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = t;
+    chip.setAttribute('data-filter', 'type');
+    chip.setAttribute('data-value', t);
+    chip.addEventListener('click', function() {
+      if (activeTypes.has(t)) {
+        activeTypes.delete(t);
+        chip.classList.remove('active');
+      } else {
+        activeTypes.add(t);
+        chip.classList.add('active');
+      }
+      applyFilters();
+    });
+    typeRow.appendChild(chip);
+  }
+  filtersEl.appendChild(typeRow);
+
+  // Layer chips
+  const layerRow = document.createElement('div');
+  layerRow.className = 'filter-row';
+  const layerLabel = document.createElement('span');
+  layerLabel.className = 'filter-label';
+  layerLabel.textContent = 'Layer';
+  layerRow.appendChild(layerLabel);
+
+  for (let i = 0; i <= 6; i++) {
+    const chip = document.createElement('span');
+    chip.className = 'chip chip-layer';
+    chip.textContent = 'L' + i;
+    chip.style.background = layerColors[i];
+    chip.style.borderColor = layerColors[i];
+    chip.setAttribute('data-filter', 'layer');
+    chip.setAttribute('data-value', String(i));
+    const layerNum = i;
+    chip.addEventListener('click', function() {
+      if (activeLayers.has(layerNum)) {
+        activeLayers.delete(layerNum);
+        chip.classList.remove('active');
+        chip.style.opacity = '1';
+      } else {
+        activeLayers.add(layerNum);
+        chip.classList.add('active');
+        chip.style.opacity = '1';
+      }
+      applyFilters();
+    });
+    layerRow.appendChild(chip);
+  }
+  filtersEl.appendChild(layerRow);
+
+  // Provider chips
+  const provRow = document.createElement('div');
+  provRow.className = 'filter-row';
+  const provLabel = document.createElement('span');
+  provLabel.className = 'filter-label';
+  provLabel.textContent = 'Provider';
+  provRow.appendChild(provLabel);
+
+  for (const p of sortedProviders) {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = p;
+    chip.setAttribute('data-filter', 'provider');
+    chip.setAttribute('data-value', p);
+    chip.addEventListener('click', function() {
+      if (activeProviders.has(p)) {
+        activeProviders.delete(p);
+        chip.classList.remove('active');
+      } else {
+        activeProviders.add(p);
+        chip.classList.add('active');
+      }
+      applyFilters();
+    });
+    provRow.appendChild(chip);
+  }
+  filtersEl.appendChild(provRow);
+
+  // -- Search input --
+  const searchInput = document.getElementById('search');
+  searchInput.addEventListener('input', function() {
+    searchQuery = this.value.toLowerCase().trim();
+    applyFilters();
+  });
+
+  // -- Clear filters button --
+  const clearBtn = document.getElementById('clear-filters');
+  clearBtn.addEventListener('click', function() {
+    activeTypes.clear();
+    activeLayers.clear();
+    activeProviders.clear();
+    searchQuery = '';
+    searchInput.value = '';
+    filtersEl.querySelectorAll('.chip.active').forEach(function(c) { c.classList.remove('active'); });
+    applyFilters();
+  });
+
+  // -- Stats --
+  const statsText = document.getElementById('stats-text');
+  const noResults = document.getElementById('no-results');
+  const cardList = document.getElementById('card-list');
+
+  // -- Build all cards (once) and track visibility --
+  const cardElements = [];
+
+  for (const item of resourceList) {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'card-header';
+
+    const expandIcon = document.createElement('span');
+    expandIcon.className = 'card-expand';
+    expandIcon.textContent = '\u25B6';
+    header.appendChild(expandIcon);
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'card-name';
+    nameEl.textContent = item.name;
+    header.appendChild(nameEl);
+
+    // Layer badge
+    const layerBadge = document.createElement('span');
+    layerBadge.className = 'badge badge-layer';
+    layerBadge.style.background = layerColors[item.layer] || '#6e7681';
+    layerBadge.textContent = 'L' + item.layer;
+    header.appendChild(layerBadge);
+
+    // Type badges
+    const badgesWrap = document.createElement('span');
+    badgesWrap.className = 'card-badges';
+    for (const t of item.types) {
+      const b = document.createElement('span');
+      b.className = 'badge';
+      b.textContent = t;
+      badgesWrap.appendChild(b);
+    }
+    header.appendChild(badgesWrap);
+
+    // IP
+    if (item.resource.ip) {
+      const ipEl = document.createElement('span');
+      ipEl.className = 'card-ip';
+      ipEl.textContent = item.resource.ip;
+      header.appendChild(ipEl);
+    }
+
+    // Description
+    if (item.resource.description) {
+      const descEl = document.createElement('span');
+      descEl.className = 'card-desc';
+      descEl.textContent = item.resource.description;
+      header.appendChild(descEl);
+    }
+
+    // Command count
+    const metaEl = document.createElement('span');
+    metaEl.className = 'card-meta';
+    metaEl.textContent = item.cmdCount + ' cmd' + (item.cmdCount !== 1 ? 's' : '');
+    header.appendChild(metaEl);
+
+    // Click to expand
+    header.addEventListener('click', function() {
+      card.classList.toggle('open');
+    });
+
+    card.appendChild(header);
+
+    // Body
+    const body = document.createElement('div');
+    body.className = 'card-body';
+
+    const bodyInner = document.createElement('div');
+    bodyInner.className = 'card-body-inner';
+
+    if (item.cmdEntries.length > 0) {
+      // Group commands by provider
+      const grouped = {};
+      for (const [key, cmd] of item.cmdEntries) {
+        const slash = key.indexOf('/');
+        const provider = slash > 0 ? key.substring(0, slash) : 'other';
+        const action = slash > 0 ? key.substring(slash + 1) : key;
+        if (!grouped[provider]) grouped[provider] = [];
+        grouped[provider].push({ action, cmd, key });
+      }
+
+      const table = document.createElement('table');
+      table.className = 'cmd-table';
+
+      // Header row
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      var cols = ['Provider', 'Action', 'Command', '', ''];
+      for (var ci = 0; ci < cols.length; ci++) {
+        var th = document.createElement('th');
+        th.textContent = cols[ci];
+        headRow.appendChild(th);
+      }
+      thead.appendChild(headRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+
+      var providerKeys = Object.keys(grouped).sort();
+      for (var pi = 0; pi < providerKeys.length; pi++) {
+        var prov = providerKeys[pi];
+        var actions = grouped[prov];
+        for (var ai = 0; ai < actions.length; ai++) {
+          var act = actions[ai];
+          var tr = document.createElement('tr');
+          tr.setAttribute('data-provider', prov);
+          tr.setAttribute('data-action', act.action);
+          tr.setAttribute('data-cmd', act.cmd);
+
+          var tdProv = document.createElement('td');
+          tdProv.className = 'cmd-provider';
+          tdProv.textContent = prov;
+          tr.appendChild(tdProv);
+
+          var tdAction = document.createElement('td');
+          tdAction.className = 'cmd-action';
+          tdAction.textContent = act.action;
+          tr.appendChild(tdAction);
+
+          var tdCmd = document.createElement('td');
+          tdCmd.className = 'cmd-text';
+          tdCmd.textContent = act.cmd;
+          tr.appendChild(tdCmd);
+
+          var tdCopy = document.createElement('td');
+          tdCopy.className = 'cmd-copy-cell';
+          var copyBtn = document.createElement('button');
+          copyBtn.className = 'cmd-copy';
+          copyBtn.title = 'Copy command';
+          copyBtn.textContent = '\u2398';
+          (function(cmdText, btn) {
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              copyToClipboard(cmdText, btn);
+            });
+          })(act.cmd, copyBtn);
+          tdCopy.appendChild(copyBtn);
+          tr.appendChild(tdCopy);
+
+          // Execute button
+          var tdExec = document.createElement('td');
+          tdExec.className = 'cmd-copy-cell';
+          (function(resName, provName, actName, cmdText, parentTr) {
+            // Look up action metadata from plan for destructive flag
+            var resData = resources[resName];
+            var actionMeta = ((resData.actions || {})[provName] || {})[actName];
+            var isDestructive = actionMeta ? !!actionMeta.destructive : false;
+
+            var execBtn = Exec.createBtn(resName, provName, actName, {
+              destructive: isDestructive,
+              command: cmdText,
+              onResult: function(data) {
+                // Remove previous result row
+                var nextRow = parentTr.nextElementSibling;
+                if (nextRow && nextRow.classList.contains('exec-result-row')) {
+                  nextRow.remove();
+                }
+                var resultRow = document.createElement('tr');
+                resultRow.className = 'exec-result-row';
+                var resultTd = document.createElement('td');
+                resultTd.colSpan = 5;
+                resultTd.appendChild(Exec.createResultEl(data));
+                resultRow.appendChild(resultTd);
+                parentTr.after(resultRow);
+              }
+            });
+            tdExec.appendChild(execBtn);
+          })(item.name, prov, act.action, act.cmd, tr);
+          tr.appendChild(tdExec);
+
+          tbody.appendChild(tr);
+        }
+      }
+
+      table.appendChild(tbody);
+      bodyInner.appendChild(table);
+    } else {
+      var emptyP = document.createElement('p');
+      emptyP.style.cssText = 'color: var(--text-dim); font-size: 0.8rem; font-style: italic; padding: 0.5rem 0;';
+      emptyP.textContent = 'No bound commands for this resource.';
+      bodyInner.appendChild(emptyP);
+    }
+
+    body.appendChild(bodyInner);
+    card.appendChild(body);
+    cardList.appendChild(card);
+
+    cardElements.push({
+      el: card,
+      item: item
+    });
+  }
+
+  // -- Copy helper --
+  function copyToClipboard(text, btn) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        showCopied(btn);
+      }).catch(function() {
+        fallbackCopy(text, btn);
+      });
+    } else {
+      fallbackCopy(text, btn);
+    }
+  }
+
+  function fallbackCopy(text, btn) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch(e) { /* ignore */ }
+    ta.remove();
+    showCopied(btn);
+  }
+
+  function showCopied(btn) {
+    btn.classList.add('copied');
+    btn.textContent = '\u2713';
+    setTimeout(function() {
+      btn.classList.remove('copied');
+      btn.textContent = '\u2398';
+    }, 1500);
+  }
+
+  // -- Filter logic --
+  function applyFilters() {
+    var visibleCommands = 0;
+    var visibleResources = 0;
+    var anyFilterActive = activeTypes.size > 0 || activeLayers.size > 0 || activeProviders.size > 0 || searchQuery.length > 0;
+
+    for (var i = 0; i < cardElements.length; i++) {
+      var ce = cardElements[i];
+      var item = ce.item;
+      var visible = true;
+
+      // Text search
+      if (searchQuery.length > 0 && item.searchText.indexOf(searchQuery) === -1) {
+        visible = false;
+      }
+
+      // Type filter (OR within types: resource must have at least one active type)
+      if (visible && activeTypes.size > 0) {
+        var hasType = false;
+        for (var ti = 0; ti < item.types.length; ti++) {
+          if (activeTypes.has(item.types[ti])) { hasType = true; break; }
+        }
+        if (!hasType) visible = false;
+      }
+
+      // Layer filter (OR within layers)
+      if (visible && activeLayers.size > 0) {
+        if (!activeLayers.has(item.layer)) visible = false;
+      }
+
+      // Provider filter (OR within providers)
+      if (visible && activeProviders.size > 0) {
+        var hasProv = false;
+        activeProviders.forEach(function(p) {
+          if (item.providers.has(p)) hasProv = true;
+        });
+        if (!hasProv) visible = false;
+      }
+
+      if (visible) {
+        ce.el.style.display = '';
+        visibleResources++;
+        visibleCommands += item.cmdCount;
+      } else {
+        ce.el.style.display = 'none';
+      }
+    }
+
+    // Update stats
+    statsText.textContent = 'Showing ' + visibleCommands + ' of ' + totalCommands + ' commands across ' + visibleResources + ' of ' + totalResources + ' resources';
+
+    // Toggle clear button and no-results
+    clearBtn.style.display = anyFilterActive ? '' : 'none';
+    noResults.style.display = visibleResources === 0 ? '' : 'none';
+    cardList.style.display = visibleResources === 0 ? 'none' : '';
+  }
+
+  // Initial render
+  applyFilters();
+
+  // Keyboard shortcut: / focuses search
+  document.addEventListener('keydown', function(e) {
+    if (e.key === '/' && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    if (e.key === 'Escape' && document.activeElement === searchInput) {
+      searchInput.blur();
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
