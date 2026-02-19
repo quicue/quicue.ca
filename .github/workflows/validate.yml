@@ -7,6 +7,42 @@ on:
     branches: [main]
 
 jobs:
+  semantic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Turtle syntax
+        run: |
+          sudo apt-get install -y -qq raptor2-utils
+          for f in semantic/*.ttl; do
+            echo "=== $(basename $f) ==="
+            rapper -c -i turtle "$f"
+          done
+
+      - name: Validate SPARQL query syntax
+        run: |
+          pip install -q rdflib
+          python3 -c "
+          import glob, sys
+          from rdflib.plugins.sparql import prepareQuery
+
+          failed = 0
+          for f in sorted(glob.glob('semantic/queries/*.rq')):
+              try:
+                  with open(f) as fh:
+                      prepareQuery(fh.read())
+                  print(f'OK: {f}')
+              except Exception as e:
+                  print(f'FAIL: {f}: {e}')
+                  failed += 1
+
+          if failed:
+              print(f'{failed} query(ies) failed syntax check')
+              sys.exit(1)
+          print(f'All {len(glob.glob(\"semantic/queries/*.rq\"))} SPARQL queries valid')
+          "
+
   cue-vet:
     runs-on: ubuntu-latest
     steps:

@@ -61,7 +61,8 @@ apercue:PipelineRunSourceShape a sh:NodeShape ;
     sh:property [
         sh:path prov:used ;
         sh:minCount 1 ;
-        sh:message "Pipeline run must reference at least one source export" ;
+        sh:class apercue:SourceExport ;
+        sh:message "Pipeline run must reference at least one source export (prov:used)" ;
         sh:severity sh:Violation ;
     ] .
 
