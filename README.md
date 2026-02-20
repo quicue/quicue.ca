@@ -61,6 +61,12 @@ Providers declare what resource types they serve. quicue.ca matches providers to
 
 The result is a fully resolved execution plan: deployment order, rollback sequence, and per-resource commands, all as plain JSON.
 
+## Foundation
+
+quicue.ca builds on **[apercue.ca](https://github.com/quicue/apercue)** --- the domain-agnostic foundation layer providing generic graph patterns (`#Graph`, `#CriticalPath`, `#ComplianceCheck`), charter-based planning (`#Charter`, `#GapAnalysis`), and W3C projections (JSON-LD, SHACL, SKOS, EARL, OWL-Time). apercue.ca proves the typed-graph-to-W3C-linked-data pattern works without any infrastructure dependency. quicue.ca adds infrastructure-specific types, providers, and execution plans on top.
+
+See the [apercue.ca ecosystem explorer](https://apercue.ca/explorer.html) for the full dependency graph.
+
 ## Architecture
 
 Four-layer model:
