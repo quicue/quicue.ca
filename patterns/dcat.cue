@@ -9,7 +9,7 @@
 //   catalog: patterns.#DCAT3Catalog & {
 //       Graph: _graph
 //       CatalogID: "https://data.example.org/infra"
-//       Publisher: "Example Organization — Infrastructure"
+//       Publisher: "Example Infrastructure Team"
 //   }
 //   // cue export -e catalog.catalog --out json > dcat.jsonld
 

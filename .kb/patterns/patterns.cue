@@ -227,7 +227,6 @@ p_airgapped_bundle: core.#Pattern & {
 	example:  "operator/airgap-bundle.cue defines #Bundle + #Gotcha. E2E proven: 284MB bundle → fresh Ubuntu 24.04 VM → 37/37 smoke tests on completely airgapped machine."
 	used_in: {
 		"quicue.ca": true
-		"downstream-instance":      true
 	}
 	related: {
 		"idempotent_by_construction": true
