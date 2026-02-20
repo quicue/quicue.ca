@@ -273,31 +273,31 @@ import (
 			// Check: requires_dependent_type
 			let _v1 = [
 				for rname, _ in _match
-				if rule.requires_dependent_type != _|_ {
-					let _has = len([
-						for dn, _ in Graph.dependents[rname]
-						for t, _ in Graph.resources[dn]["@type"]
-						if rule.requires_dependent_type[t] != _|_ {1},
-					]) > 0
-					if !_has {
-						{resource: rname, check: "requires_dependent_type"}
-					}
+				if rule.requires_dependent_type != _|_
+				let _has = len([
+					for dn, _ in Graph.dependents[rname]
+					for t, _ in Graph.resources[dn]["@type"]
+					if rule.requires_dependent_type[t] != _|_ {1},
+				]) > 0
+				if !_has {
+					resource: rname
+					check:    "requires_dependent_type"
 				},
 			]
 
 			// Check: requires_dependency_type (direct dependencies only)
 			let _v2 = [
 				for rname, _ in _match
-				if rule.requires_dependency_type != _|_ {
-					let _deps = *Graph.resources[rname].depends_on | {}
-					let _has = len([
-						for depName, _ in _deps
-						for t, _ in Graph.resources[depName]["@type"]
-						if rule.requires_dependency_type[t] != _|_ {1},
-					]) > 0
-					if !_has {
-						{resource: rname, check: "requires_dependency_type"}
-					}
+				if rule.requires_dependency_type != _|_
+				let _deps = *Graph.resources[rname].depends_on | {}
+				let _has = len([
+					for depName, _ in _deps
+					for t, _ in Graph.resources[depName]["@type"]
+					if rule.requires_dependency_type[t] != _|_ {1},
+				]) > 0
+				if !_has {
+					resource: rname
+					check:    "requires_dependency_type"
 				},
 			]
 
@@ -322,11 +322,13 @@ import (
 			// Check: min_dependents
 			let _v5 = [
 				for rname, _ in _match
-				if rule.min_dependents != _|_ {
-					let _count = len([for k, _ in Graph.dependents[rname] {k}])
-					if _count < rule.min_dependents {
-						{resource: rname, check: "min_dependents", actual: _count, required: rule.min_dependents}
-					}
+				if rule.min_dependents != _|_
+				let _count = len([for k, _ in Graph.dependents[rname] {k}])
+				if _count < rule.min_dependents {
+					resource: rname
+					check:    "min_dependents"
+					actual:   _count
+					required: rule.min_dependents
 				},
 			]
 
