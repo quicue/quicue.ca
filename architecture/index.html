@@ -1,0 +1,1917 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Model it in CUE. Validate by unification. Export to whatever the world expects.">
+      
+      
+      
+        <link rel="canonical" href="https://docs.quicue.ca/architecture/">
+      
+      
+        <link rel="prev" href="../getting-started/">
+      
+      
+        <link rel="next" href="../patterns/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>Architecture - quicue.ca</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="quicue.ca" class="md-header__button md-logo" aria-label="quicue.ca" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            quicue.ca
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/quicue/quicue.ca" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    quicue/quicue.ca
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="quicue.ca" class="md-nav__button md-logo" aria-label="quicue.ca" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    quicue.ca
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/quicue/quicue.ca" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    quicue/quicue.ca
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#four-layer-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Four-layer model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#definition-layer-vocab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Definition layer: vocab/
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Definition layer: vocab/">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#resource-resourcecue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #Resource (resource.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-and-actiondef-actionscue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #Action and #ActionDef (actions.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typeregistry-typescue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #TypeRegistry (types.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vizdata-viz-contractcue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #VizData (viz-contract.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pattern-layer-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern layer: patterns/
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pattern layer: patterns/">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infragraph-graphcue-the-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #InfraGraph (graph.cue) — the core
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bindcluster-bindcue-command-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #BindCluster (bind.cue) — command resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#executionplan-deploycue-the-unifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #ExecutionPlan (deploy.cue) — the unifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploymentplan-and-rollbackplan-graphcue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #DeploymentPlan and #RollbackPlan (graph.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export-projections-projectionscue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Export projections (projections.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visualization-visualizationcue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Visualization (visualization.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#template-layer-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template layer: template/*/
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Template layer: template/*/">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metametacue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        meta/meta.cue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patternsnamecue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        patterns/&lt;name&gt;.cue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#29-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        29 providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#value-layer-examples-and-your-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Value layer: examples and your code
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extension-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension modules
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extension modules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ou-role-scoped-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ou/ — Role-scoped views
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boot-bootstrap-sequencing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        boot/ — Bootstrap sequencing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orche-multi-site-federation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        orche/ — Multi-site federation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cab-change-advisory-board" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cab/ — Change Advisory Board
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wiki-documentation-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wiki/ — Documentation generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#server-fastapi-gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        server/ — FastAPI gateway
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kg-knowledge-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        kg/ — Knowledge graph
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="kg/ — Knowledge graph">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#downstream-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Downstream validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-flow-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data flow summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key invariants
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../charter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Charter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../knowledge-graph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../linked-data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linked Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Templates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../federation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Federation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Example Output
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#four-layer-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Four-layer model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#definition-layer-vocab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Definition layer: vocab/
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Definition layer: vocab/">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#resource-resourcecue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #Resource (resource.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-and-actiondef-actionscue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #Action and #ActionDef (actions.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typeregistry-typescue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #TypeRegistry (types.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vizdata-viz-contractcue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #VizData (viz-contract.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pattern-layer-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern layer: patterns/
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pattern layer: patterns/">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infragraph-graphcue-the-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #InfraGraph (graph.cue) — the core
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bindcluster-bindcue-command-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #BindCluster (bind.cue) — command resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#executionplan-deploycue-the-unifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #ExecutionPlan (deploy.cue) — the unifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploymentplan-and-rollbackplan-graphcue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #DeploymentPlan and #RollbackPlan (graph.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export-projections-projectionscue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Export projections (projections.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visualization-visualizationcue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Visualization (visualization.cue)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#template-layer-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template layer: template/*/
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Template layer: template/*/">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metametacue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        meta/meta.cue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patternsnamecue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        patterns/&lt;name&gt;.cue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#29-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        29 providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#value-layer-examples-and-your-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Value layer: examples and your code
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extension-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension modules
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extension modules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ou-role-scoped-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ou/ — Role-scoped views
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boot-bootstrap-sequencing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        boot/ — Bootstrap sequencing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orche-multi-site-federation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        orche/ — Multi-site federation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cab-change-advisory-board" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cab/ — Change Advisory Board
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wiki-documentation-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wiki/ — Documentation generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#server-fastapi-gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        server/ — FastAPI gateway
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kg-knowledge-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        kg/ — Knowledge graph
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="kg/ — Knowledge graph">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#downstream-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Downstream validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-flow-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data flow summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key invariants
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="architecture">Architecture</h1>
+<p>quicue.ca models any domain as typed dependency graphs in CUE. This document explains how the layers compose, what each module does, and how data flows from resource definitions to executable plans.</p>
+<h2 id="four-layer-model">Four-layer model</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Definition (vocab/)          What things ARE and what you can DO to them
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    ↓
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Pattern (patterns/)          How to analyze, bind, plan, and export
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    ↓
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>Template (template/*/)       Platform-specific action implementations
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    ↓
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>Value (examples/, your code) Concrete infrastructure instances
+</code></pre></div>
+<p>Each layer imports only from the layer below it. CUE's type system enforces that values satisfy all constraints from every layer simultaneously — there is no runtime, no fallback, and no partial evaluation.</p>
+<h2 id="definition-layer-vocab">Definition layer: <code>vocab/</code></h2>
+<p>The vocabulary defines the type system. Every infrastructure entity, action, and semantic type is a CUE definition here.</p>
+<h3 id="resource-resourcecue"><code>#Resource</code> (<code>resource.cue</code>)</h3>
+<p>The foundation. Every infrastructure component is a <code>#Resource</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>dns: vocab.#Resource &amp; {
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    name:         &quot;dns&quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    &quot;@type&quot;:      {LXCContainer: true, DNSServer: true}
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    depends_on:   {router: true}
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    host:         &quot;pve-node1&quot;
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    container_id: 101
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    ip:           &quot;198.51.100.211&quot;
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>}
+</code></pre></div>
+<p>Key design decisions:</p>
+<ul>
+<li><strong>Struct-as-set for <code>@type</code> and <code>depends_on</code>.</strong> <code>{LXCContainer: true}</code> gives O(1) membership checks. Patterns test <code>resource["@type"][SomeType] != _|_</code> instead of iterating a list.</li>
+<li><strong>Generic field names.</strong> <code>host</code> (not <code>node</code>), <code>container_id</code> (not <code>lxcid</code>), <code>vm_id</code> (not <code>vmid</code>). Providers map generic names to platform-specific commands. This decouples the graph from any single platform.</li>
+<li><strong>Open schema (<code>...</code>).</strong> Resources can carry domain-specific fields without modifying vocab. A Proxmox resource can have <code>pool: "production"</code> alongside the standard fields.</li>
+<li><strong>ASCII-safe identifiers.</strong> All resource names, <code>@type</code> keys, <code>depends_on</code> keys, and tag keys are constrained to ASCII via <code>#SafeID</code> and <code>#SafeLabel</code> regex patterns. This prevents zero-width unicode injection, homoglyph attacks (Cyrillic "a" vs Latin "a"), and invisible characters that would break CUE unification silently. <code>cue vet</code> catches violations at compile time.</li>
+</ul>
+<h3 id="action-and-actiondef-actionscue"><code>#Action</code> and <code>#ActionDef</code> (<code>actions.cue</code>)</h3>
+<p>Actions are executable operations. Two schemas serve different purposes:</p>
+<ul>
+<li><strong><code>#Action</code></strong> — a resolved action with a concrete <code>command</code> string. This is what the binding layer produces.</li>
+<li><strong><code>#ActionDef</code></strong> — an action <em>definition</em> with typed parameters and a command template. Providers declare these; the binding layer resolves them against resources.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>// ActionDef (provider declares this)
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>ping: vocab.#ActionDef &amp; {
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    name:             &quot;Ping&quot;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    description:      &quot;Test connectivity&quot;
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    category:         &quot;info&quot;
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    params:           {ip: {from_field: &quot;ip&quot;}}
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    command_template: &quot;ping -c 3 {ip}&quot;
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    idempotent:       true
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>}
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>// Action (binding produces this)
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>ping: vocab.#Action &amp; {
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    name:        &quot;Ping&quot;
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    command:     &quot;ping -c 3 198.51.100.211&quot;  // resolved
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    idempotent:  true
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>}
+</code></pre></div>
+<p>The <code>from_field</code> key is what makes compile-time binding work. If a resource lacks the field a parameter needs, the action is silently omitted (not an error — the provider simply doesn't apply to that resource). If a <em>required</em> parameter references a field that exists but has the wrong type, CUE catches it.</p>
+<h3 id="typeregistry-typescue"><code>#TypeRegistry</code> (<code>types.cue</code>)</h3>
+<p>Semantic types describe WHAT a resource IS. Each type declares:</p>
+<ul>
+<li><code>requires</code> — fields that resources of this type must have</li>
+<li><code>grants</code> — action names this type enables</li>
+<li><code>structural_deps</code> — fields that imply dependency relationships</li>
+</ul>
+<p>Types fall into three categories:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Examples</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Implementation</td>
+<td><code>LXCContainer</code>, <code>VirtualMachine</code>, <code>DockerContainer</code></td>
+<td>How it runs</td>
+</tr>
+<tr>
+<td>Semantic</td>
+<td><code>DNSServer</code>, <code>ReverseProxy</code>, <code>Database</code></td>
+<td>What it does</td>
+</tr>
+<tr>
+<td>Classification</td>
+<td><code>CriticalInfra</code></td>
+<td>Operational tier</td>
+</tr>
+</tbody>
+</table>
+<p>A resource can have multiple types. A Proxmox LXC running PowerDNS is <code>{LXCContainer: true, DNSServer: true}</code> — it gets both container management actions from the proxmox provider AND DNS-specific actions from the powerdns provider.</p>
+<h3 id="vizdata-viz-contractcue"><code>#VizData</code> (<code>viz-contract.cue</code>)</h3>
+<p>The visualization contract defines the JSON shape consumed by D3.js graph explorers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>{nodes: [...], edges: [...], topology: {...}, metrics: {...}}
+</code></pre></div>
+<p>This contract is implemented by <code>patterns/#VizData</code> and consumed by the graph explorer at quicue.ca.</p>
+<h2 id="pattern-layer-patterns">Pattern layer: <code>patterns/</code></h2>
+<p>Patterns are CUE definitions that compute derived data from resources. They compose by accepting the same <code>#InfraGraph</code> input.</p>
+<h3 id="infragraph-graphcue-the-core"><code>#InfraGraph</code> (<code>graph.cue</code>) — the core</h3>
+<p>Converts a flat set of resources into a dependency graph with computed properties:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>infra: patterns.#InfraGraph &amp; {Input: _resources}
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>// Now available:
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>//   infra.resources.dns._depth     = 1
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>//   infra.resources.dns._ancestors = {router: true}
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>//   infra.resources.dns._path      = [&quot;dns&quot;, &quot;router&quot;]
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>//   infra.topology                 = {layer_0: {router: true}, layer_1: {dns: true}}
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>//   infra.roots                    = {router: true}
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>//   infra.leaves                   = {dns: true}
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>//   infra.dependents.router        = {dns: true}
+</code></pre></div>
+<p>Computed properties:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_depth</code></td>
+<td><code>int</code></td>
+<td>Distance from root (0 = no dependencies)</td>
+</tr>
+<tr>
+<td><code>_ancestors</code></td>
+<td><code>{[string]: true}</code></td>
+<td>Transitive closure — all resources this one depends on</td>
+</tr>
+<tr>
+<td><code>_path</code></td>
+<td><code>[...string]</code></td>
+<td>Path to root via first parent</td>
+</tr>
+<tr>
+<td><code>topology</code></td>
+<td><code>{layer_N: {[name]: true}}</code></td>
+<td>Resources grouped by depth</td>
+</tr>
+<tr>
+<td><code>roots</code></td>
+<td><code>{[name]: true}</code></td>
+<td>Resources with no dependencies</td>
+</tr>
+<tr>
+<td><code>leaves</code></td>
+<td><code>{[name]: true}</code></td>
+<td>Resources nothing depends on</td>
+</tr>
+<tr>
+<td><code>dependents</code></td>
+<td><code>{[name]: {[name]: true}}</code></td>
+<td>Inverse of ancestors — O(1) impact lookups</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Performance note.</strong> Transitive closure (<code>_ancestors</code>) is computed via CUE unification (the rogpeppe fixpoint pattern). Performance depends on topology — wide fan-in (many deps per node) is the bottleneck, not node count. For high-fan-in graphs, provide precomputed depth values:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>infra: #InfraGraph &amp; {
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    Input:       _resources
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    Precomputed: {depth: {&quot;dns&quot;: 1, &quot;router&quot;: 0, ...}}
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>}
+</code></pre></div>
+<p>Precomputed depth values bypass transitive closure for graphs with wide fan-in.</p>
+<h3 id="query-patterns">Query patterns</h3>
+<p>All query patterns accept a <code>Graph: #InfraGraph</code> input:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Input</th>
+<th>Output</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#ImpactQuery</code></td>
+<td><code>Target: string</code></td>
+<td><code>affected</code>, <code>affected_count</code></td>
+<td>"What breaks if X fails?"</td>
+</tr>
+<tr>
+<td><code>#BlastRadius</code></td>
+<td><code>Target: string</code></td>
+<td><code>affected</code>, <code>rollback_order</code>, <code>startup_order</code>, <code>safe_peers</code></td>
+<td>Change impact analysis</td>
+</tr>
+<tr>
+<td><code>#ZoneAwareBlastRadius</code></td>
+<td><code>Target</code>, <code>Zones</code></td>
+<td>Same + <code>by_zone</code>, <code>zone_risk</code></td>
+<td>Multi-zone blast radius</td>
+</tr>
+<tr>
+<td><code>#CompoundRiskAnalysis</code></td>
+<td><code>Targets: [...]</code></td>
+<td><code>compound_risk</code>, <code>all_affected</code></td>
+<td>Simultaneous changes</td>
+</tr>
+<tr>
+<td><code>#DependencyChain</code></td>
+<td><code>Target: string</code></td>
+<td><code>path</code>, <code>depth</code>, <code>ancestors</code></td>
+<td>Startup path</td>
+</tr>
+<tr>
+<td><code>#CriticalityRank</code></td>
+<td>—</td>
+<td><code>ranked</code> (by dependent count)</td>
+<td>Priority ordering</td>
+</tr>
+<tr>
+<td><code>#RiskScore</code></td>
+<td>—</td>
+<td><code>ranked</code> (direct × transitive)</td>
+<td>Risk scoring</td>
+</tr>
+<tr>
+<td><code>#SinglePointsOfFailure</code></td>
+<td>—</td>
+<td><code>risks</code></td>
+<td>No-redundancy detection</td>
+</tr>
+<tr>
+<td><code>#SPOFWithRedundancy</code></td>
+<td><code>OverlapThreshold</code></td>
+<td><code>risks</code></td>
+<td>SPOF with peer overlap analysis</td>
+</tr>
+<tr>
+<td><code>#GroupByType</code></td>
+<td>—</td>
+<td><code>groups</code>, <code>counts</code></td>
+<td>Type inventory</td>
+</tr>
+<tr>
+<td><code>#ImmediateDependents</code></td>
+<td><code>Target: string</code></td>
+<td><code>dependents</code>, <code>count</code></td>
+<td>Direct dependents only</td>
+</tr>
+<tr>
+<td><code>#GraphMetrics</code></td>
+<td>—</td>
+<td><code>total_resources</code>, <code>max_depth</code>, etc.</td>
+<td>Summary stats</td>
+</tr>
+<tr>
+<td><code>#HealthStatus</code></td>
+<td><code>Status: {[name]: "healthy"\|"down"}</code></td>
+<td><code>propagated</code>, <code>summary</code></td>
+<td>Health simulation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="bindcluster-bindcue-command-resolution"><code>#BindCluster</code> (<code>bind.cue</code>) — command resolution</h3>
+<p>Matches providers to resources by <code>@type</code> overlap and resolves command templates:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>cluster: patterns.#BindCluster &amp; {
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    resources: _resources
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    providers: {
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>        proxmox: patterns.#ProviderDecl &amp; {
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>            types:    {LXCContainer: true, VirtualMachine: true}
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>            registry: proxmox_patterns.#ProxmoxRegistry
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>        }
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    }
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>}
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>// cluster.bound.dns.actions.proxmox.container_status.command = &quot;pct status 101&quot;
+</code></pre></div>
+<p>The binding algorithm:</p>
+<ol>
+<li>For each resource, iterate all providers</li>
+<li>If <code>provider.types ∩ resource["@type"] ≠ ∅</code>, the provider matches</li>
+<li>For each action in the provider's registry, check if all required parameters resolve from resource fields via <code>from_field</code></li>
+<li>Resolve the command template with <code>#ResolveTemplate</code> (compile-time string substitution, handles up to 8 parameters)</li>
+<li>Produce a concrete <code>vocab.#Action</code> with the resolved command</li>
+</ol>
+<h3 id="executionplan-deploycue-the-unifier"><code>#ExecutionPlan</code> (<code>deploy.cue</code>) — the unifier</h3>
+<p>Composes binding, graph analysis, and deployment planning over the same resource set:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>execution: patterns.#ExecutionPlan &amp; {
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    resources: _resources
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    providers: _providers
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>}
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>// execution.cluster.bound     — resources with resolved commands
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>// execution.graph.topology    — dependency layers
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>// execution.plan.layers       — ordered deployment with gates
+</code></pre></div>
+<p>CUE enforces that all three agree. If a resource's dependencies are inconsistent with its binding, evaluation fails — not at deploy time, at <code>cue vet</code> time.</p>
+<h3 id="deploymentplan-and-rollbackplan-graphcue"><code>#DeploymentPlan</code> and <code>#RollbackPlan</code> (<code>graph.cue</code>)</h3>
+<p>Layer-by-layer orchestration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>deploy: patterns.#DeploymentPlan &amp; {Graph: infra}
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>// deploy.layers = [
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>//   {layer: 0, resources: [&quot;router&quot;], gate: &quot;Layer 0 complete - ready for layer 1&quot;},
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>//   {layer: 1, resources: [&quot;dns&quot;, &quot;auth&quot;], gate: &quot;Layer 1 complete - ready for layer 2&quot;},
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>// ]
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>// deploy.startup_sequence  = [&quot;router&quot;, &quot;dns&quot;, &quot;auth&quot;, ...]
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>// deploy.shutdown_sequence = [..., &quot;auth&quot;, &quot;dns&quot;, &quot;router&quot;]
+</code></pre></div>
+<p><code>#RollbackPlan</code> reverses from a given failure layer (deepest affected resources first).</p>
+<h3 id="export-projections-projectionscue">Export projections (<code>projections.cue</code>)</h3>
+<p>The execution plan can be projected into multiple output formats:</p>
+<table>
+<thead>
+<tr>
+<th>Projection</th>
+<th>Format</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>notebook</code></td>
+<td><code>.ipynb</code> JSON</td>
+<td>Jupyter runbook with per-layer cells</td>
+</tr>
+<tr>
+<td><code>rundeck</code></td>
+<td>YAML</td>
+<td>Rundeck job definitions</td>
+</tr>
+<tr>
+<td><code>http</code></td>
+<td><code>.http</code></td>
+<td>RFC 9110 REST Client files</td>
+</tr>
+<tr>
+<td><code>wiki</code></td>
+<td>Markdown</td>
+<td>MkDocs site (index + per-resource pages)</td>
+</tr>
+<tr>
+<td><code>script</code></td>
+<td>Bash</td>
+<td>Self-contained deployment script with parallelism</td>
+</tr>
+<tr>
+<td><code>ops</code></td>
+<td>JSON</td>
+<td>Task list for <code>cue cmd</code> consumption</td>
+</tr>
+</tbody>
+</table>
+<h3 id="visualization-visualizationcue">Visualization (<code>visualization.cue</code>)</h3>
+<p>Graphviz DOT and Mermaid diagram generation from the dependency graph.</p>
+<h2 id="template-layer-template">Template layer: <code>template/*/</code></h2>
+<p>Each of the 29 provider templates follows a standard layout:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>template/&lt;name&gt;/
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  meta/meta.cue         # Provider metadata + type matching
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  patterns/&lt;name&gt;.cue   # Action registry (ActionDef definitions)
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  examples/demo.cue     # Working example
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  README.md
+</code></pre></div>
+<h3 id="metametacue"><code>meta/meta.cue</code></h3>
+<p>Declares what resource types this provider serves:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>package meta
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>import &quot;quicue.ca/vocab&quot;
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>match: vocab.#ProviderMatch &amp; {
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    types:    {VirtualizationPlatform: true}
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    provider: &quot;proxmox&quot;
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>}
+</code></pre></div>
+<h3 id="patternsnamecue"><code>patterns/&lt;name&gt;.cue</code></h3>
+<p>Implements concrete actions as <code>#ActionDef</code> registries. Example from Proxmox:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>#ProxmoxRegistry: {
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    container_status: vocab.#ActionDef &amp; {
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>        name:             &quot;Container Status&quot;
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>        description:      &quot;Get LXC container status&quot;
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>        category:         &quot;info&quot;
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>        params: {
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>            host:         {from_field: &quot;host&quot;}
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>            container_id: {from_field: &quot;container_id&quot;, type: &quot;int&quot;}
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>        }
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>        command_template: &quot;ssh {host} &#39;pct status {container_id}&#39;&quot;
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>        idempotent:       true
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    }
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>    // ...
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>}
+</code></pre></div>
+<h3 id="29-providers">29 providers</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Providers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compute</td>
+<td>proxmox, govc, powercli, kubevirt</td>
+</tr>
+<tr>
+<td>Container/Orchestration</td>
+<td>docker, incus, k3d, kubectl, argocd</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>dagger, gitlab</td>
+</tr>
+<tr>
+<td>Networking</td>
+<td>vyos, caddy, nginx</td>
+</tr>
+<tr>
+<td>DNS</td>
+<td>cloudflare, powerdns, technitium</td>
+</tr>
+<tr>
+<td>Identity/Secrets</td>
+<td>vault, keycloak</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>postgresql</td>
+</tr>
+<tr>
+<td>DCIM/IPAM</td>
+<td>netbox</td>
+</tr>
+<tr>
+<td>Provisioning</td>
+<td>foreman</td>
+</tr>
+<tr>
+<td>Automation</td>
+<td>ansible, awx</td>
+</tr>
+<tr>
+<td>Monitoring</td>
+<td>zabbix</td>
+</tr>
+<tr>
+<td>IaC</td>
+<td>terraform, opentofu</td>
+</tr>
+<tr>
+<td>Backup</td>
+<td>restic, pbs</td>
+</tr>
+</tbody>
+</table>
+<h2 id="value-layer-examples-and-your-code">Value layer: examples and your code</h2>
+<p>The value layer provides concrete resource instances. Here's how the datacenter example composes everything:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>// examples/datacenter/main.cue
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>_resources: {
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    &quot;router-core&quot;: {
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>        name:     &quot;router-core&quot;
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>        &quot;@type&quot;:  {Router: true, CriticalInfra: true}
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>        ip:       &quot;198.51.100.1&quot;
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>        ssh_user: &quot;vyos&quot;
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>    }
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>    &quot;dns-primary&quot;: {
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>        name:         &quot;dns-primary&quot;
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>        &quot;@type&quot;:      {LXCContainer: true, DNSServer: true}
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>        depends_on:   {&quot;router-core&quot;: true}
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>        host:         &quot;pve-alpha&quot;
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>        container_id: 100
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>        ip:           &quot;198.51.100.211&quot;
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>    }
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>    // ... 28 more resources
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>}
+<a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a>
+<a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a>_providers: {
+<a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a>    vyos:     {types: {Router: true}, registry: vyos_patterns.#VyOSRegistry}
+<a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a>    proxmox:  {types: {VirtualMachine: true, LXCContainer: true}, registry: proxmox_patterns.#ProxmoxRegistry}
+<a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a>    powerdns: {types: {DNSServer: true}, registry: powerdns_patterns.#PowerDNSRegistry}
+<a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a>    // ... 25 more providers
+<a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a>}
+<a id="__codelineno-12-26" name="__codelineno-12-26" href="#__codelineno-12-26"></a>
+<a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a>execution: patterns.#ExecutionPlan &amp; {
+<a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a>    resources: _resources
+<a id="__codelineno-12-29" name="__codelineno-12-29" href="#__codelineno-12-29"></a>    providers: _providers
+<a id="__codelineno-12-30" name="__codelineno-12-30" href="#__codelineno-12-30"></a>}
+<a id="__codelineno-12-31" name="__codelineno-12-31" href="#__codelineno-12-31"></a>
+<a id="__codelineno-12-32" name="__codelineno-12-32" href="#__codelineno-12-32"></a>output: {
+<a id="__codelineno-12-33" name="__codelineno-12-33" href="#__codelineno-12-33"></a>    summary:          execution.graph.#GraphMetrics
+<a id="__codelineno-12-34" name="__codelineno-12-34" href="#__codelineno-12-34"></a>    topology:         execution.graph.topology
+<a id="__codelineno-12-35" name="__codelineno-12-35" href="#__codelineno-12-35"></a>    deployment_plan:  execution.plan
+<a id="__codelineno-12-36" name="__codelineno-12-36" href="#__codelineno-12-36"></a>    impact: {
+<a id="__codelineno-12-37" name="__codelineno-12-37" href="#__codelineno-12-37"></a>        for rname, _ in _resources {
+<a id="__codelineno-12-38" name="__codelineno-12-38" href="#__codelineno-12-38"></a>            (rname): (patterns.#ImpactQuery &amp; {Graph: execution.graph, Target: rname})
+<a id="__codelineno-12-39" name="__codelineno-12-39" href="#__codelineno-12-39"></a>        }
+<a id="__codelineno-12-40" name="__codelineno-12-40" href="#__codelineno-12-40"></a>    }
+<a id="__codelineno-12-41" name="__codelineno-12-41" href="#__codelineno-12-41"></a>    // ...
+<a id="__codelineno-12-42" name="__codelineno-12-42" href="#__codelineno-12-42"></a>}
+</code></pre></div>
+<h2 id="extension-modules">Extension modules</h2>
+<h3 id="ou-role-scoped-views"><code>ou/</code> — Role-scoped views</h3>
+<p>Role-scoped views that filter resources and actions by role:</p>
+<ul>
+<li><code>ops</code> — full access to all actions</li>
+<li><code>dev</code> — read-only monitoring and log access</li>
+<li><code>readonly</code> — status queries only</li>
+</ul>
+<p>Exports W3C Hydra JSON-LD for semantic API navigation.</p>
+<h3 id="boot-bootstrap-sequencing"><code>boot/</code> — Bootstrap sequencing</h3>
+<p>Credential collection and bootstrap ordering for initial infrastructure setup. Handles the chicken-and-egg problem (e.g., you need DNS to reach the vault, but you need the vault to configure DNS).</p>
+<h3 id="orche-multi-site-federation"><code>orche/</code> — Multi-site federation</h3>
+<p>Models core + edge topology for multi-site deployments. Includes drift detection patterns for declared-vs-live state reconciliation.</p>
+<h3 id="cab-change-advisory-board"><code>cab/</code> — Change Advisory Board</h3>
+<p>Generates CAB reports from impact analysis: what's changing, what's affected, what's the rollback plan, who needs to approve.</p>
+<h3 id="wiki-documentation-generation"><code>wiki/</code> — Documentation generation</h3>
+<p>Produces MkDocs-compatible markdown from the resource graph: index page, per-layer views, per-resource detail pages.</p>
+<h3 id="server-fastapi-gateway"><code>server/</code> — FastAPI gateway</h3>
+<p>HTTP API for executing resolved commands. Reads the CUE-generated OpenAPI spec and exposes 654 actions across 29 providers as REST endpoints. Live at <a href="https://api.quicue.ca/docs">api.quicue.ca</a> (public, mock mode — unauthenticated callers see resolved commands without execution). Serves W3C Hydra JSON-LD and graph data for the <a href="https://demo.quicue.ca/">operator dashboard</a> which provides D3 graph visualization, execution planner, resource browser, and Hydra explorer.</p>
+<h3 id="kg-knowledge-graph"><code>kg/</code> — Knowledge graph</h3>
+<p>Vendored copy of the <a href="https://github.com/quicue/quicue-kg">quicue-kg</a> framework. The <code>.kb/</code> directory at the repo root is a multi-graph knowledge base with typed subdirectories (decisions/, patterns/, insights/, rejected/), each an independent CUE package validated against its kg type.</p>
+<h4 id="downstream-validation">Downstream validation</h4>
+<p><code>.kb/downstream.cue</code> registers known consumers (grdn, cmhc-retrofit, maison-613, apercue). Each consumer maintains its own <code>.kb/</code> with a deps registry cataloging which vocab and pattern definitions it imports and where they're used — for example, grdn's deps.cue records 14 pattern and 2 vocab definitions with source, purpose, and consuming files.</p>
+<p>The <code>make check-downstream</code> target runs <code>cue vet</code> on validation targets across downstream projects. Renaming a field in <code>#InfraGraph</code> produces a unification error in any consumer that references it, caught at build time rather than discovered in production.</p>
+<h2 id="data-flow-summary">Data flow summary</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>1. Define resources (CUE values with @type and depends_on)
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>                    ↓
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>2. Declare providers (type matching + action registries)
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>                    ↓
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>3. #ExecutionPlan unifies:
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>   ├── #BindCluster  → resolved commands per resource per provider
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>   ├── #InfraGraph   → depth, ancestors, topology, dependents
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>   └── #DeploymentPlan → ordered layers with gates
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>                    ↓
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>4. CUE validates everything simultaneously:
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>   - Missing fields → compile error
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>   - Dangling dependencies → validation error
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>   - Type mismatches → unification error
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>                    ↓
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>5. Export to any format:
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>   - cue export -e output --out json          → full execution data
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a>   - cue export -e execution.notebook         → Jupyter runbook
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a>   - cue export -e execution.script --out text → deployment script
+<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>   - cue export -e jsonld --out json          → JSON-LD graph
+</code></pre></div>
+<h2 id="key-invariants">Key invariants</h2>
+<ol>
+<li>
+<p><strong>No runtime template resolution.</strong> Every <code>{param}</code> placeholder is resolved at <code>cue vet</code> time. If a command has an unresolved placeholder, it won't compile.</p>
+</li>
+<li>
+<p><strong>The graph is the source of truth.</strong> Deployment plans, rollback sequences, blast radius, documentation, and visualizations are all computed from the same unified constraint set. Change one dependency and everything updates.</p>
+</li>
+<li>
+<p><strong>Struct-as-set everywhere.</strong> <code>@type</code>, <code>depends_on</code>, <code>provides</code>, and <code>tags</code> all use <code>{key: true}</code> structs for O(1) membership testing. This is a deliberate performance decision — CUE's <code>list.Contains</code> is O(n) and compounds across comprehensions.</p>
+</li>
+<li>
+<p><strong>Hidden fields for export control.</strong> CUE exports all public (capitalized) fields. Intermediate computation uses hidden fields (<code>_depth</code>, <code>_ancestors</code>, <code>_graph</code>) to prevent JSON bloat. Export-facing definitions expose only the fields consumers need.</p>
+</li>
+<li>
+<p><strong>Topology-sensitive transitive closure.</strong> CUE's fixpoint computation for <code>_ancestors</code> is bottlenecked by fan-in (edge density), not node count. For high-fan-in graphs, precompute depth values externally.</p>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
