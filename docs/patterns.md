@@ -2,6 +2,8 @@
 
 Reference for all patterns in `quicue.ca/patterns@v0`. Every pattern is a CUE definition that takes typed inputs and produces computed outputs. Patterns compose — most accept `Graph: #InfraGraph` and can be combined freely.
 
+**Identifier safety:** All resource names, `@type` keys, and `depends_on` keys are constrained to ASCII via `#SafeID` and `#SafeLabel` in `vocab/resource.cue`. Patterns assume safe identifiers and do not need to validate them — `cue vet` enforces the constraints at compile time.
+
 ## Graph construction
 
 ### `#InfraGraph`

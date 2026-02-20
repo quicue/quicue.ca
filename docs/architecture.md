@@ -40,6 +40,7 @@ Key design decisions:
 - **Struct-as-set for `@type` and `depends_on`.** `{LXCContainer: true}` gives O(1) membership checks. Patterns test `resource["@type"][SomeType] != _|_` instead of iterating a list.
 - **Generic field names.** `host` (not `node`), `container_id` (not `lxcid`), `vm_id` (not `vmid`). Providers map generic names to platform-specific commands. This decouples the graph from any single platform.
 - **Open schema (`...`).** Resources can carry domain-specific fields without modifying vocab. A Proxmox resource can have `pool: "production"` alongside the standard fields.
+- **ASCII-safe identifiers.** All resource names, `@type` keys, `depends_on` keys, and tag keys are constrained to ASCII via `#SafeID` and `#SafeLabel` regex patterns. This prevents zero-width unicode injection, homoglyph attacks (Cyrillic "a" vs Latin "a"), and invisible characters that would break CUE unification silently. `cue vet` catches violations at compile time.
 
 ### `#Action` and `#ActionDef` (`actions.cue`)
 
