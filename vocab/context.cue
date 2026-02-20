@@ -15,13 +15,11 @@ context: {
 		// Override this in your instance data for your domain
 		"@base": "https://infra.example.com/resources/"
 
-		// Namespace prefixes
+		// W3C namespace prefixes (aligned with apercue.ca @context)
 		"quicue":  "https://quicue.ca/vocab#"
 		"dcterms": "http://purl.org/dc/terms/"
 		"prov":    "http://www.w3.org/ns/prov#"
 		"dcat":    "http://www.w3.org/ns/dcat#"
-		"as":      "https://www.w3.org/ns/activitystreams#"
-		"oa":      "http://www.w3.org/ns/oa#"
 		"sh":      "http://www.w3.org/ns/shacl#"
 		"schema":  "https://schema.org/"
 		"time":    "http://www.w3.org/2006/time#"
@@ -33,15 +31,15 @@ context: {
 			(typeName): "quicue:\(typeName)"
 		}
 
-		// Resource fields (generic names)
-		"name":         "quicue:name"
+		// Resource fields — dcterms for generic, quicue for infra-specific
+		"name":         "dcterms:title"
+		"description":  "dcterms:description"
 		"ip":           "quicue:ipAddress"
 		"fqdn":         "quicue:fqdn"
 		"ssh_user":     "quicue:sshUser"
 		"host":         "quicue:host"
 		"container_id": "quicue:containerId"
 		"vm_id":        "quicue:vmId"
-		"description":  "quicue:description"
 
 		// Relationships — IRI references to other resources.
 		// depends_on maps to dcterms:requires (ISO 15836-2:2019):
