@@ -16,11 +16,16 @@ package patterns
 
 import "list"
 
+// Hidden mirrors of vocab.#SafeID / vocab.#SafeLabel — needed because
+// CUE hidden definitions are package-scoped and vocab's aren't visible here.
+_#SafeID:    =~"^[a-zA-Z][a-zA-Z0-9_.-]*$"
+_#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
+
 // #GraphResource - Schema for resources with computed graph properties
 // Use this when you want automatic depth, ancestors, etc.
 #GraphResource: {
-	name: string
-	"@type": {[string]: true}
+	name: _#SafeID
+	"@type": {[_#SafeLabel]: true}
 
 	// Optional fields - use generic names (providers map to platform-specific)
 	ip?:           string
@@ -29,12 +34,12 @@ import "list"
 	vm_id?:        int | string // VM identifier
 	fqdn?:         string
 	ssh_user?:     string
-	provides?: {[string]: true}
-	tags?: {[string]: true}
+	provides?: {[_#SafeLabel]: true}
+	tags?: {[_#SafeLabel]: true}
 	description?: string
 
 	// Dependencies - set membership (clean unification)
-	depends_on?: {[string]: true}
+	depends_on?: {[_#SafeID]: true}
 
 	// Computed: depth in dependency graph (0 = root)
 	_depth: int
@@ -61,17 +66,17 @@ import "list"
 //
 #InfraGraph: {
 	// Input: string-based resources (portable, can come from JSON)
-	Input: [string]: {
-		name: string
-		"@type": {[string]: true}
-		depends_on?: {[string]: true}
+	Input: [_#SafeID]: {
+		name: _#SafeID
+		"@type": {[_#SafeLabel]: true}
+		depends_on?: {[_#SafeID]: true}
 		...
 	}
 
 	// Optional: pre-computed depth values from Python (for large graphs)
 	// When provided, skips expensive CUE depth recursion
 	Precomputed?: {
-		depth: [string]: int
+		depth: [_#SafeID]: int
 	}
 
 	// Validation: all dependency references must exist in Input
