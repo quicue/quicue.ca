@@ -99,10 +99,11 @@ import "quicue.ca/vocab"
 	Output: _withDeps
 }
 
-// #ValidateGraph - Apply type contracts to all resources in a graph
+// #ValidateTypes - Apply type contracts to all resources in a graph
+// (Renamed from #ValidateGraph to avoid collision with graph.cue's structural validator)
 // Usage:
-//   validatedGraph: patterns.#ValidateGraph & {Input: myResources}
-#ValidateGraph: {
+//   validatedGraph: patterns.#ValidateTypes & {Input: myResources}
+#ValidateTypes: {
 	Input: [string]: _
 
 	// Apply type contracts to each resource

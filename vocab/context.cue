@@ -23,6 +23,10 @@ context: {
 		"as":      "https://www.w3.org/ns/activitystreams#"
 		"oa":      "http://www.w3.org/ns/oa#"
 		"sh":      "http://www.w3.org/ns/shacl#"
+		"schema":  "https://schema.org/"
+		"time":    "http://www.w3.org/2006/time#"
+		"earl":    "http://www.w3.org/ns/earl#"
+		"skos":    "http://www.w3.org/2004/02/skos/core#"
 
 		// Map each semantic type to the vocabulary
 		for typeName, _ in #TypeRegistry {
@@ -39,13 +43,21 @@ context: {
 		"vm_id":        "quicue:vmId"
 		"description":  "quicue:description"
 
-		// Relationships - @type: @id means values are IRI references
+		// Relationships — IRI references to other resources.
+		// depends_on maps to dcterms:requires (ISO 15836-2:2019):
+		//   "A requires B to support its function, delivery, or coherence."
 		"depends_on": {
-			"@id":   "quicue:dependsOn"
+			"@id":   "dcterms:requires"
 			"@type": "@id"
 		}
 		"hosted_on": {
 			"@id":   "quicue:hostedOn"
+			"@type": "@id"
+		}
+
+		// Lifecycle — schema:actionStatus (schema.org ActionStatusType)
+		"status": {
+			"@id":   "schema:actionStatus"
 			"@type": "@id"
 		}
 

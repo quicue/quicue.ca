@@ -126,6 +126,25 @@ p_safe_deploy: core.#Pattern & {
 	}
 }
 
+p_hidden_intermediary: core.#Pattern & {
+	name:     "Hidden Intermediary for Nested Structs"
+	category: "cue"
+	problem:  "CUE field references inside nested structs resolve to the nearest enclosing scope. summary: { total: total } creates a self-reference — the inner 'total' shadows the outer 'total'. CUE treats this as a tautology or produces 'field not allowed' errors."
+	solution: "Define hidden intermediaries at the outer scope: _total: total. Then reference them inside the nested struct: summary: { total: _total }. Hidden fields with _ prefix are exempt from name collision because they're scoped differently."
+	context:  "Any CUE definition that copies outer field values into a nested summary or output struct. Especially common with summary, output, export patterns."
+	example:  "_total_dur: total_duration; _crit_count: len(critical); summary: { total_duration: _total_dur, critical_count: _crit_count }"
+	used_in: {
+		"quicue.ca":       true
+		"cmhc-retrofit":   true
+		"charter":         true
+		"patterns-v2":     true
+	}
+	related: {
+		"hidden_wrapper":          true
+		"contract_via_unification": true
+	}
+}
+
 // --- Deployment Lifecycle Principles ---
 // The following patterns codify the deployment philosophy
 // derived from the quicue.ca ecosystem and validated by the

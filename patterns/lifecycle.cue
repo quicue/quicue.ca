@@ -17,10 +17,35 @@
 
 package patterns
 
-import "strings"
+import (
+	"list"
+	"strings"
+)
 
 // #LifecyclePhase enumerates the ordered phases of a deployment lifecycle.
 #LifecyclePhase: "package" | "bootstrap" | "bind" | "deploy" | "verify" | "drift"
+
+// Ordered list for SKOS export (CUE can't iterate disjunctions).
+_lifecyclePhaseList: ["package", "bootstrap", "bind", "deploy", "verify", "drift"]
+
+// #LifecyclePhasesSKOS — W3C SKOS OrderedCollection projection.
+// Exports lifecycle phases as machine-readable ordered concepts.
+//
+// Export: cue export ./patterns/ -e #LifecyclePhasesSKOS --out json
+#LifecyclePhasesSKOS: {
+	"@type":          "skos:OrderedCollection"
+	"skos:prefLabel": "Deployment Lifecycle Phases"
+	"skos:memberList": {
+		"@list": [
+			for i, p in _lifecyclePhaseList {
+				"@type":          "skos:Concept"
+				"@id":            "quicue:lifecycle/" + p
+				"skos:prefLabel": p
+				"skos:notation":  "\(i)"
+			},
+		]
+	}
+}
 
 // --- Bootstrap (absorbed from boot/) ---
 
@@ -53,11 +78,24 @@ import "strings"
 #BootstrapPlan: {
 	resources: [string]: #BootstrapResource
 
+	// Compute correct topological depth via recursive fixpoint (same as #InfraGraph._depth).
+	// Base case: no deps → 0. Recursive: max(dep depths) + 1.
+	_depths: {
+		for name, res in resources {
+			let _deps = *res.depends_on | {}
+			(name): [
+				if len([for d, _ in _deps if resources[d] != _|_ {d}]) > 0 {
+					list.Max([for d, _ in _deps if resources[d] != _|_ {_depths[d]}]) + 1
+				},
+				0,
+			][0]
+		}
+	}
+
 	// Computed: resources grouped by their dependency depth
 	_by_layer: {
 		for name, res in resources {
-			let _depth = len([ for dep, _ in res.depends_on if dep != _|_ {dep}])
-			"\(_depth)": "\(name)": res
+			"\(_depths[name])": (name): res
 		}
 	}
 
@@ -161,6 +199,31 @@ import "strings"
 		"echo \"Results: $PASS passed, $FAIL failed\"",
 		"[ $FAIL -eq 0 ]",
 	], "\n")
+
+	// ── EARL report projection ────────────────────────────────────
+	// W3C EARL (Working Group Note, 2017-02-02): express test plans
+	// as earl:Assertion for interoperability with accessibility and
+	// conformance testing frameworks.
+	//
+	// Outcome is earl:untested at CUE eval time (actual results come
+	// from running the script). The test PLAN is the linked data.
+	//
+	// Export: cue export -e verify.earl_report --out json
+	earl_report: [
+		for c in checks {
+			"@type": "earl:Assertion"
+			"earl:test": {
+				"@type":        "earl:TestCriterion"
+				"dcterms:title": c.label
+				"earl:command":  c.command
+			}
+			"earl:result": {
+				"@type":        "earl:TestResult"
+				"earl:outcome": {"@id": "earl:untested"}
+				"earl:expected": c.expected
+			}
+		},
+	]
 }
 
 // --- Deployment Lifecycle (composition) ---
