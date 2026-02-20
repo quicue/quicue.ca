@@ -240,6 +240,122 @@ rollback: patterns.#RollbackPlan & {Graph: infra, FailedAt: 2}
 // rollback.safe = ["router", "dns", "auth"]    // layers 0-1 untouched
 ```
 
+## Structural analysis
+
+**File:** `patterns/analysis.cue`
+
+Higher-order patterns that extend `#InfraGraph` with graph-theoretic analysis. All operate on the same typed dependency graph and compose with existing patterns.
+
+### `#CycleDetector`
+
+**Purpose:** Validate DAG property before `#InfraGraph` construction. Runs on raw input — catches cycles that would cause CUE fixpoint divergence.
+
+```cue
+check: patterns.#CycleDetector & {Input: rawResources}
+// check.acyclic == true → safe to build #InfraGraph
+// check.cycles == [{resource: "a", via: ["b"]}] → cycle detected
+```
+
+Algorithm: bounded-depth BFS with doubling (5 steps = 32-hop reach).
+
+### `#ConnectedComponents`
+
+**Purpose:** Find weakly connected components — orphaned resources with no dependency link to the main cluster.
+
+```cue
+cc: patterns.#ConnectedComponents & {Graph: infra}
+// cc.count == 1 → entire graph is connected
+// cc.isolated == {orphan_node: true} → disconnected resources
+// cc.components → {canonical_label: {member: true, ...}, ...}
+```
+
+### `#Subgraph`
+
+**Purpose:** Extract an induced subgraph by roots, target, or radius. Returns selected nodes and internal edges.
+
+```cue
+// Everything downstream of "dns"
+sub: patterns.#Subgraph & {Graph: infra, Roots: {"dns": true}}
+
+// Within 2 layers of "web-app" in both directions
+sub: patterns.#Subgraph & {Graph: infra, Target: "web-app", Radius: 2, Mode: "both"}
+
+// sub.selected — node set
+// sub.edges — edges within subgraph
+// sub.summary — {total, edges}
+```
+
+Modes: `"descendants"` (default), `"ancestors"`, `"both"`.
+
+### `#GraphDiff`
+
+**Purpose:** Structural delta between two graph versions — added/removed nodes, edges, and type changes.
+
+```cue
+diff: patterns.#GraphDiff & {Before: graphV1, After: graphV2}
+// diff.added_nodes — names and types of new resources
+// diff.removed_nodes — names and types of deleted resources
+// diff.type_changes — resources with added/removed types
+// diff.added_edges, diff.removed_edges — dependency changes
+// diff.summary.has_changes — quick boolean check
+```
+
+Compose with `#CompoundRiskAnalysis` on changed nodes for blast radius of a change.
+
+### `#CriticalPath`
+
+**Purpose:** Critical Path Method — earliest/latest start times, slack, and critical sequence. Resources with zero slack form the critical path.
+
+```cue
+cpm: patterns.#CriticalPath & {
+    Graph:   infra
+    Weights: {"database": 5, "web-app": 2}  // optional durations, default 1
+}
+// cpm.critical — resources on the critical path with start/finish/duration
+// cpm.critical_sequence — ordered by start time
+// cpm.slack — per-resource float time
+// cpm.total_duration — project/deployment duration
+```
+
+## Compliance checking
+
+**File:** `patterns/validation.cue`
+
+Declarative structural rules evaluated against graph topology.
+
+### `#ComplianceRule`
+
+**Purpose:** Define a structural rule — match resources by type, assert a property.
+
+```cue
+{
+    name: "db-monitoring"
+    match_types: {Database: true}
+    requires_dependent_type: {MonitoringServer: true}
+    severity: "critical"
+}
+```
+
+Assertions: `requires_dependent_type`, `requires_dependency_type`, `must_not_be_root`, `must_not_be_leaf`, `min_dependents`, `max_depth`.
+
+### `#ComplianceCheck`
+
+**Purpose:** Evaluate compliance rules against a graph. Returns per-rule pass/fail with specific violations.
+
+```cue
+compliance: patterns.#ComplianceCheck & {
+    Graph: infra
+    Rules: [{
+        name: "databases-need-monitoring"
+        match_types: {Database: true}
+        requires_dependent_type: {MonitoringServer: true}
+        severity: "critical"
+    }]
+}
+// compliance.summary = {total: 1, passed: 0, failed: 1, critical_failures: 1}
+// compliance.results[0].violations = [{resource: "prod-db", check: "requires_dependent_type"}]
+```
+
 ## Validation
 
 **File:** `patterns/validation.cue`
@@ -379,6 +495,17 @@ tc: patterns.#ApplyTypeContracts & {Input: resource}
 // tc._allDeps = {network: true}  (structural deps derived from types)
 ```
 
+### `#ValidateTypes`
+
+**Purpose:** Apply type contracts to all resources in a graph (batch version of `#ApplyTypeContracts`).
+
+```cue
+validated: patterns.#ValidateTypes & {Input: myResources}
+// validated.Output — resources with derived dependencies
+// validated.resourceCount = 14
+// validated.validated = true  // if we get here, all types checked out
+```
+
 ### `#TypeRequirements`
 
 **Purpose:** Extract all required fields for a set of types.
@@ -490,6 +617,60 @@ These extend `#ExecutionPlan` to produce specific output formats:
 | `wiki` | Markdown | MkDocs pages (index + per-resource detail) |
 | `script` | Bash | Self-contained deployment script with parallelism |
 | `ops` | JSON | Task list for `cue cmd` consumption |
+
+## Lifecycle
+
+**File:** `patterns/lifecycle.cue`
+
+Composable types for the deployment lifecycle: Bundle → Bootstrap → Execute → Verify → Drift.
+
+### `#BootstrapPlan`
+
+**Purpose:** Compute layered creation order from dependency topology. Produces a bash script with layer gates.
+
+```cue
+boot: patterns.#BootstrapPlan & {resources: _bootstrapResources}
+// boot.script — bash script creating resources in topological order
+```
+
+### `#DriftReport`
+
+**Purpose:** Compare declared state (CUE) against observed state (runtime JSON).
+
+```cue
+drift: patterns.#DriftReport & {
+    declared: execution.cluster.resources
+    observed: liveState  // injected via cue export -t observed=@live.json
+}
+// drift.missing — declared but not observed
+// drift.extra — observed but not declared
+// drift.summary.in_sync — true if no divergence
+```
+
+### `#SmokeTest`
+
+**Purpose:** Generate a bash smoke test script from a list of checks.
+
+```cue
+smoke: patterns.#SmokeTest & {
+    checks: [{label: "DNS resolves", command: "dig +short example.com", expected: "10.0.1.10"}]
+}
+// smoke.script — executable bash script
+```
+
+### `#DeploymentLifecycle`
+
+**Purpose:** Compose all lifecycle phases into a single type. Each phase is optional.
+
+```cue
+lifecycle: patterns.#DeploymentLifecycle & {
+    name: "production"
+    phases: ["bootstrap", "deploy", "verify"]
+    bootstrap: patterns.#BootstrapPlan & {resources: _resources}
+    execution: patterns.#ExecutionPlan & {resources: _resources, providers: _providers}
+    verify: patterns.#SmokeTest & {checks: _checks}
+}
+```
 
 ## Composition example
 
@@ -610,16 +791,18 @@ Action interfaces define what operations a resource type should support. Used by
 
 ## Summary
 
-76 definitions across 15 files, organized into:
+90+ definitions across 20 files, organized into:
 
 | Category | Count | File(s) |
 |----------|-------|---------|
 | Graph analysis & topology | 12 | `graph.cue` |
+| Structural analysis | 5 | `analysis.cue` |
 | Operational patterns | 8 | `graph.cue` |
 | Visualization | 6 | `visualization.cue`, `graph.cue` |
-| Validation | 6 | `validation.cue` |
+| Validation & compliance | 8 | `validation.cue` |
 | Network zones | 7 | `network.cue` |
 | Providers & action binding | 20 | `providers.cue`, `bind.cue`, `interfaces.cue` |
-| Type contracts | 3 | `type-contracts.cue` |
+| Type contracts | 4 | `type-contracts.cue` |
 | Execution & deployment | 2 | `deploy.cue`, `projections.cue` |
+| Lifecycle | 5 | `lifecycle.cue` |
 | Export formats | 10 | `toon.cue`, `openapi.cue`, `justfile.cue`, `shacl.cue` |

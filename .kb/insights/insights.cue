@@ -182,3 +182,46 @@ i009: core.#Insight & {
 	]
 	related: {"ADR-013": true}
 }
+
+i011: core.#Insight & {
+	id:        "INSIGHT-011"
+	statement: "W3C vocabulary alignment is mostly projection work — CUE's typed data already has the structure, it just needs the right IRIs"
+	evidence: [
+		"depends_on mapped from quicue:dependsOn to dcterms:requires — zero code change, just one IRI swap in context.cue",
+		"#ComplianceCheck results already have the structure of sh:ValidationReport — adding the projection was 20 lines",
+		"#SmokeTest checks map 1:1 to earl:Assertion — each check is one assertion with an outcome",
+		"#CriticalPath scheduling maps to time:Interval — the CUE computation is the same, output gains W3C IRIs",
+		"#GapAnalysis missing resources are exactly sh:ValidationResult entries — the semantics were already SHACL-shaped",
+		"schema:actionStatus has exactly the 4 states needed for task lifecycle (PotentialAction, Active, Completed, Failed)",
+	]
+	method:     "cross_reference"
+	confidence: "high"
+	discovered: "2026-02-19"
+	implication: "When your data model is already typed and validated by CUE, W3C compliance is a thin projection layer — not a rewrite. The investment is in choosing the right vocabulary mapping, not in restructuring data. CUE's struct-as-set and typed fields map naturally to RDF predicates."
+	action_items: [
+		"Add @context entries for time:, earl:, skos:, schema: to vocab/context.cue",
+		"Document W3C vocabulary mapping table in docs/patterns.md",
+		"Consider publishing a formal OWL ontology for quicue: namespace",
+	]
+	related: {"INSIGHT-006": true, "INSIGHT-007": true}
+}
+
+i010: core.#Insight & {
+	id:        "INSIGHT-010"
+	statement: "Three latent bugs in patterns/ went undetected because CUE's lax evaluation hides struct iteration errors and name collisions"
+	evidence: [
+		"#BootstrapPlan used len(depends_on) as depth proxy — a resource with 3 peers at depth 0 got 'depth 3'. No test caught this because the only BootstrapPlan consumer (lifecycle.cue) was never exercised against a non-trivial topology",
+		"#ValidateGraph was defined in BOTH graph.cue and type-contracts.cue in the same package — CUE silently unified them, creating a chimera definition requiring fields from both",
+		"#DependencyValidation iterated depends_on as an array ('for dep in') but the codebase uses struct-as-set ({[string]: true}) — the iteration silently produced wrong results",
+	]
+	method:     "observation"
+	confidence: "high"
+	discovered: "2026-02-19"
+	implication: "CUE's lazy evaluation and open-struct defaults mean bugs can hide in definitions that are syntactically valid but semantically wrong. Critical patterns need exercising examples, not just cue vet."
+	action_items: [
+		"Add exercising tests for #BootstrapPlan, #ComplianceCheck, #CycleDetector, #ConnectedComponents, #Subgraph, #GraphDiff, #CriticalPath against the 3-layer and datacenter examples",
+		"CI should run cue eval (not just cue vet) on patterns that compute outputs",
+		"Audit remaining patterns for struct-as-set vs array iteration mismatches",
+	]
+	related: {"INSIGHT-003": true}
+}

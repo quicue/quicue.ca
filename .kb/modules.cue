@@ -20,8 +20,11 @@ modules: {
 			"#ImpactQuery", "#BlastRadius", "#SinglePointsOfFailure",
 			"#CriticalityRank", "#HealthStatus", "#RollbackPlan",
 			"#DeploymentPlan", "#TOONExport", "#ExportGraph",
-			"#ValidateGraph", "#GroupByType", "#GraphMetrics",
+			"#ValidateGraph", "#ValidateTypes", "#GroupByType", "#GraphMetrics",
 			"#ImmediateDependents", "#DependencyChain",
+			"#CycleDetector", "#ConnectedComponents", "#Subgraph",
+			"#GraphDiff", "#CriticalPath", "#ComplianceCheck",
+			"#LifecyclePhasesSKOS",
 		]
 	}
 	templates: {
@@ -102,9 +105,9 @@ modules: {
 		path:        "charter/"
 		module:      "quicue.ca@v0"
 		layer:       "constraint"
-		description: "Constraint-first project planning: declare scope, evaluate gaps, track gates"
+		description: "Constraint-first project planning: declare scope, evaluate gaps, track gates. SHACL gap report projection."
 		status:      "active"
-		schemas:     ["#Charter", "#Gate", "#GapAnalysis", "#Milestone"]
+		schemas:     ["#Charter", "#Gate", "#GapAnalysis", "#Milestone", "#InfraCharter"]
 		depends:     ["patterns"]
 	}
 	examples: {
@@ -124,6 +127,8 @@ modules: {
 			"docker-bootstrap",
 			"wiki-projection",
 			"toon-export",
+			"patterns-v2",
+			"reconciliation",
 		]
 	}
 }

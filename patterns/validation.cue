@@ -11,6 +11,7 @@
 package patterns
 
 import (
+	"list"
 	"strings"
 	"quicue.ca/vocab"
 )
@@ -133,11 +134,11 @@ import (
 	// Input: resources collection
 	_resources: [string]: vocab.#Resource
 
-	// Check all depends_on references
+	// Check all depends_on references (struct-as-set: {[string]: true})
 	_brokenDeps: [
 		for name, resource in _resources
 		if resource.depends_on != _|_
-		for dep in resource.depends_on
+		for dep, _ in resource.depends_on
 		if _resources[dep] == _|_ {
 			source:     name
 			dependency: dep
@@ -202,4 +203,184 @@ import (
 
 	valid:  len(_invalidIPs) == 0
 	issues: _invalidIPs
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COMPLIANCE CHECKING (graph-aware)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// #ComplianceRule — A declarative structural rule for graph resources.
+//
+// Each rule selects resources by type, then asserts a property.
+// Set one or more assertion fields per rule.
+//
+// Example rules:
+//   {name: "db-monitoring", match_types: {Database: true},
+//    requires_dependent_type: {MonitoringServer: true}, severity: "critical"}
+//   {name: "no-orphan-lb", match_types: {LoadBalancer: true},
+//    must_not_be_leaf: true}
+//
+#ComplianceRule: {
+	name:        string
+	description: string | *""
+	severity:    *"warning" | "critical" | "info"
+
+	// Type selector: which resources this rule applies to
+	match_types: {[string]: true}
+
+	// Assertions (all optional — set one or more)
+	requires_dependent_type?:  {[string]: true} // must have a dependent of this type
+	requires_dependency_type?: {[string]: true} // must depend on something of this type
+	must_not_be_root?:         true              // must depend on something
+	must_not_be_leaf?:         true              // something must depend on it
+	min_dependents?:           int               // minimum number of dependents
+	max_depth?:                int               // maximum allowed depth
+}
+
+// #ComplianceCheck — Evaluate declarative compliance rules against a graph.
+//
+// Takes an #InfraGraph and a list of #ComplianceRule, returns per-rule
+// pass/fail results with specific violations.
+//
+// Usage:
+//   compliance: #ComplianceCheck & {
+//     Graph: infra
+//     Rules: [{
+//       name: "databases-need-monitoring"
+//       match_types: {Database: true}
+//       requires_dependent_type: {MonitoringServer: true}
+//       severity: "critical"
+//     }]
+//   }
+//   // compliance.summary.failed — number of failed rules
+//   // compliance.results[0].violations — list of offending resources
+//
+#ComplianceCheck: {
+	Graph: #InfraGraph
+	Rules: [...#ComplianceRule]
+
+	results: [
+		for i, rule in Rules {
+			// Find resources matching this rule's type selector
+			let _match = {
+				for rname, r in Graph.resources {
+					for t, _ in r["@type"] if rule.match_types[t] != _|_ {
+						(rname): true
+					}
+				}
+			}
+
+			// Check: requires_dependent_type
+			let _v1 = [
+				for rname, _ in _match
+				if rule.requires_dependent_type != _|_ {
+					let _has = len([
+						for dn, _ in Graph.dependents[rname]
+						for t, _ in Graph.resources[dn]["@type"]
+						if rule.requires_dependent_type[t] != _|_ {1},
+					]) > 0
+					if !_has {
+						{resource: rname, check: "requires_dependent_type"}
+					}
+				},
+			]
+
+			// Check: requires_dependency_type (direct dependencies only)
+			let _v2 = [
+				for rname, _ in _match
+				if rule.requires_dependency_type != _|_ {
+					let _deps = *Graph.resources[rname].depends_on | {}
+					let _has = len([
+						for depName, _ in _deps
+						for t, _ in Graph.resources[depName]["@type"]
+						if rule.requires_dependency_type[t] != _|_ {1},
+					]) > 0
+					if !_has {
+						{resource: rname, check: "requires_dependency_type"}
+					}
+				},
+			]
+
+			// Check: must_not_be_root
+			let _v3 = [
+				for rname, _ in _match
+				if rule.must_not_be_root != _|_
+				if Graph.roots[rname] != _|_ {
+					{resource: rname, check: "must_not_be_root"}
+				},
+			]
+
+			// Check: must_not_be_leaf
+			let _v4 = [
+				for rname, _ in _match
+				if rule.must_not_be_leaf != _|_
+				if Graph.leaves[rname] != _|_ {
+					{resource: rname, check: "must_not_be_leaf"}
+				},
+			]
+
+			// Check: min_dependents
+			let _v5 = [
+				for rname, _ in _match
+				if rule.min_dependents != _|_ {
+					let _count = len([for k, _ in Graph.dependents[rname] {k}])
+					if _count < rule.min_dependents {
+						{resource: rname, check: "min_dependents", actual: _count, required: rule.min_dependents}
+					}
+				},
+			]
+
+			// Check: max_depth
+			let _v6 = [
+				for rname, _ in _match
+				if rule.max_depth != _|_
+				if Graph.resources[rname]._depth > rule.max_depth {
+					{resource: rname, check: "max_depth", actual: Graph.resources[rname]._depth, limit: rule.max_depth}
+				},
+			]
+
+			let _allViolations = list.Concat([_v1, _v2, _v3, _v4, _v5, _v6])
+
+			name:       rule.name
+			severity:   rule.severity
+			matching:   len([for m, _ in _match {m}])
+			violations: _allViolations
+			passed:     len(_allViolations) == 0
+		},
+	]
+
+	summary: {
+		total:             len(Rules)
+		passed:            len([for r in results if r.passed {1}])
+		failed:            len([for r in results if !r.passed {1}])
+		critical_failures: len([for r in results if !r.passed && r.severity == "critical" {1}])
+	}
+
+	// ── SHACL ValidationReport projection ──────────────────────────
+	// W3C SHACL (Recommendation, 2017-07-20): express compliance
+	// results as sh:ValidationReport for interoperability with RDF
+	// validation toolchains.
+	//
+	// Export: cue export -e compliance.shacl_report --out json
+	_severity_iri: {
+		"critical": "sh:Violation"
+		"warning":  "sh:Warning"
+		"info":     "sh:Info"
+	}
+
+	shacl_report: {
+		"@type":       "sh:ValidationReport"
+		"sh:conforms": summary.failed == 0
+		"sh:result": [
+			for r in results if !r.passed
+			for v in r.violations {
+				"@type":                          "sh:ValidationResult"
+				"sh:focusNode":                   {"@id": v.resource}
+				"sh:sourceConstraintComponent":   {"@id": "quicue:" + v.check}
+				"sh:resultSeverity":              {"@id": _severity_iri[r.severity]}
+				"sh:resultMessage":               r.name + ": " + v.check + " on " + v.resource
+				"sh:sourceShape":                 {"@id": "quicue:rule/" + r.name}
+			},
+		]
+	}
 }

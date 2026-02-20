@@ -222,6 +222,35 @@ import (
 		depth_satisfied &&
 		count_satisfied &&
 		len([for _, _ in unsatisfied_gates {1}]) == 0
+
+	// ── SHACL ValidationReport projection ──────────────────────
+	// W3C SHACL (Recommendation, 2017-07-20): express gap analysis
+	// results as sh:ValidationReport. Missing resources and types
+	// become sh:ValidationResult entries with sh:Violation severity.
+	//
+	// Export: cue export -e gaps.shacl_report --out json
+	shacl_report: {
+		"@type":              "sh:ValidationReport"
+		"sh:conforms":        complete
+		"dcterms:conformsTo": {"@id": "charter:" + Charter.name}
+		"sh:result": list.Concat([[
+			for name, _ in missing_resources {
+				"@type":                        "sh:ValidationResult"
+				"sh:focusNode":                 {"@id": name}
+				"sh:resultSeverity":            {"@id": "sh:Violation"}
+				"sh:resultMessage":             "Required resource '" + name + "' not present in graph"
+				"sh:sourceConstraintComponent": {"@id": "quicue:RequiredResource"}
+			},
+		], [
+			for t, _ in missing_types {
+				"@type":                        "sh:ValidationResult"
+				"sh:focusNode":                 {"@id": t}
+				"sh:resultSeverity":            {"@id": "sh:Violation"}
+				"sh:resultMessage":             "Required type '" + t + "' not represented in graph"
+				"sh:sourceConstraintComponent": {"@id": "quicue:RequiredType"}
+			},
+		]])
+	}
 }
 
 // #Milestone — evaluate a single gate against the graph.

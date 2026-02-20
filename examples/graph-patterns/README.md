@@ -17,10 +17,16 @@ This example demonstrates all graph patterns available in `quicue.ca/patterns@v0
 | `#GraphMetrics` | Summary statistics | `{Graph: g}` |
 | `#ExportGraph` | Clean export for external tools | `{Graph: g}` |
 | `#ValidateGraph` | Check for structural issues | `{Input: resources}` |
+| `#CycleDetector` | Validate DAG property (pre-construction) | `{Input: rawResources}` |
+| `#ConnectedComponents` | Find orphaned/isolated subgraphs | `{Graph: g}` |
+| `#Subgraph` | Extract induced subgraph by roots/target/radius | `{Graph: g, Roots/Target: ...}` |
+| `#GraphDiff` | Structural delta between two graph versions | `{Before: g1, After: g2}` |
+| `#CriticalPath` | CPM: earliest/latest times, slack, critical chain | `{Graph: g, Weights?: {...}}` |
+| `#ComplianceCheck` | Evaluate declarative structural rules | `{Graph: g, Rules: [...]}` |
 
 ## Key Concepts
 
-- `depends_on` arrays become traversable graph structure
+- `depends_on` uses struct-as-set: `{[string]: true}`
 - `#InfraGraph` computes `_depth`, `_ancestors`, `_path` per resource
 - Queries are CUE expressions over the computed graph
 - All patterns use CUE unification: `#Pattern & {Input: data}`
