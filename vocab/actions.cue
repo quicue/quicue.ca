@@ -143,9 +143,9 @@ package vocab
 // #ProviderMatch - Declares what resource types a provider serves
 #ProviderMatch: {
 	// Provider matches if ANY type overlaps with resource @type
-	types: {[string]: true}
+	types: {[#SafeLabel]: true}
 	// Provider name (used for action namespacing)
-	provider: string
+	provider: #SafeLabel
 }
 
 // #ActionRegistry - All known actions with their contracts

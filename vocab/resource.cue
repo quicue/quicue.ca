@@ -12,15 +12,21 @@
 
 package vocab
 
+// ASCII-safe identifier constraints — prevents zero-width unicode injection,
+// homoglyph attacks (Cyrillic "a" vs Latin "a"), and invisible characters
+// that would break CUE unification silently. cue vet catches violations.
+#SafeID:    =~"^[a-zA-Z][a-zA-Z0-9_.-]*$"   // resource names, depends_on keys
+#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"     // @type keys, tag keys, type registry
+
 // #Resource - Core resource definition
 // Every infrastructure resource conforms to this schema
 #Resource: {
 	// Identity
-	name:   string
+	name:   #SafeID
 	"@id"?: string | *"https://infra.example.com/resources/\(name)"
 
 	// Semantic types (struct-as-set for O(1) membership checks)
-	"@type": {[string]: true}
+	"@type": {[#SafeLabel]: true}
 
 	// Network
 	ip?:   string
@@ -33,19 +39,19 @@ package vocab
 	hosted_on?:    string       // Parent resource name
 
 	// Dependencies (set membership for clean unification)
-	depends_on?: {[string]: true}
+	depends_on?: {[#SafeID]: true}
 
 	// Access
 	ssh_user?: string
 
 	// Capabilities this resource provides (set membership)
-	provides?: {[string]: true}
+	provides?: {[#SafeLabel]: true}
 
 	// Actions - filled by #BindCluster (provider-namespaced: actions.provider.action)
 	actions?: [string]: [string]: #Action
 
 	// Metadata (set membership)
-	tags?: {[string]: true}
+	tags?: {[#SafeLabel]: true}
 	description?: string
 
 	// Allow domain-specific extensions

@@ -9,8 +9,8 @@ package boot
 	// Allow any fields from the unified resource
 	...
 
-	// Required: resource must have a name
-	name: string
+	// Required: resource must have a name (ASCII-safe)
+	name: =~"^[a-zA-Z][a-zA-Z0-9_.-]*$"
 
 	// Optional: lifecycle commands (if present, used for bootstrap)
 	lifecycle?: {
@@ -35,7 +35,7 @@ package boot
 	port?: int
 
 	// Optional: dependencies (used for layer computation)
-	depends_on?: {[string]: true} | [...string]
+	depends_on?: {[=~"^[a-zA-Z][a-zA-Z0-9_.-]*$"]: true} | [...=~"^[a-zA-Z][a-zA-Z0-9_.-]*$"]
 
 	// Bootstrap-specific additions (these are what quicue-boot adds)
 	_bootstrap: {

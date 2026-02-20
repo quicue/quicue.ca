@@ -18,7 +18,7 @@
 package vocab
 
 // #TypeRegistry - Catalog of known semantic types
-#TypeRegistry: {
+#TypeRegistry: {[#SafeLabel]: #TypeEntry} & {
 	// ========== Implementation Types (how it runs) ==========
 
 	LXCContainer: {
