@@ -218,6 +218,26 @@ p_static_first: core.#Pattern & {
 	}
 }
 
+p_ascii_safe_identifiers: core.#Pattern & {
+	name:     "ASCII-Safe Identifiers"
+	category: "security"
+	problem:  "CUE unification treats strings as opaque byte sequences. Unicode homoglyphs (Cyrillic 'а' vs Latin 'a'), zero-width characters (U+200B), and RTL overrides (U+202E) create visually identical but structurally distinct keys. A depends_on reference with an invisible character silently fails to match its target."
+	solution: "Constrain all graph identifiers to ASCII via regex at the definition layer. #SafeID for resource names and dependency references. #SafeLabel for type names, tags, and registry keys. cue vet enforces at compile time with zero runtime cost."
+	context:  "Any CUE schema where string values participate in struct key lookup, unification, or cross-reference. Especially critical for @type (provider matching), depends_on (graph edges), and name (identity)."
+	example:  "#SafeID: =~\"^[a-zA-Z][a-zA-Z0-9_.-]*$\"; #SafeLabel: =~\"^[a-zA-Z][a-zA-Z0-9_-]*$\""
+	used_in: {
+		"apercue":       true
+		"quicue.ca":     true
+		"cmhc-retrofit": true
+		"grdn":          true
+		"maison-613":    true
+	}
+	related: {
+		"struct_as_set":            true
+		"contract_via_unification": true
+	}
+}
+
 p_airgapped_bundle: core.#Pattern & {
 	name:     "Airgapped Bundle"
 	category: "operations"

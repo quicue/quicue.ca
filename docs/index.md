@@ -88,6 +88,10 @@ deployment: layers: [{layer: 0, resources: ["docker"]}, ...]
 
 No assertion framework. No test runner. The contract IS CUE values. Unification IS the enforcement.
 
+## Security: ASCII-safe identifiers
+
+All graph identifiers (`name`, `@type` keys, `depends_on` keys, `tags` keys) are constrained to ASCII via `#SafeID` and `#SafeLabel` regex patterns in `vocab/resource.cue`. This prevents unicode homoglyph attacks and zero-width character injection at compile time. See the [apercue.ca README](https://github.com/quicue/apercue#security-ascii-safe-identifiers) for the threat model.
+
 ## Providers (29)
 
 | Category | Providers |

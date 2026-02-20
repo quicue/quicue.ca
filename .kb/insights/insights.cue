@@ -206,6 +206,27 @@ i011: core.#Insight & {
 	related: {"INSIGHT-006": true, "INSIGHT-007": true}
 }
 
+i012: core.#Insight & {
+	id:        "INSIGHT-012"
+	statement: "ASCII-safe identifier constraints catch unicode injection at compile time with zero runtime cost"
+	evidence: [
+		"Cyrillic 'а' (U+0430) vs Latin 'a' (U+0061) creates distinct CUE keys that look identical — unification silently fails to match",
+		"Zero-width space (U+200B) embedded in 'dns​server' creates a valid CUE string key that never matches 'dnsserver' in depends_on",
+		"RTL override (U+202E) in type names can disguise what a resource claims to be",
+		"#SafeID regex =~'^[a-zA-Z][a-zA-Z0-9_.-]*$' rejects all non-ASCII at cue vet time",
+		"Applied to vocab, patterns, viz-contract, actions, and boot across both apercue.ca and quicue.ca",
+	]
+	method:     "cross_reference"
+	confidence: "high"
+	discovered: "2026-02-19"
+	implication: "CUE's type system can enforce input validation at compile time. Unicode safety is not a runtime concern — it's a schema constraint. The regex costs nothing at runtime because there IS no runtime. This pattern generalizes: any string field that participates in unification or struct key lookup should be constrained to a safe alphabet."
+	action_items: [
+		"Add CI test fixtures with intentional unicode violations to verify rejection",
+		"Consider extending SafeID to provider template parameter names",
+	]
+	related: {"ADR-014": true, "INSIGHT-005": true}
+}
+
 i010: core.#Insight & {
 	id:        "INSIGHT-010"
 	statement: "Three latent bugs in patterns/ went undetected because CUE's lax evaluation hides struct iteration errors and name collisions"

@@ -202,6 +202,24 @@ d013: core.#Decision & {
 	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
 }
 
+d014: core.#Decision & {
+	id:        "ADR-014"
+	title:     "ASCII-safe identifiers (#SafeID, #SafeLabel) on all graph surfaces"
+	status:    "accepted"
+	date:      "2026-02-19"
+	context:   "CUE unification treats string values as opaque byte sequences. Cyrillic 'а' (U+0430) and Latin 'a' (U+0061) are different CUE values that look identical on screen. Zero-width characters (U+200B, U+200C, U+200D) are invisible but create distinct keys. RTL overrides (U+202E) can disguise dependency names. Any of these break unification silently — a resource named with a homoglyph won't match its depends_on reference."
+	decision:  "Constrain all graph identifiers to ASCII via regex. #SafeID (resource names, depends_on keys) allows [a-zA-Z][a-zA-Z0-9_.-]*. #SafeLabel (@type keys, tags, type registry) allows [a-zA-Z][a-zA-Z0-9_-]*. Descriptions are unconstrained for i18n. Enforced at cue vet time — compile-time, zero runtime cost."
+	rationale: "The attack surface is CUE's string equality. If two keys look the same but differ in invisible characters, unification produces unexpected results without errors. Constraining identifiers to ASCII eliminates the entire class of unicode-based confusion attacks. The regex is applied at the definition layer (vocab/resource.cue, patterns/graph.cue) so all downstream consumers inherit it automatically."
+	consequences: [
+		"All resource names, @type keys, depends_on keys, tag keys, and provider names must be ASCII",
+		"patterns/graph.cue defines hidden mirrors (_#SafeID, _#SafeLabel) because CUE hidden defs are package-scoped",
+		"boot/resource.cue uses inline regex (no cross-package hidden field access)",
+		"Downstream repos (grdn, cmhc-retrofit, maison-613) inherit constraints via quicue.ca symlink",
+		"apercue.ca has identical constraints — both layers enforce independently",
+	]
+	appliesTo: [{"@id": "https://quicue.ca/project/quicue-ca"}]
+}
+
 d011: core.#Decision & {
 	id:        "ADR-011"
 	title:     "lacuene is not a downstream consumer"
