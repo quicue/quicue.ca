@@ -1,0 +1,204 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-02-20T12:00:00Z",
+    "tools": [
+      {
+        "vendor": "CycloneDX",
+        "name": "cyclonedx-gomod",
+        "version": "1.8.0"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "bom-ref": "acme-api-server",
+      "name": "acme-api-server",
+      "version": "2.1.0",
+      "description": "ACME Corp API server"
+    }
+  },
+  "components": [
+    {
+      "type": "framework",
+      "bom-ref": "gin-v1.9.1",
+      "name": "gin",
+      "version": "v1.9.1",
+      "description": "HTTP web framework written in Go",
+      "purl": "pkg:golang/github.com/gin-gonic/gin@v1.9.1",
+      "licenses": [{"license": {"id": "MIT"}}]
+    },
+    {
+      "type": "library",
+      "bom-ref": "sonic-v1.9.1",
+      "name": "sonic",
+      "version": "v1.9.1",
+      "description": "High-performance JSON codec",
+      "purl": "pkg:golang/github.com/bytedance/sonic@v1.9.1",
+      "licenses": [{"license": {"id": "Apache-2.0"}}]
+    },
+    {
+      "type": "library",
+      "bom-ref": "validator-v10.14.0",
+      "name": "validator",
+      "version": "v10.14.0",
+      "description": "Struct and field validation",
+      "purl": "pkg:golang/github.com/go-playground/validator@v10.14.0",
+      "licenses": [{"license": {"id": "MIT"}}]
+    },
+    {
+      "type": "library",
+      "bom-ref": "cobra-v1.8.0",
+      "name": "cobra",
+      "version": "v1.8.0",
+      "description": "CLI framework for Go",
+      "purl": "pkg:golang/github.com/spf13/cobra@v1.8.0",
+      "licenses": [{"license": {"id": "Apache-2.0"}}]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pflag-v1.0.5",
+      "name": "pflag",
+      "version": "v1.0.5",
+      "description": "Drop-in replacement for Go flag package",
+      "purl": "pkg:golang/github.com/spf13/pflag@v1.0.5",
+      "licenses": [{"license": {"id": "BSD-3-Clause"}}]
+    },
+    {
+      "type": "library",
+      "bom-ref": "viper-v1.18.2",
+      "name": "viper",
+      "version": "v1.18.2",
+      "description": "Configuration management for Go",
+      "purl": "pkg:golang/github.com/spf13/viper@v1.18.2",
+      "licenses": [{"license": {"id": "MIT"}}]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pgx-v5.5.3",
+      "name": "pgx",
+      "version": "v5.5.3",
+      "description": "PostgreSQL driver and toolkit for Go",
+      "purl": "pkg:golang/github.com/jackc/pgx@v5.5.3",
+      "licenses": [{"license": {"id": "MIT"}}]
+    },
+    {
+      "type": "library",
+      "bom-ref": "zap-v1.27.0",
+      "name": "zap",
+      "version": "v1.27.0",
+      "description": "Blazing fast structured logger for Go",
+      "purl": "pkg:golang/go.uber.org/zap@v1.27.0",
+      "licenses": [{"license": {"id": "MIT"}}]
+    },
+    {
+      "type": "library",
+      "bom-ref": "otel-sdk-v1.24.0",
+      "name": "opentelemetry-sdk",
+      "version": "v1.24.0",
+      "description": "OpenTelemetry Go SDK",
+      "purl": "pkg:golang/go.opentelemetry.io/otel/sdk@v1.24.0",
+      "licenses": [{"license": {"id": "Apache-2.0"}}]
+    },
+    {
+      "type": "library",
+      "bom-ref": "jwt-v5.2.1",
+      "name": "golang-jwt",
+      "version": "v5.2.1",
+      "description": "JWT implementation for Go",
+      "purl": "pkg:golang/github.com/golang-jwt/jwt@v5.2.1",
+      "licenses": [{"license": {"id": "MIT"}}]
+    },
+    {
+      "type": "library",
+      "bom-ref": "redis-v9.4.0",
+      "name": "redis",
+      "version": "v9.4.0",
+      "description": "Redis client for Go",
+      "purl": "pkg:golang/github.com/redis/go-redis@v9.4.0",
+      "licenses": [{"license": {"id": "BSD-2-Clause"}}]
+    },
+    {
+      "type": "library",
+      "bom-ref": "prometheus-client-v1.19.0",
+      "name": "prometheus-client",
+      "version": "v1.19.0",
+      "description": "Prometheus instrumentation library for Go",
+      "purl": "pkg:golang/github.com/prometheus/client_golang@v1.19.0",
+      "licenses": [{"license": {"id": "Apache-2.0"}}]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "acme-api-server",
+      "dependsOn": [
+        "gin-v1.9.1",
+        "cobra-v1.8.0",
+        "viper-v1.18.2",
+        "pgx-v5.5.3",
+        "zap-v1.27.0",
+        "otel-sdk-v1.24.0",
+        "jwt-v5.2.1",
+        "redis-v9.4.0",
+        "prometheus-client-v1.19.0"
+      ]
+    },
+    {
+      "ref": "gin-v1.9.1",
+      "dependsOn": [
+        "sonic-v1.9.1",
+        "validator-v10.14.0"
+      ]
+    },
+    {
+      "ref": "cobra-v1.8.0",
+      "dependsOn": [
+        "pflag-v1.0.5"
+      ]
+    },
+    {
+      "ref": "viper-v1.18.2",
+      "dependsOn": [
+        "pflag-v1.0.5"
+      ]
+    },
+    {
+      "ref": "sonic-v1.9.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "validator-v10.14.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pflag-v1.0.5",
+      "dependsOn": []
+    },
+    {
+      "ref": "pgx-v5.5.3",
+      "dependsOn": []
+    },
+    {
+      "ref": "zap-v1.27.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "otel-sdk-v1.24.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "jwt-v5.2.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "redis-v9.4.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "prometheus-client-v1.19.0",
+      "dependsOn": []
+    }
+  ]
+}
