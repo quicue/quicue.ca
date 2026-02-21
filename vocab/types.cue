@@ -391,6 +391,54 @@ package vocab
 		structural_deps: ["region"]
 	}
 
+	// ========== Software Supply Chain Types ==========
+
+	SoftwareApplication: {
+		description: "Software application or service binary"
+	}
+
+	SoftwareLibrary: {
+		description: "Software library or package dependency"
+	}
+
+	SoftwareFramework: {
+		description: "Software framework (Spring, Django, Rails, Gin)"
+	}
+
+	SoftwareContainer: {
+		description: "Container image artifact (OCI, Docker)"
+	}
+
+	SoftwarePlatform: {
+		description: "Runtime platform (JVM, Node.js, .NET CLR)"
+	}
+
+	SoftwareFirmware: {
+		description: "Embedded firmware component"
+	}
+
+	SoftwareFile: {
+		description: "Single file artifact in a software bill of materials"
+	}
+
+	OperatingSystem: {
+		description: "Operating system (Ubuntu, Alpine, Windows)"
+	}
+
+	// ========== CI/CD Pipeline Types ==========
+
+	CIPipeline: {
+		description: "CI/CD pipeline definition"
+	}
+
+	CIStage: {
+		description: "Stage within a CI/CD pipeline"
+	}
+
+	CIJob: {
+		description: "Individual job within a CI/CD stage"
+	}
+
 	// ========== Classification Types (operational tier) ==========
 
 	CriticalInfra: {

@@ -11,7 +11,7 @@ node_modules/
 .claude/
 .wrangler/
 docs/plans/
-.kg/cue.mod/pkg/
+.kb/cue.mod/pkg/
 site/
 
 # Operator dashboard — generated files (only hand-crafted HTML + build tooling committed)

@@ -1,0 +1,60 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  GO_VERSION: "1.21"
+
+default:
+  image: golang:1.21
+
+build_app:
+  stage: build
+  script:
+    - go build -o build/app ./cmd/main.go
+  artifacts:
+    paths: [build/]
+
+build_lib:
+  stage: build
+  script:
+    - go build ./lib/...
+
+unit_tests:
+  stage: test
+  needs: [build_lib]
+  script:
+    - go test -v -race ./...
+  artifacts:
+    paths: [coverage.out]
+
+integration_tests:
+  stage: test
+  needs: [build_app]
+  services:
+    - postgres:15
+  script:
+    - go test -v -tags=integration ./...
+
+lint:
+  stage: test
+  needs: []
+  image: golangci/golangci-lint:latest
+  script:
+    - golangci-lint run ./...
+
+deploy_staging:
+  stage: deploy
+  needs: [unit_tests, integration_tests]
+  environment: staging
+  script:
+    - kubectl apply -f k8s/staging/
+
+deploy_production:
+  stage: deploy
+  needs: [unit_tests, integration_tests]
+  environment: production
+  when: manual
+  script:
+    - kubectl apply -f k8s/production/

@@ -3,11 +3,11 @@
 # Usage: kg <command> [args...]
 set -euo pipefail
 
-KG_DIR=".kg"
+KG_DIR=".kb"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODULE_DIR="$(dirname "$SCRIPT_DIR")"
 
-# .kg/ is its own CUE module — all cue commands must run from inside it
+# .kb/ is its own CUE module — all cue commands must run from inside it
 _cue() { (cd "$KG_DIR" && cue "$@"); }
 _cue_here() { (cd "$1" && cue "${@:2}"); }
 
@@ -16,9 +16,9 @@ cmd_help() {
 Usage: kg <command> [args...]
 
 Commands:
-  init              Scaffold .kg/ directory with imports
+  init              Scaffold .kb/ directory with imports
   add <type>        Create new entry (decision|pattern|insight|rejected)
-  vet               Validate .kg/ content
+  vet               Validate .kb/ content
   index [--full]    Export aggregated index as JSON
   query <expr>      Query via CUE expression
   lint              Knowledge quality checks
@@ -26,7 +26,7 @@ Commands:
   diff [ref]        Semantic changelog since git ref
   link <a> <b>      Cross-reference two entries
   graph [--dot]     Export relationships as VizData JSON or DOT
-  fed <dirs...>     Federate multiple .kg/ directories
+  fed <dirs...>     Federate multiple .kb/ directories
 USAGE
 }
 
@@ -97,7 +97,7 @@ cmd_vet() {
         fi
     fi
 
-    echo "OK: All .kg/ entries valid"
+    echo "OK: All .kb/ entries valid"
 }
 
 # ── add ───────────────────────────────────────────────────────────
@@ -544,7 +544,7 @@ cmd_graph() {
 cmd_fed() {
     if [ $# -eq 0 ]; then
         echo "Usage: kg fed <dir1> <dir2> [dir3...]"
-        echo "Federates multiple .kg/ directories and shows combined index"
+        echo "Federates multiple .kb/ directories and shows combined index"
         exit 1
     fi
 
@@ -557,12 +557,12 @@ cmd_fed() {
 
     local all_indexes="[]"
     for dir in "$@"; do
-        local kg_path="$dir/.kg"
+        local kg_path="$dir/.kb"
         if [ ! -d "$kg_path" ]; then
             kg_path="$dir"
         fi
         if [ ! -d "$kg_path" ]; then
-            echo "WARN: $dir has no .kg/ directory, skipping" >&2
+            echo "WARN: $dir has no .kb/ directory, skipping" >&2
             continue
         fi
 
