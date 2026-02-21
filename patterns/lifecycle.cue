@@ -116,6 +116,31 @@ _lifecyclePhaseList: ["package", "bootstrap", "bind", "deploy", "verify", "drift
 			}
 		},
 	], "\n")
+
+	// ── PROV-O projection ────────────────────────────────────────
+	// Bootstrap is a prov:Activity that creates resources in
+	// topological order. Each resource creation is a sub-activity.
+	//
+	// Export: cue export -e bootstrap.prov_report --out json
+	prov_report: {
+		"@type":      "prov:Activity"
+		"prov:type":  "quicue:Bootstrap"
+		"prov:generated": [
+			for name, res in resources {
+				"@type":     "prov:Entity"
+				"@id":       "quicue:resource/" + name
+				"prov:type": "quicue:BootstrapResource"
+				"dcterms:title": name
+				if res.lifecycle != _|_ if res.lifecycle.create != _|_ {
+					"prov:wasGeneratedBy": {
+						"@type":     "prov:Activity"
+						"prov:type": "quicue:CreateResource"
+						"prov:atLocation": "layer-\(_depths[name])"
+					}
+				}
+			},
+		]
+	}
 }
 
 // --- Drift Detection ---
@@ -166,6 +191,34 @@ _lifecyclePhaseList: ["package", "bootstrap", "bind", "deploy", "verify", "drift
 		total_extra:    len(extra)
 		total_drifted:  len(drifts)
 		in_sync:        total_missing == 0 && total_extra == 0 && total_drifted == 0
+	}
+
+	// ── PROV-O projection ────────────────────────────────────────
+	// Drift detection is a prov:Activity: it compares declared state
+	// (prov:used) against observed state and generates a report.
+	//
+	// Export: cue export -e drift.prov_report --out json
+	prov_report: {
+		"@type":        "prov:Activity"
+		"prov:type":    "quicue:DriftDetection"
+		"prov:used": [
+			{"@type": "prov:Entity", "prov:type": "quicue:DeclaredState", "prov:value": summary.total_declared},
+			{"@type": "prov:Entity", "prov:type": "quicue:ObservedState", "prov:value": summary.total_observed},
+		]
+		"prov:generated": {
+			"@type":       "prov:Entity"
+			"prov:type":   "quicue:DriftReport"
+			"prov:value": {
+				missing: summary.total_missing
+				extra:   summary.total_extra
+				drifted: summary.total_drifted
+				in_sync: summary.in_sync
+			}
+		}
+		"schema:actionStatus": {
+			if summary.in_sync {"@id": "schema:CompletedActionStatus"}
+			if !summary.in_sync {"@id": "schema:FailedActionStatus"}
+		}
 	}
 }
 

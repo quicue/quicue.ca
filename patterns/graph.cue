@@ -14,7 +14,10 @@
 
 package patterns
 
-import "list"
+import (
+	"list"
+	"quicue.ca/vocab"
+)
 
 // Hidden mirrors of vocab.#SafeID / vocab.#SafeLabel — needed because
 // CUE hidden definitions are package-scoped and vocab's aren't visible here.
@@ -318,16 +321,24 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 
 // #ExportGraph - Export graph with clean IDs for external consumption
 //
+// Produces JSON-LD-compatible output with @context grounding IRIs.
+// Each resource gets an @id for persistent identification.
+//
 // Usage:
 //   export: #ExportGraph & {Graph: infra}
 //   // export.resources = [{name: "dns", depends_on: {"pve": true}, ...}, ...]
+//   // export.jsonld includes @context for JSON-LD processors
 //
 #ExportGraph: {
 	Graph: #InfraGraph
 
+	// Optional: base IRI for resource @id generation
+	BaseIRI: string | *"https://quicue.ca/resources/"
+
 	// Export resources as flat list with string references (no CUE refs)
 	resources: [
 		for rname, r in Graph.resources {
+			"@id":   "\(BaseIRI)\(rname)"
 			name:    rname
 			"@type": r["@type"]
 			if r.ip != _|_ {ip: r.ip}
@@ -351,6 +362,14 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 		if len(_depths) > 0 {
 			max_depth: list.Max(_depths)
 		}
+	}
+
+	// JSON-LD framing — grounding IRIs for W3C interop
+	jsonld: {
+		"@context":       vocab.context."@context"
+		"@type":          "quicue:InfraGraph"
+		"dct:conformsTo": "https://quicue.ca/vocab"
+		"@graph":         resources
 	}
 }
 

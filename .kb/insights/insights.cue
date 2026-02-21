@@ -227,6 +227,30 @@ i012: core.#Insight & {
 	related: {"ADR-014": true, "INSIGHT-005": true}
 }
 
+i013: core.#Insight & {
+	id:        "INSIGHT-013"
+	statement: "Export-facing CUE definitions systematically lack W3C @context, @id, and dct:conformsTo — compliance is spotty not architectural"
+	evidence: [
+		"Full audit (2026-02-20) found 7 files producing structured output without proper JSON-LD framing: graph.cue (#ExportGraph), lifecycle.cue (#BootstrapPlan, #DriftReport), wiki.cue (#WikiProjection), openapi.cue (#OpenAPISpec), toon.cue (#TOONExport), visualization.cue (#GraphvizDiagram), boot/credentials.cue (#CredentialBundle)",
+		"Files that DO have proper W3C alignment — dcat.cue, shacl.cue, ldes.cue, validation.cue (shacl_report), lifecycle.cue (earl_report for smoke tests) — were added intentionally, not systematically",
+		"charter.cue has SHACL report but not EARL — gap analysis IS evaluation reporting (earl:Assertion) but only uses sh:ValidationReport",
+		"analysis.cue #CriticalPath has time_report with OWL-Time but uses raw integers, not xsd:dateTime — technically invalid",
+		"vocab/context.cue declares schema:, time:, earl: prefixes but these are unused in most output definitions",
+	]
+	method:     "cross_reference"
+	confidence: "high"
+	discovered: "2026-02-20"
+	implication: "W3C compliance must be architectural, not ad-hoc. Every export-facing definition (#*Export, #*Report, #*Projection, #*Catalog) should include @context, @type, and dct:conformsTo as standard fields. Hookify rules now enforce this for new code; existing gaps need backfill."
+	action_items: [
+		"Add @context + dct:conformsTo to #ExportGraph, #OpenAPISpec, #WikiProjection",
+		"Add PROV-O projections to #BootstrapPlan, #DriftReport, #CredentialBundle",
+		"Add EARL projection to charter #GapAnalysis alongside existing SHACL report",
+		"Fix #CriticalPath time_report to use xsd:dateTime instead of raw integers",
+		"Add schema:DataVisualization typing to #GraphvizDiagram and #MermaidDiagram",
+	]
+	related: {"INSIGHT-011": true, "INSIGHT-006": true}
+}
+
 i010: core.#Insight & {
 	id:        "INSIGHT-010"
 	statement: "Three latent bugs in patterns/ went undetected because CUE's lax evaluation hides struct iteration errors and name collisions"

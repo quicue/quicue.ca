@@ -28,6 +28,7 @@ package charter
 
 import (
 	"list"
+	"strings"
 	"quicue.ca/patterns@v0"
 	"quicue.ca/vocab@v0"
 )
@@ -250,6 +251,73 @@ import (
 				"sh:sourceConstraintComponent": {"@id": "quicue:RequiredType"}
 			},
 		]])
+	}
+
+	// ── EARL report projection ────────────────────────────────────
+	// W3C EARL (Working Group Note, 2017-02-02): express gap analysis
+	// as evaluation assertions. Each charter constraint becomes an
+	// earl:Assertion with pass/fail outcome.
+	//
+	// Complements shacl_report: SHACL reports WHAT failed (validation),
+	// EARL reports WHETHER requirements are met (evaluation).
+	//
+	// Export: cue export -e gaps.earl_report --out json
+	earl_report: {
+		"@type":          "earl:EvaluationReport"
+		"dct:conformsTo": {"@id": "http://www.w3.org/TR/EARL10-Schema/"}
+		"earl:assertion": list.Concat([
+			// Root constraint
+			[{
+				"@type": "earl:Assertion"
+				"earl:test": {
+					"@type":        "earl:TestCriterion"
+					"dcterms:title": "Required roots present"
+				}
+				"earl:result": {
+					"@type":        "earl:TestResult"
+					"earl:outcome": {"@id": "earl:" + ([ if _root_satisfied {"passed"}, "failed"][0])}
+				}
+			}],
+			// Depth constraint
+			if Charter.scope.min_depth != _|_ {[{
+				"@type": "earl:Assertion"
+				"earl:test": {
+					"@type":        "earl:TestCriterion"
+					"dcterms:title": "Minimum depth >= \(Charter.scope.min_depth)"
+				}
+				"earl:result": {
+					"@type":        "earl:TestResult"
+					"earl:outcome": {"@id": "earl:" + ([ if depth_satisfied {"passed"}, "failed"][0])}
+				}
+			}]},
+			// Resource count constraint
+			if Charter.scope.total_resources != _|_ {[{
+				"@type": "earl:Assertion"
+				"earl:test": {
+					"@type":        "earl:TestCriterion"
+					"dcterms:title": "Resource count >= \(Charter.scope.total_resources)"
+				}
+				"earl:result": {
+					"@type":        "earl:TestResult"
+					"earl:outcome": {"@id": "earl:" + ([ if count_satisfied {"passed"}, "failed"][0])}
+				}
+			}]},
+			// Gate assertions
+			[for gname, gs in gate_status {
+				"@type": "earl:Assertion"
+				"earl:test": {
+					"@type":        "earl:TestCriterion"
+					"dcterms:title": "Gate: " + gname
+				}
+				"earl:result": {
+					"@type":        "earl:TestResult"
+					"earl:outcome": {"@id": "earl:" + ([ if gs.satisfied {"passed"}, "failed"][0])}
+					if !gs.satisfied {
+						"earl:info": "Missing: " + strings.Join([for m, _ in gs.missing {m}], ", ")
+					}
+				}
+			}],
+		])
 	}
 }
 
