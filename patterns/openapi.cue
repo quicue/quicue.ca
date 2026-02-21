@@ -50,6 +50,7 @@ package patterns
 			title:       Info.title
 			description: Info.description
 			version:     Info.version
+			"x-dct:conformsTo": "https://spec.openapis.org/oas/3.0.3"
 		}
 
 		tags: [

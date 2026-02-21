@@ -97,7 +97,7 @@
     <p>
       This specification defines the data model, directory layout, type constraints, aggregation
       semantics, W3C vocabulary projections, and federation protocol for conforming
-      <code>.kg/</code> knowledge graphs.
+      <code>.kb/</code> knowledge graphs.
     </p>
   </section>
 
@@ -127,7 +127,7 @@
 
     <p>
       <strong>quicue-kg</strong> addresses this by defining a typed, validated, machine-readable
-      knowledge graph that lives alongside source code in a <code>.kg/</code> directory.
+      knowledge graph that lives alongside source code in a <code>.kb/</code> directory.
       The framework leverages the [[CUE]] language's properties:
     </p>
 
@@ -161,7 +161,7 @@
         This specification is intended for:
       </p>
       <ul>
-        <li>Developers implementing <code>.kg/</code> knowledge graphs in their projects.</li>
+        <li>Developers implementing <code>.kb/</code> knowledge graphs in their projects.</li>
         <li>Tool authors building editors, linters, or query interfaces for quicue-kg data.</li>
         <li>Platform engineers integrating knowledge graph data into autonomous software agents
           or development workflows.</li>
@@ -192,7 +192,7 @@
 
       <div class="conformance-class">
         <h4>Conforming Knowledge Graph</h4>
-        <p>A <dfn>conforming knowledge graph</dfn> is a <code>.kg/</code> directory that:</p>
+        <p>A <dfn>conforming knowledge graph</dfn> is a <code>.kb/</code> directory that:</p>
         <ol>
           <li>MUST contain a valid CUE module declaration.</li>
           <li>MUST declare <code>package kg</code> in all <code>.cue</code> files at the directory root.</li>
@@ -226,7 +226,7 @@
     <dl>
       <dt><dfn>Knowledge Graph</dfn></dt>
       <dd>A typed, validated collection of interconnected knowledge entries stored in a
-        <code>.kg/</code> directory. Abbreviated as <em>KG</em>.</dd>
+        <code>.kb/</code> directory. Abbreviated as <em>KG</em>.</dd>
 
       <dt><dfn>Entry</dfn></dt>
       <dd>A single record in the knowledge graph, conforming to one of the defined types
@@ -275,7 +275,7 @@
     <h2>Directory Layout</h2>
 
     <p>
-      A <a>conforming knowledge graph</a> resides in a <code>.kg/</code> directory at the root
+      A <a>conforming knowledge graph</a> resides in a <code>.kb/</code> directory at the root
       of a project. All CUE files MUST be at the directory root level &mdash; CUE packages are
       directory-scoped, meaning files in subdirectories constitute separate package instances
       even if they declare the same package name.
@@ -283,7 +283,7 @@
 
     <pre class="example" title="Required directory structure">
 project/
-  .kg/
+  .kb/
     cue.mod/
       module.cue          # Module declaration
       pkg/
@@ -304,12 +304,12 @@ project/
     <section id="module-declaration">
       <h3>Module Declaration</h3>
       <p>
-        The <code>.kg/cue.mod/module.cue</code> file MUST declare a CUE module. The module
-        name SHOULD follow the pattern <code>{project-domain}/.kg</code> but MAY use any
+        The <code>.kb/cue.mod/module.cue</code> file MUST declare a CUE module. The module
+        name SHOULD follow the pattern <code>{project-domain}/.kb</code> but MAY use any
         valid CUE module identifier.
       </p>
       <pre class="example" title="Module declaration">
-// .kg/cue.mod/module.cue
+// .kb/cue.mod/module.cue
 module: ""
 language: version: "v0.11.0"</pre>
     </section>
@@ -327,7 +327,7 @@ language: version: "v0.11.0"</pre>
           <code>CUE_REGISTRY='quicue.ca=ghcr.io/quicue/cue-modules,registry.cue.works'</code>
           and run <code>cue mod tidy</code>.</li>
         <li><strong>Local symlink</strong> &mdash; create a symlink at
-          <code>.kg/cue.mod/pkg/quicue.ca/kg/</code> pointing to a local checkout of the
+          <code>.kb/cue.mod/pkg/quicue.ca/kg/</code> pointing to a local checkout of the
           quicue-kg repository.</li>
       </ol>
     </section>
@@ -335,7 +335,7 @@ language: version: "v0.11.0"</pre>
     <section id="package-declaration">
       <h3>Package Declaration</h3>
       <p>
-        Every <code>.cue</code> file at the root of the <code>.kg/</code> directory MUST
+        Every <code>.cue</code> file at the root of the <code>.kb/</code> directory MUST
         declare <code>package kg</code>. Files MUST NOT be placed in subdirectories, as CUE
         treats each directory as a separate package scope.
       </p>
@@ -354,7 +354,7 @@ decisions: {
     <section id="file-organization">
       <h3>File Organization</h3>
       <p>
-        Within the flat <code>.kg/</code> directory, entries SHOULD be organized by type into
+        Within the flat <code>.kb/</code> directory, entries SHOULD be organized by type into
         separate files for readability. The RECOMMENDED file organization is:
       </p>
       <table class="def">
@@ -1278,7 +1278,7 @@ index: aggregate.#KGIndex & {
     patterns:  patterns    // references from patterns.cue
 }
 
-// Export: cue export .kg/ -e index.summary --out json</pre>
+// Export: cue export .kb/ -e index.summary --out json</pre>
 
       <p>
         All fields within <code>summary</code>, <code>by_status</code>, and
@@ -1434,7 +1434,7 @@ index: aggregate.#KGIndex & {
       </table>
 
       <pre class="example" title="PROV-O export command">
-cue export .kg/ -e _provenance.graph --out json</pre>
+cue export .kb/ -e _provenance.graph --out json</pre>
 
       <p>The projection uses the following JSON-LD context:</p>
       <pre class="example" title="PROV-O JSON-LD context">
@@ -1520,7 +1520,7 @@ cue export .kg/ -e _provenance.graph --out json</pre>
       </table>
 
       <pre class="example" title="Web Annotation export command">
-cue export .kg/ -e _annotations.graph --out json</pre>
+cue export .kb/ -e _annotations.graph --out json</pre>
     </section>
 
     <!-- 8.3 DCAT -->
@@ -1529,7 +1529,7 @@ cue export .kg/ -e _annotations.graph --out json</pre>
 
       <p>
         The catalog projection maps knowledge graph metadata to the [[DCAT]] vocabulary.
-        Each project with a <code>.kg/</code> directory becomes a <code>dcat:Dataset</code>,
+        Each project with a <code>.kb/</code> directory becomes a <code>dcat:Dataset</code>,
         and federation results become a <code>dcat:Catalog</code>.
       </p>
 
@@ -1563,7 +1563,7 @@ cue export .kg/ -e _annotations.graph --out json</pre>
             <td>License information.</td>
           </tr>
           <tr>
-            <td>CUE source (<code>.kg/</code>)</td>
+            <td>CUE source (<code>.kb/</code>)</td>
             <td class="mapping-arrow">&rarr;</td>
             <td><code>dcat:Distribution</code> (mediaType: <code>application/cue</code>)</td>
             <td>The CUE source distribution.</td>
@@ -1585,10 +1585,10 @@ cue export .kg/ -e _annotations.graph --out json</pre>
 
       <pre class="example" title="DCAT export commands">
 # Single project dataset
-cue export .kg/ -e _catalog.dataset --out json
+cue export .kb/ -e _catalog.dataset --out json
 
 # Federated catalog
-kg fed ~/project-a/.kg/ ~/project-b/.kg/ --format dcat</pre>
+kg fed ~/project-a/.kb/ ~/project-b/.kb/ --format dcat</pre>
     </section>
 
     <!-- 8.4 N-Triples -->
@@ -1653,14 +1653,14 @@ kg fed ~/project-a/.kg/ ~/project-b/.kg/ --format dcat</pre>
       </table>
 
       <pre class="example" title="N-Triples export command">
-cue export .kg/ -e _ntriples.triples --out text</pre>
+cue export .kb/ -e _ntriples.triples --out text</pre>
 
       <pre class="example" title="N-Triples unix pipeline">
 # Count triples by type
-cue export .kg/ -e _ntriples.triples --out text | grep 'rdf-syntax-ns#type' | sort | uniq -c
+cue export .kb/ -e _ntriples.triples --out text | grep 'rdf-syntax-ns#type' | sort | uniq -c
 
 # Find all provenance activities
-cue export .kg/ -e _ntriples.triples --out text | grep 'prov#Activity'</pre>
+cue export .kb/ -e _ntriples.triples --out text | grep 'prov#Activity'</pre>
     </section>
 
     <!-- 8.5 Turtle -->
@@ -1683,7 +1683,7 @@ cue export .kg/ -e _ntriples.triples --out text | grep 'prov#Activity'</pre>
       </p>
 
       <pre class="example" title="Turtle export command">
-cue export .kg/ -e _turtle.document --out text</pre>
+cue export .kb/ -e _turtle.document --out text</pre>
     </section>
 
     <!-- 8.6 SKOS -->
@@ -1750,10 +1750,10 @@ cue export .kg/ -e _turtle.document --out text</pre>
 
       <pre class="example" title="SKOS export commands">
 # JSON-LD concept scheme
-cue export .kg/ -e _taxonomy.graph --out json
+cue export .kb/ -e _taxonomy.graph --out json
 
 # Turtle for compatibility with existing SKOS files
-cue export .kg/ -e _taxonomy.turtle --out text</pre>
+cue export .kb/ -e _taxonomy.turtle --out text</pre>
     </section>
 
     <!-- 8.7 Prolog -->
@@ -1805,7 +1805,7 @@ cue export .kg/ -e _taxonomy.turtle --out text</pre>
 
       <pre class="example" title="Prolog export and query">
 # Export Prolog program
-cue export .kg/ -e _prolog.program --out text > kb.pl
+cue export .kb/ -e _prolog.program --out text > kb.pl
 
 # Query in SWI-Prolog
 swipl -l kb.pl -g "shared_pattern(P, A, B), writef('%w shared by %w and %w\n', [P, A, B]), fail."</pre>
@@ -1831,7 +1831,7 @@ swipl -l kb.pl -g "shared_pattern(P, A, B), writef('%w shared by %w and %w\n', [
 
       <pre class="example" title="Datalog export and evaluation">
 # Export Soufflé-compatible Datalog
-cue export .kg/ -e _datalog.program --out text > kb.dl
+cue export .kb/ -e _datalog.program --out text > kb.dl
 
 # Evaluate with Soufflé
 souffle kb.dl
@@ -1903,20 +1903,20 @@ cue export ./vocab -e context --out json > kg-context.jsonld</pre>
 
       <p>
         A <a>conforming processor</a> discovers knowledge graphs by performing a filesystem
-        walk looking for the presence of <code>.kg/cue.mod/module.cue</code>. The discovery
+        walk looking for the presence of <code>.kb/cue.mod/module.cue</code>. The discovery
         algorithm is:
       </p>
 
       <ol>
         <li>Walk the filesystem from a set of root directories.</li>
-        <li>For each directory, check for the existence of <code>.kg/cue.mod/module.cue</code>.</li>
+        <li>For each directory, check for the existence of <code>.kb/cue.mod/module.cue</code>.</li>
         <li>If found, the parent directory contains a knowledge graph.</li>
-        <li>Validate the <code>.kg/</code> directory with <code>cue vet</code>.</li>
+        <li>Validate the <code>.kb/</code> directory with <code>cue vet</code>.</li>
         <li>If validation passes, include the knowledge graph in the federation set.</li>
       </ol>
 
       <pre class="example" title="Federation discovery command">
-kg fed ~/project-a/.kg/ ~/project-b/.kg/ ~/project-c/.kg/</pre>
+kg fed ~/project-a/.kb/ ~/project-b/.kb/ ~/project-c/.kb/</pre>
     </section>
 
     <!-- 9.2 Merging -->
@@ -2048,12 +2048,12 @@ kg fed ~/project-a/.kg/ ~/project-b/.kg/ ~/project-c/.kg/</pre>
 
       <p>
         When an autonomous software agent begins a session in a project containing a
-        <code>.kg/</code> directory, the agent's runtime SHOULD automatically inject
+        <code>.kb/</code> directory, the agent's runtime SHOULD automatically inject
         knowledge graph context. The RECOMMENDED initialization sequence is:
       </p>
 
       <ol>
-        <li>Detect the presence of <code>.kg/cue.mod/module.cue</code> in the project.</li>
+        <li>Detect the presence of <code>.kb/cue.mod/module.cue</code> in the project.</li>
         <li>Run <code>kg index</code> to retrieve the current knowledge graph state.</li>
         <li>Run <code>kg rejected</code> to load all rejected approaches.</li>
         <li>Include the rejected approaches in the agent's working context.</li>
@@ -2107,7 +2107,7 @@ kg fed ~/project-a/.kg/ ~/project-b/.kg/ ~/project-c/.kg/</pre>
       </p>
 
       <ul>
-        <li><code>.kg/</code> directories committed to version control inherit the repository's
+        <li><code>.kb/</code> directories committed to version control inherit the repository's
           access control. If the repository is public, all knowledge graph entries are public.</li>
         <li>The <code>context</code> and <code>rationale</code> fields of <code>#Decision</code>
           entries may inadvertently expose threat models or security assumptions.</li>
@@ -2121,7 +2121,7 @@ kg fed ~/project-a/.kg/ ~/project-b/.kg/ ~/project-c/.kg/</pre>
 
       <p>
         Knowledge graph entries MUST NOT contain credentials, secrets, API keys, tokens, or
-        other authentication material. The <code>.kg/</code> directory is designed for
+        other authentication material. The <code>.kb/</code> directory is designed for
         structural and architectural knowledge, not operational secrets.
       </p>
 
@@ -2163,7 +2163,7 @@ kg fed ~/project-a/.kg/ ~/project-b/.kg/ ~/project-c/.kg/</pre>
       <h3>Media Type</h3>
 
       <p>
-        The CUE source format used by <code>.kg/</code> directories uses file extension
+        The CUE source format used by <code>.kb/</code> directories uses file extension
         <code>.cue</code>. As of publication, the CUE language does not have an
         IANA-registered media type. This specification uses <code>application/cue</code>
         as an informational media type identifier in DCAT distribution entries.
@@ -2350,7 +2350,7 @@ kg fed ~/project-a/.kg/ ~/project-b/.kg/ ~/project-c/.kg/</pre>
     <h2>Complete Example</h2>
 
     <p>
-      This appendix presents a minimal but complete <code>.kg/</code> directory demonstrating
+      This appendix presents a minimal but complete <code>.kb/</code> directory demonstrating
       all core types, a context entry, and an aggregation index.
     </p>
 
@@ -2382,7 +2382,7 @@ insights: {
     "INSIGHT-001": core.#Insight & {
         id:         "INSIGHT-001"
         statement:  "CUE unification is sufficient for cross-project knowledge merging"
-        evidence:   ["Successfully federated 5 .kg/ directories without conflicts"]
+        evidence:   ["Successfully federated 5 .kb/ directories without conflicts"]
         method:     "experiment"
         confidence: "high"
         discovered: "2026-02-10"
@@ -2402,7 +2402,7 @@ rejected: {
         approach:    "Store knowledge graph in SQLite"
         reason:      "Adds runtime dependency. Loses CUE type safety. Cannot federate via unification."
         date:        "2026-01-10"
-        alternative: "Use flat CUE files in .kg/ directory with cue vet for validation."
+        alternative: "Use flat CUE files in .kb/ directory with cue vet for validation."
     }
 }</pre>
 
@@ -2450,14 +2450,14 @@ index: aggregate.#KGIndex & {
 
     <pre class="example" title="Validation and export">
 # Validate the knowledge graph
-cue vet .kg/
+cue vet .kb/
 
 # Export the summary
-cue export .kg/ -e index.summary --out json
+cue export .kb/ -e index.summary --out json
 # Output: {"total_decisions":1,"total_insights":1,"total_rejected":1,"total_patterns":1,"total":4}
 
 # Export decisions by status
-cue export .kg/ -e index.by_status --out json
+cue export .kb/ -e index.by_status --out json
 # Output: {"proposed":{},"accepted":{"ADR-001":"Use CUE for configuration"},"deprecated":{},"superseded":{}}</pre>
   </section>
 
@@ -2520,8 +2520,8 @@ cue export .kg/ -e index.by_status --out json
       <p>
         CUE packages are directory-scoped. Files in subdirectories are treated as separate
         package instances, even if they declare the same package name. A file at
-        <code>.kg/decisions/adr-001.cue</code> cannot reference values from
-        <code>.kg/index.cue</code> &mdash; they are different packages. The flat directory
+        <code>.kb/decisions/adr-001.cue</code> cannot reference values from
+        <code>.kb/index.cue</code> &mdash; they are different packages. The flat directory
         requirement ensures all entries share a single package scope, enabling
         cross-referencing and aggregation.
       </p>
