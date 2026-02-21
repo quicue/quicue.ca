@@ -223,17 +223,6 @@ make check-downstream
 
 This catches breakage early — if you rename a field in `#InfraGraph`, `check-downstream` fails on any consumer that references it.
 
-## Security: ASCII-Safe Identifiers
-
-All graph identifiers are constrained to ASCII via `#SafeID` and `#SafeLabel`:
-
-```cue
-#SafeID:    =~"^[a-zA-Z][a-zA-Z0-9_.-]*$"   // resource names, depends_on keys
-#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"     // @type keys, tag keys, type registry
-```
-
-This prevents zero-width unicode injection, homoglyph attacks (Cyrillic "a" vs Latin "a"), and invisible characters that would break CUE unification silently. `cue vet` catches violations at compile time. Descriptions are left unconstrained for i18n.
-
 ## Requirements
 
 - [CUE](https://cuelang.org/) v0.15.4+
