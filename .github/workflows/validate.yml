@@ -273,11 +273,12 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         run: |
-          npx wrangler pages project create quicue-demo --production-branch=main 2>/dev/null || true
+          npx wrangler pages project create quicue-demo --production-branch=main || echo "Project may already exist"
           npx wrangler pages deploy operator/public --project-name=quicue-demo --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        continue-on-error: true
 
   deploy-api:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -296,8 +297,9 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         run: |
-          npx wrangler pages project create quicue-api --production-branch=main 2>/dev/null || true
+          npx wrangler pages project create quicue-api --production-branch=main || echo "Project may already exist"
           npx wrangler pages deploy /tmp/static-api --project-name=quicue-api --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        continue-on-error: true
