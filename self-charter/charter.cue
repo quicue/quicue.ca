@@ -61,12 +61,7 @@ _tasks: {
 		description: "Regenerate demo.quicue.ca D3 dashboard data with latest patterns"
 		depends_on:  {"api-regen": true}
 	}
-	"cat-regen": {
-		name:        "cat-regen"
-		"@type":     {CI: true}
-		description: "Regenerate cat.quicue.ca provider catalogue with latest templates"
-		depends_on:  {"safeid-propagation": true}
-	}
+
 
 	// ── Remaining: CI ─────────────────────────────────────────────
 	"ci-workflow": {
@@ -142,7 +137,6 @@ _charter: charter.#Charter & {
 				"specs-registry": true
 				"api-regen":      true
 				"demo-regen":     true
-				"cat-regen":      true
 			}
 			depends_on: {"security-complete": true}
 		}
