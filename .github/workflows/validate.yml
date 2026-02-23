@@ -48,17 +48,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout apercue dependency
-        uses: actions/checkout@v4
-        with:
-          repository: quicue/apercue
-          path: _deps/apercue
-
-      - name: Link apercue into cue.mod/pkg
-        run: |
-          mkdir -p cue.mod/pkg
-          ln -s "$GITHUB_WORKSPACE/_deps/apercue" cue.mod/pkg/apercue.ca
-
       - name: Install CUE
         uses: cue-lang/setup-cue@v1.0.1
         with:
@@ -86,17 +75,6 @@ jobs:
     needs: cue-vet
     steps:
       - uses: actions/checkout@v4
-
-      - name: Checkout apercue dependency
-        uses: actions/checkout@v4
-        with:
-          repository: quicue/apercue
-          path: _deps/apercue
-
-      - name: Link apercue into cue.mod/pkg
-        run: |
-          mkdir -p cue.mod/pkg
-          ln -s "$GITHUB_WORKSPACE/_deps/apercue" cue.mod/pkg/apercue.ca
 
       - name: Install CUE
         uses: cue-lang/setup-cue@v1.0.1
@@ -174,17 +152,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout apercue dependency
-        uses: actions/checkout@v4
-        with:
-          repository: quicue/apercue
-          path: _deps/apercue
-
-      - name: Link apercue into cue.mod/pkg
-        run: |
-          mkdir -p cue.mod/pkg
-          ln -s "$GITHUB_WORKSPACE/_deps/apercue" cue.mod/pkg/apercue.ca
-
       - name: Install CUE
         uses: cue-lang/setup-cue@v1.0.1
         with:
@@ -201,17 +168,6 @@ jobs:
     needs: binding
     steps:
       - uses: actions/checkout@v4
-
-      - name: Checkout apercue dependency
-        uses: actions/checkout@v4
-        with:
-          repository: quicue/apercue
-          path: _deps/apercue
-
-      - name: Link apercue into cue.mod/pkg
-        run: |
-          mkdir -p cue.mod/pkg
-          ln -s "$GITHUB_WORKSPACE/_deps/apercue" cue.mod/pkg/apercue.ca
 
       - name: Install CUE
         uses: cue-lang/setup-cue@v1.0.1
