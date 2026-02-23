@@ -251,6 +251,27 @@ i013: core.#Insight & {
 	related: {"INSIGHT-011": true, "INSIGHT-006": true}
 }
 
+i014: core.#Insight & {
+	id:        "INSIGHT-014"
+	statement: "Existing config can be projected into quicue.ca graph shape without modifying original code"
+	evidence: [
+		"grdn has custom K8s/Proxmox schemas with hostname/ip/role fields -- no @type or depends_on",
+		"A single graph.cue file (65 lines) projects nested config into 9 flat resources with @type and depends_on",
+		"CUE comprehensions iterate proxmox_cluster.nodes and k8s_cluster.nodes to generate the resource map",
+		"Original config.cue, schemas/, and GitLab CI are untouched -- graph.cue is purely additive",
+		"CUE version bump from v0.9.0 to v0.15.4 required for @v0 import syntax, no breakage in existing code",
+	]
+	method:     "experiment"
+	confidence: "high"
+	discovered: "2026-02-23"
+	implication: "Adopting quicue.ca patterns does not require rewriting existing infrastructure code. A projection file can wrap any CUE config into graph-compatible shape. This lowers the adoption barrier for existing CUE users."
+	action_items: [
+		"Document the projection pattern as a migration guide",
+		"Add grdn as a worked example of incremental adoption",
+	]
+	related: {"INSIGHT-001": true}
+}
+
 i010: core.#Insight & {
 	id:        "INSIGHT-010"
 	statement: "Three latent bugs in patterns/ went undetected because CUE's lax evaluation hides struct iteration errors and name collisions"
