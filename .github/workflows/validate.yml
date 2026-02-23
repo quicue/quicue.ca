@@ -272,7 +272,9 @@ jobs:
         run: bash operator/build.sh
 
       - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy operator/public --project-name=quicue-demo
+        run: |
+          npx wrangler pages project create quicue-demo --production-branch=main 2>/dev/null || true
+          npx wrangler pages deploy operator/public --project-name=quicue-demo --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -293,7 +295,9 @@ jobs:
         run: bash server/build-static-api.sh /tmp/static-api
 
       - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy /tmp/static-api --project-name=quicue-api
+        run: |
+          npx wrangler pages project create quicue-api --production-branch=main 2>/dev/null || true
+          npx wrangler pages deploy /tmp/static-api --project-name=quicue-api --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
