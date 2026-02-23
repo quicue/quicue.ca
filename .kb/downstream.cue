@@ -28,11 +28,6 @@ downstream: {
 		has_kb:        true
 		status:        "active"
 	}
-	apercue: {
-		"@id":       "https://apercue.ca/project/apercue"
-		module:      "apercue.ca@v0"
-		description: "Production datacenter instances — real deployments consuming quicue.ca patterns"
-		imports: ["quicue.ca/vocab@v0", "quicue.ca/patterns@v0"]
-		status: "active"
-	}
+	// Note: apercue.ca is the upstream foundation (Layer 0), not a downstream consumer.
+	// quicue.ca imports apercue.ca/patterns and apercue.ca/charter, not the reverse.
 }
