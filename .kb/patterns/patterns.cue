@@ -145,6 +145,22 @@ p_hidden_intermediary: core.#Pattern & {
 	}
 }
 
+p_graph_projection: core.#Pattern & {
+	name:     "Graph Projection from Existing Config"
+	category: "adoption"
+	problem:  "Existing CUE codebases have their own schemas (custom structs, nested clusters, domain-specific fields) that don't use @type or depends_on. Rewriting to conform to quicue.ca resource shape is invasive and risks breaking working code."
+	solution: "Write a single additive file (graph.cue) that reads from existing config fields via CUE comprehensions and produces a flat resource map with @type and depends_on. The original code is untouched. The projection file is the only new artifact."
+	context:  "Any existing CUE project considering adoption of quicue.ca patterns. The projection file maps domain concepts (proxmox_cluster.nodes, k8s_cluster.nodes) into generic typed resources."
+	example:  "grdn/graph.cue: 65 lines, reads proxmox_cluster and k8s_cluster, produces 9 resources across 5 layers. Original config.cue, schemas/, and CI are unmodified."
+	used_in: {
+		"grdn": true
+	}
+	related: {
+		"struct_as_set":   true
+		"three_layer":     true
+	}
+}
+
 // --- Deployment Lifecycle Principles ---
 // The following patterns codify the deployment philosophy
 // derived from the quicue.ca ecosystem and validated by the
