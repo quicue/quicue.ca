@@ -114,7 +114,7 @@ resources: {
         "@type":      {DNSServer: true, LXCContainer: true}
         container_id: "101"
         host:         "pve-node-1"
-        ip:           "10.0.1.10"
+        ip:           "198.51.100.10"
     }
 }
 

@@ -15,7 +15,7 @@ package patterns
 import "quicue.ca/vocab"
 
 // #SHACLContext — extends the quicue JSON-LD context with SHACL namespace.
-#SHACLContext: vocab.context."@context" & {
+#SHACLContext: vocab.context["@context"] & {
 	"sh":      "http://www.w3.org/ns/shacl#"
 	"rdfs":    "http://www.w3.org/2000/01/rdf-schema#"
 	"dcterms": "http://purl.org/dc/terms/"

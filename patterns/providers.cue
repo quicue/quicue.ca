@@ -14,7 +14,7 @@
 //
 //   actions: {
 //       patterns.#ProxmoxLXC & {LXCID: 100, Node: "pve-node-1"}
-//       patterns.#SSH & {IP: "10.0.1.10", User: "root"}
+//       patterns.#SSH & {IP: "198.51.100.10", User: "root"}
 //   }
 
 package patterns

@@ -10,31 +10,33 @@ import "quicue.ca/patterns@v0"
 // ── Test graph (5 nodes, 2 layers) ─────────────────────────────
 _test_resources: {
 	"docker": {
-		name:   "docker"
+		name:    "docker"
 		"@type": {DockerHost: true}
 	}
 	"postgres": {
-		name:   "postgres"
+		name:    "postgres"
 		"@type": {Database: true}
 		depends_on: {"docker": true}
 	}
 	"redis": {
-		name:   "redis"
+		name:    "redis"
 		"@type": {Cache: true}
 		depends_on: {"docker": true}
 	}
 	"api": {
-		name:   "api"
+		name:    "api"
 		"@type": {AppWorkload: true}
 		depends_on: {"postgres": true, "redis": true}
 	}
 	"frontend": {
-		name:   "frontend"
+		name:    "frontend"
 		"@type": {AppWorkload: true}
 		depends_on: {"api": true}
 	}
 }
 
+// #GapAnalysis now accepts any graph with {resources, roots, topology}.
+// patterns.#InfraGraph satisfies this interface.
 _test_graph: patterns.#InfraGraph & {Input: _test_resources}
 
 // ── Test 1: Complete charter (all resources present) ────────────

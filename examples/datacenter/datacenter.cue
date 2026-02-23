@@ -874,7 +874,7 @@ vizData: _viz.data
 // ═══════════════════════════════════════════════════════════════════════════════
 
 jsonld: {
-	"@context": vocab.context."@context" & {
+	"@context": vocab.context["@context"] & {
 		"@base": _base
 	}
 

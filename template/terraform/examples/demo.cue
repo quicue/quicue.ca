@@ -13,10 +13,10 @@ _config: terraform.#TerraformConfig & {
 			username: "root"
 			nodes: [{
 				name:    "pve-alpha"
-				address: "10.0.0.10"
+				address: "192.0.2.10"
 			}, {
 				name:    "pve-beta"
-				address: "10.0.0.11"
+				address: "192.0.2.11"
 			}]
 		}
 	}
@@ -66,9 +66,9 @@ _resources: {
 		cloudinit: {
 			user:     "deploy"
 			ssh_keys: ["ssh-ed25519 AAAA... admin@infra"]
-			ip:       "10.0.1.50/24"
-			gateway:  "10.0.1.1"
-			dns_servers: ["10.0.1.1", "1.1.1.1"]
+			ip:       "198.51.100.50/24"
+			gateway:  "198.51.100.1"
+			dns_servers: ["198.51.100.1", "1.1.1.1"]
 		}
 		proxmox: {
 			node:     "pve-beta"
@@ -162,8 +162,8 @@ _resources: {
 		cloudinit: {
 			user:     "kube"
 			ssh_keys: ["ssh-ed25519 AAAA... ops@infra"]
-			ip:       "10.0.2.20/24"
-			gateway:  "10.0.2.1"
+			ip:       "203.0.113.20/24"
+			gateway:  "203.0.113.1"
 		}
 		proxmox: {
 			node:     "pve-alpha"

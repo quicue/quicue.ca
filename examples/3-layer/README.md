@@ -57,8 +57,8 @@ cue eval ./examples/3-layer/ -e output
         logs:    "ssh pve-node-1 'pct exec 100 -- journalctl -n 50'"
         config:  "ssh pve-node-1 'pct config 100'"
         status:  "ssh pve-node-1 'pct status 100'"
-        ping:    "ping -c 3 10.0.1.10"
-        ssh:     "ssh root@10.0.1.10"
+        ping:    "ping -c 3 198.51.100.10"
+        ssh:     "ssh root@198.51.100.10"
     }
 }
 "git-server": {
@@ -69,8 +69,8 @@ cue eval ./examples/3-layer/ -e output
         logs:    "ssh pve-node-2 'pct exec 200 -- journalctl -n 50'"
         config:  "ssh pve-node-2 'pct config 200'"
         status:  "ssh pve-node-2 'pct status 200'"
-        ping:    "ping -c 3 10.0.1.20"
-        ssh:     "ssh git@10.0.1.20"
+        ping:    "ping -c 3 198.51.100.20"
+        ssh:     "ssh git@198.51.100.20"
     }
 }
 ```

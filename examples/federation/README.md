@@ -18,7 +18,7 @@ dc-core (tier: core, 198.51.100.0/24)
     ├── caddy-proxy (reverse proxy)
     └── gitlab-scm (source control) ──── replicated ────┐
                                                          │
-edge-remote (tier: edge, 10.99.0.0/24)                  │
+edge-remote (tier: edge, 203.0.113.0/24)                  │
     ├── wireguard-tunnel                                 │
     ├── restic-offsite (backup)                          │
     └── gitlab-scm (replica) ◄───────────────────────────┘

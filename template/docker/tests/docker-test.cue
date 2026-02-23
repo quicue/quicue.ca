@@ -104,12 +104,12 @@ _assertHost_df:     _testHostActions.df.command & "docker system df"
 // =============================================================================
 
 _testConnectivity: patterns.#ConnectivityActions & {
-	IP:   "10.0.1.5"
+	IP:   "198.51.100.5"
 	USER: "admin"
 }
 
-_assertConn_ping: _testConnectivity.ping.command & "ping -c 3 10.0.1.5"
-_assertConn_ssh:  _testConnectivity.ssh.command & "ssh admin@10.0.1.5"
+_assertConn_ping: _testConnectivity.ping.command & "ping -c 3 198.51.100.5"
+_assertConn_ssh:  _testConnectivity.ssh.command & "ssh admin@198.51.100.5"
 
 // =============================================================================
 // TEST: #ActionTemplates generates correct commands
@@ -135,8 +135,8 @@ _assertTemplate_compose_up: _testTemplate_compose_up.command & "docker compose -
 _testTemplate_health: _T.health_check & {CONTAINER: "myapp"}
 _assertTemplate_health: _testTemplate_health.command & "docker inspect --format='{{.State.Health.Status}}' myapp"
 
-_testTemplate_port: _T.port_check & {IP: "10.0.0.1", PORT: 8080}
-_assertTemplate_port: _testTemplate_port.command & "nc -zv 10.0.0.1 8080"
+_testTemplate_port: _T.port_check & {IP: "192.0.2.1", PORT: 8080}
+_assertTemplate_port: _testTemplate_port.command & "nc -zv 192.0.2.1 8080"
 
 _testTemplate_http: _T.http_health & {URL: "http://localhost:8080/health"}
 _assertTemplate_http: _testTemplate_http.command & =~"curl.*http://localhost:8080/health"

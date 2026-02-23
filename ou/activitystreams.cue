@@ -15,7 +15,7 @@ package ou
 import "quicue.ca/vocab"
 
 // #ASContext — extends the quicue JSON-LD context with ActivityStreams namespace.
-#ASContext: vocab.context."@context" & {
+#ASContext: vocab.context["@context"] & {
 	"as":      "https://www.w3.org/ns/activitystreams#"
 	"rdfs":    "http://www.w3.org/2000/01/rdf-schema#"
 	"dcterms": "http://purl.org/dc/terms/"

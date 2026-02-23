@@ -21,7 +21,7 @@ site: bootstrap.#DockerSite & {
 	tier:    "core"
 	network: "monitoring-net"
 
-	network_config: subnet: "10.10.0.0/24"
+	network_config: subnet: "203.0.113.0/24"
 
 	services: {
 		postgres: bootstrap.#PostgresService & {
@@ -70,17 +70,17 @@ site: bootstrap.#DockerSite & {
 // Wrap Grafana in a BootstrapResource for lifecycle management
 grafana_bootstrap: boot.#BootstrapResource & {
 	name: "mon-grafana"
-	ip:   "10.10.0.5"
+	ip:   "203.0.113.5"
 	port: 3000
 	health: {
-		command: "curl -sf http://10.10.0.5:3000/api/health"
+		command: "curl -sf http://203.0.113.5:3000/api/health"
 		timeout: "30s"
 		retries: 5
 	}
 	_bootstrap: {
 		layer: 2
 		credentials: {
-			collector: "curl -sf http://10.10.0.5:3000/api/admin/settings | jq .security"
+			collector: "curl -sf http://203.0.113.5:3000/api/admin/settings | jq .security"
 			paths: ["/opt/monitoring/grafana-creds.json"]
 		}
 	}

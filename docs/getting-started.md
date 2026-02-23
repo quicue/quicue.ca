@@ -45,7 +45,7 @@ _resources: {
     router: vocab.#Resource & {
         name:     "router"
         "@type":  {Router: true}
-        ip:       "192.168.1.1"
+        ip:       "198.51.100.1"
         ssh_user: "admin"
     }
     dns: vocab.#Resource & {
@@ -54,7 +54,7 @@ _resources: {
         depends_on:   {router: true}
         host:         "pve-node1"
         container_id: 100
-        ip:           "192.168.1.10"
+        ip:           "198.51.100.10"
     }
     web: vocab.#Resource & {
         name:         "web"
@@ -62,7 +62,7 @@ _resources: {
         depends_on:   {router: true, dns: true}
         host:         "pve-node1"
         container_id: 101
-        ip:           "192.168.1.11"
+        ip:           "198.51.100.11"
     }
 }
 

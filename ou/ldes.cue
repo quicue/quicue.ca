@@ -19,7 +19,7 @@ package ou
 import "quicue.ca/vocab"
 
 // #LDESContext — extends quicue context with TREE and LDES namespaces.
-#LDESContext: vocab.context."@context" & {
+#LDESContext: vocab.context["@context"] & {
 	"tree": "https://w3id.org/tree#"
 	"ldes": "https://w3id.org/ldes#"
 	"dct":  "http://purl.org/dc/terms/"

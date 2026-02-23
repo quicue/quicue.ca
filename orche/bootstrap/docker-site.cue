@@ -124,7 +124,7 @@ import "strings"
 	network_config: #Network & {
 		name:   network
 		driver: "bridge"
-		subnet: string | *"10.0.0.0/16"
+		subnet: string | *"192.0.2.0/16"
 	}
 
 	services: [string]: #DockerService

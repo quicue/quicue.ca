@@ -21,7 +21,7 @@ package patterns
 import "quicue.ca/vocab"
 
 // #ODRLContext — extends quicue context with ODRL namespace.
-#ODRLContext: vocab.context."@context" & {
+#ODRLContext: vocab.context["@context"] & {
 	"odrl": "http://www.w3.org/ns/odrl/2/"
 	"dct":  "http://purl.org/dc/terms/"
 	"xsd":  "http://www.w3.org/2001/XMLSchema#"

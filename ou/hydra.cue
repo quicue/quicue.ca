@@ -21,7 +21,7 @@ import (
 )
 
 // #HydraContext — extends the quicue JSON-LD context with Hydra namespace.
-#HydraContext: vocab.context."@context" & {
+#HydraContext: vocab.context["@context"] & {
 	"hydra":        "http://www.w3.org/ns/hydra/core#"
 	"rdfs":         "http://www.w3.org/2000/01/rdf-schema#"
 	"rdf":          "http://www.w3.org/1999/02/22-rdf-syntax-ns#"

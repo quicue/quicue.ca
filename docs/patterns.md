@@ -422,7 +422,7 @@ v: patterns.#RequiredFieldsValidation & {
 ```cue
 v: patterns.#IPRangeValidation & {
     _resources: resources
-    _allowedPrefix: "10.0.1."
+    _allowedPrefix: "198.51.100."
 }
 ```
 
@@ -571,9 +571,9 @@ CUE enforces that all three sub-definitions agree — same resources flow throug
 ```cue
 resolved: patterns.#ResolveTemplate & {
     template: "ssh {user}@{ip} 'pct status {container_id}'"
-    values: {user: "root", ip: "10.0.1.1", container_id: "101"}
+    values: {user: "root", ip: "198.51.100.1", container_id: "101"}
 }
-// resolved.result = "ssh root@10.0.1.1 'pct status 101'"
+// resolved.result = "ssh root@198.51.100.1 'pct status 101'"
 ```
 
 Handles up to 8 parameters via a conditional replacement chain.
@@ -655,7 +655,7 @@ drift: patterns.#DriftReport & {
 
 ```cue
 smoke: patterns.#SmokeTest & {
-    checks: [{label: "DNS resolves", command: "dig +short example.com", expected: "10.0.1.10"}]
+    checks: [{label: "DNS resolves", command: "dig +short example.com", expected: "198.51.100.10"}]
 }
 // smoke.script — executable bash script
 ```
@@ -714,8 +714,8 @@ toon: (patterns.#TOONExport & {
 Output format:
 ```
 resources[7]{name,types,ip,host,container_id}:
-  dns-primary,DNSServer|LXCContainer,10.0.1.10,pve-node-1,100
-  web-server,WebServer|LXCContainer,10.0.1.20,pve-node-2,102
+  dns-primary,DNSServer|LXCContainer,198.51.100.10,pve-node-1,100
+  web-server,WebServer|LXCContainer,198.51.100.20,pve-node-2,102
 
 dependencies[4]{from,to}:
   dns-secondary,dns-primary

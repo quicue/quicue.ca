@@ -6,7 +6,7 @@ import "quicue.ca/template/ansible"
 // Sample resources (mimicking a real quicue graph)
 _resources: {
 	"dns-server": {
-		ip:           "10.0.1.10"
+		ip:           "198.51.100.10"
 		host:         "pve-node-1"
 		container_id: 100
 		ssh_user:     "root"
@@ -17,7 +17,7 @@ _resources: {
 		}
 	}
 	"git-server": {
-		ip:       "10.0.1.20"
+		ip:       "198.51.100.20"
 		host:     "pve-node-2"
 		vm_id:    200
 		ssh_user: "git"
@@ -28,7 +28,7 @@ _resources: {
 		}
 	}
 	"web-proxy": {
-		ip:           "10.0.1.30"
+		ip:           "198.51.100.30"
 		host:         "pve-node-1"
 		container_id: 300
 		ssh_user:     "root"
@@ -36,7 +36,7 @@ _resources: {
 		owner: "infra-team"
 	}
 	"dev-workstation": {
-		ip:       "10.0.1.50"
+		ip:       "198.51.100.50"
 		host:     "pve-node-3"
 		vm_id:    500
 		ssh_user: "dev"
@@ -47,7 +47,7 @@ _resources: {
 		monitoring: enabled: false
 	}
 	"monitoring": {
-		ip:           "10.0.1.60"
+		ip:           "198.51.100.60"
 		host:         "pve-node-2"
 		container_id: 600
 		ssh_user:     "root"
