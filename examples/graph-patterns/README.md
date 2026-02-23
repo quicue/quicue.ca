@@ -2,6 +2,14 @@
 
 Comprehensive graph queries and analysis patterns for infrastructure dependency graphs.
 
+## Try it
+
+```bash
+cue eval ./examples/graph-patterns/ -e output.topology
+cue eval ./examples/graph-patterns/ -e output.impact_if_dns_fails
+cue export ./examples/graph-patterns/ -e output.summary --out json
+```
+
 ## Overview
 
 This example demonstrates all graph patterns available in `quicue.ca/patterns@v0`:
