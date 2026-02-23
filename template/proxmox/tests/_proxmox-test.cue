@@ -74,12 +74,12 @@ _assertNode_clusterStatus:  _testHypervisor.cluster_status.command & "ssh root@p
 // =============================================================================
 
 _testConnectivity: patterns.#ConnectivityActions & {
-	IP:   "10.0.1.5"
+	IP:   "198.51.100.5"
 	USER: "admin"
 }
 
-_assertConn_ping: _testConnectivity.ping.command & "ping -c 3 10.0.1.5"
-_assertConn_ssh:  _testConnectivity.ssh.command & "ssh admin@10.0.1.5"
+_assertConn_ping: _testConnectivity.ping.command & "ping -c 3 198.51.100.5"
+_assertConn_ssh:  _testConnectivity.ssh.command & "ssh admin@198.51.100.5"
 
 // =============================================================================
 // TEST: #ContainerLifecycle generates correct commands

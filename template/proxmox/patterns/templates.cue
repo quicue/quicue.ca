@@ -13,7 +13,7 @@ package patterns
 // Usage:
 //   import "quicue.ca/proxmox/patterns"
 //   _T: patterns.#ActionTemplates
-//   actions: { ping: _T.ping & {IP: "10.0.0.1"} }
+//   actions: { ping: _T.ping & {IP: "192.0.2.1"} }
 #ActionTemplates: {
 	// =========================================================================
 	// Connectivity actions (generic)

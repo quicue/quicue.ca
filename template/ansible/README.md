@@ -30,12 +30,12 @@ ansible-playbook -i inventory.yml site.yml
 all:
   hosts:
     dns-server:
-      ansible_host: 10.0.1.10
+      ansible_host: 198.51.100.10
       ansible_user: root
       container_id: 100
       pve_node: pve-node-1
     git-server:
-      ansible_host: 10.0.1.20
+      ansible_host: 198.51.100.20
       ansible_user: git
       vmid: 200
       pve_node: pve-node-2

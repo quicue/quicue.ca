@@ -35,13 +35,13 @@ federation: orchestration.#Federation & {
 		primary: {
 			tier: "core"
 			location: "us-east"
-			network: {prefix: "10.1.0.0/16", dns: ["10.1.1.5"]}
+			network: {prefix: "198.51.100.0/24", dns: ["198.51.100.5"]}
 			resources: {...}
 		}
 		replica: {
 			tier: "core"
 			location: "us-west"
-			network: {prefix: "10.2.0.0/16", dns: ["10.2.1.5"]}
+			network: {prefix: "203.0.113.0/24", dns: ["203.0.113.5"]}
 			resources: {...}
 		}
 	}

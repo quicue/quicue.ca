@@ -58,20 +58,20 @@ infra: orchestration.#Federation & {
 			tier:     "edge"
 			location: "cottage"
 			network: {
-				prefix: "10.99.0.0/24"
-				dns: ["10.99.0.1"]
+				prefix: "203.0.113.0/24"
+				dns: ["203.0.113.1"]
 			}
 			resources: {
 				tunnel: {
 					name: "wireguard-tunnel"
 					"@type": {TunnelEndpoint: true}
-					ip:         "10.99.0.1"
+					ip:         "203.0.113.1"
 					depends_on: {}
 				}
 				backup: {
 					name: "restic-offsite"
 					"@type": {BackupService: true}
-					ip:         "10.99.0.10"
+					ip:         "203.0.113.10"
 					depends_on: {tunnel: true}
 				}
 			}

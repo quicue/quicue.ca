@@ -81,7 +81,7 @@ import (
 resources: {
 	"dns-server": {
 		name:         "dns-server"
-		ip:           "10.0.1.10"
+		ip:           "198.51.100.10"
 		host:         "pve-node-1" // generic: hypervisor host
 		container_id: 100          // generic: container identifier
 		"@type": {DNSServer: true, LXCContainer: true}
@@ -95,7 +95,7 @@ resources: {
 
 	"git-server": {
 		name:         "git-server"
-		ip:           "10.0.1.20"
+		ip:           "198.51.100.20"
 		host:         "pve-node-2"
 		container_id: 200
 		"@type": {SourceControlManagement: true, LXCContainer: true}

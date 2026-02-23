@@ -11,19 +11,19 @@ Generated from `template/ansible/examples/demo.cue` and `template/terraform/exam
 ```yaml
 hosts:
   dns-server:
-    ansible_host: 10.0.1.10
+    ansible_host: 198.51.100.10
     ansible_python_interpreter: /usr/bin/python3
     ansible_user: root
     container_id: 100
     pve_node: pve-node-1
   git-server:
-    ansible_host: 10.0.1.20
+    ansible_host: 198.51.100.20
     ansible_python_interpreter: /usr/bin/python3
     ansible_user: git
     pve_node: pve-node-2
     vmid: 200
   web-proxy:
-    ansible_host: 10.0.1.30
+    ansible_host: 198.51.100.30
     ansible_python_interpreter: /usr/bin/python3
     ansible_user: root
     container_id: 300
@@ -31,7 +31,7 @@ hosts:
     pve_node: pve-node-1
   dev-workstation:
     ansible_become: true
-    ansible_host: 10.0.1.50
+    ansible_host: 198.51.100.50
     ansible_port: 2222
     ansible_python_interpreter: /usr/bin/python3
     ansible_user: dev
@@ -39,7 +39,7 @@ hosts:
     pve_node: pve-node-3
     vmid: 500
   monitoring:
-    ansible_host: 10.0.1.60
+    ansible_host: 198.51.100.60
     ansible_python_interpreter: /usr/bin/python3
     ansible_user: root
     container_id: 600
@@ -93,7 +93,7 @@ Auto-generated groups: `owner_<name>`, `node_<name>`, and tag-based groups.
 ```json
 [
   {
-    "targets": ["10.0.1.10:9100"],
+    "targets": ["198.51.100.10:9100"],
     "labels": {
       "environment": "homelab",
       "instance": "dns-server",
@@ -105,7 +105,7 @@ Auto-generated groups: `owner_<name>`, `node_<name>`, and tag-based groups.
     }
   },
   {
-    "targets": ["10.0.1.10:9119"],
+    "targets": ["198.51.100.10:9119"],
     "labels": {
       "environment": "homelab",
       "instance": "dns-server",
@@ -117,7 +117,7 @@ Auto-generated groups: `owner_<name>`, `node_<name>`, and tag-based groups.
     }
   },
   {
-    "targets": ["10.0.1.20:9100"],
+    "targets": ["198.51.100.20:9100"],
     "labels": {
       "instance": "git-server",
       "exporter": "node",
@@ -126,7 +126,7 @@ Auto-generated groups: `owner_<name>`, `node_<name>`, and tag-based groups.
     }
   },
   {
-    "targets": ["10.0.1.20:9168"],
+    "targets": ["198.51.100.20:9168"],
     "labels": {
       "instance": "git-server",
       "exporter": "gitlab",
@@ -243,8 +243,8 @@ Selected resources showing key features (full output is ~550 lines):
         "agent": true,
         "username": "root",
         "node": [
-          { "name": "pve-alpha", "address": "10.0.0.10" },
-          { "name": "pve-beta", "address": "10.0.0.11" }
+          { "name": "pve-alpha", "address": "192.0.2.10" },
+          { "name": "pve-beta", "address": "192.0.2.11" }
         ]
       }]
     }]
@@ -287,11 +287,11 @@ Selected resources showing key features (full output is ~550 lines):
       "username": "deploy",
       "keys": ["ssh-ed25519 AAAA... admin@infra"]
     },
-    "dns": { "servers": ["10.0.1.1", "1.1.1.1"] },
+    "dns": { "servers": ["198.51.100.1", "1.1.1.1"] },
     "ip_config": [{
       "ipv4": {
-        "address": "10.0.1.50/24",
-        "gateway": "10.0.1.1"
+        "address": "198.51.100.50/24",
+        "gateway": "198.51.100.1"
       }
     }]
   }

@@ -366,9 +366,9 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 
 	// JSON-LD framing — grounding IRIs for W3C interop
 	jsonld: {
-		"@context":       vocab.context."@context"
+		"@context":       vocab.context["@context"]
 		"@type":          "quicue:InfraGraph"
-		"dct:conformsTo": "https://quicue.ca/vocab"
+		"dct:conformsTo": {"@id": "https://quicue.ca/vocab"}
 		"@graph":         resources
 	}
 }
@@ -511,6 +511,9 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 
 	// The output data structure (arrays for JavaScript compatibility)
 	data: {
+		"@context":       vocab.context["@context"]
+		"@type":          "quicue:GraphVisualization"
+		"dct:conformsTo": {"@id": "https://quicue.ca/vocab"}
 		nodes:       _nodes
 		edges:       _edges
 		topology:    _topology

@@ -27,14 +27,14 @@ import (
 resources: {
 	"pve-node": {
 		name:     "pve-node"
-		ip:       "10.0.1.1"
+		ip:       "198.51.100.1"
 		ssh_user: "root"
 		"@type": {VirtualizationPlatform: true}
 	}
 
 	"technitium": {
 		name:         "technitium"
-		ip:           "10.0.1.10"
+		ip:           "198.51.100.10"
 		container_id: 101
 		host:         "pve-node" // structural_dep -> auto depends_on
 		"@type": {LXCContainer: true, DNSServer: true, CriticalInfra: true}
@@ -42,7 +42,7 @@ resources: {
 
 	"caddy": {
 		name:         "caddy"
-		ip:           "10.0.1.50"
+		ip:           "198.51.100.50"
 		container_id: 102
 		host:         "pve-node"
 		"@type": {LXCContainer: true, ReverseProxy: true}
@@ -50,7 +50,7 @@ resources: {
 
 	"multi-role": {
 		name: "multi-role"
-		ip:   "10.0.1.99"
+		ip:   "198.51.100.99"
 		// Note: No container_id or host - this is NOT an LXC
 		// It's just a DNS server and reverse proxy (maybe bare metal)
 		depends_on: {technitium: true}

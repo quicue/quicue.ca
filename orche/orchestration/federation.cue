@@ -11,7 +11,7 @@ import "list"
 
 	// Network configuration
 	network: {
-		prefix: string // e.g., "10.1.0.0/16"
+		prefix: string // e.g., "198.51.100.0/24"
 		dns:    [...string]
 		gateway?: string
 	}

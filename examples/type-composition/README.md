@@ -40,7 +40,7 @@ Actions derived from `@type` arrays and field presence.
 
 // Resource: types determine which actions it gets
 resources: "technitium": {
-    ip: "10.0.1.10"
+    ip: "198.51.100.10"
     "@type": {DNSServer: true, CriticalInfra: true}
 }
 // → actions: [ping, check_dns]  (CriticalInfra has no actions)

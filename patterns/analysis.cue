@@ -15,7 +15,10 @@
 
 package patterns
 
-import "list"
+import (
+	"list"
+	apercue_patterns "apercue.ca/patterns@v0"
+)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // STRUCTURAL ANALYSIS
@@ -327,14 +330,14 @@ import "list"
 // SCHEDULING / CRITICAL PATH
 // ═══════════════════════════════════════════════════════════════════════════
 
-// #CriticalPath — Critical Path Method analysis on a dependency graph.
+// #CriticalPath — re-exported from apercue.ca/patterns with:
+//   - O(n) backward pass via precomputed _immDeps map
+//   - Structured OWL-Time projection (time:Instant objects)
+//   - UnitType parameter for OWL-Time time:unitType
+//   - JSON-LD @context from vocab
+//   - apercue: namespace for slack/isCritical extensions
 //
-// Computes earliest/latest start times and slack for each resource.
-// Resources with zero slack form the critical path — any delay on these
-// delays the entire project/deployment.
-//
-// Weights are optional durations per resource (default: 1 unit each).
-// Compose with #Charter gates for milestone-aware scheduling.
+// Graph accepts #AnalyzableGraph — #InfraGraph satisfies this interface.
 //
 // Usage:
 //   cpm: #CriticalPath & {
@@ -345,131 +348,20 @@ import "list"
 //   // cpm.total_duration — project duration
 //   // cpm.slack — per-resource float time
 //
-#CriticalPath: {
-	Graph:    #InfraGraph
-	Weights?: [string]: number
+#CriticalPath: apercue_patterns.#CriticalPath
 
-	// Helper: duration for a resource (default 1)
-	_dur: {
-		for name, _ in Graph.resources {
-			(name): [
-				if Weights != _|_ && Weights[name] != _|_ {Weights[name]},
-				1,
-			][0]
-		}
-	}
-
-	// Forward pass: earliest start time (recursive from roots)
-	// EST[n] = max(EST[d] + dur[d]) for all dependencies d of n
-	_earliest: {
-		for name, r in Graph.resources {
-			let _deps = *r.depends_on | {}
-			(name): [
-				if len([for d, _ in _deps {d}]) > 0 {
-					list.Max([for d, _ in _deps {_earliest[d] + _dur[d]}])
-				},
-				0,
-			][0]
-		}
-	}
-
-	// Finish time per resource
-	_finish: {
-		for name, _ in Graph.resources {
-			(name): _earliest[name] + _dur[name]
-		}
-	}
-
-	// Total project duration
-	_allFinish: [for _, f in _finish {f}]
-	total_duration: [
-		if len(_allFinish) > 0 {list.Max(_allFinish)},
-		0,
-	][0]
-
-	// Backward pass: latest start time (recursive from leaves)
-	// LST[n] = min(LST[d]) - dur[n] for all immediate dependents d of n
-	_latest: {
-		for name, _ in Graph.resources {
-			let _immDeps = [
-				for other, or in Graph.resources
-				if or.depends_on != _|_ && or.depends_on[name] != _|_ {
-					_latest[other]
-				},
-			]
-			(name): [
-				if len(_immDeps) > 0 {
-					list.Min(_immDeps) - _dur[name]
-				},
-				total_duration - _dur[name],
-			][0]
-		}
-	}
-
-	// Slack: how much a resource can be delayed without affecting total duration
-	slack: {
-		for name, _ in Graph.resources {
-			(name): _latest[name] - _earliest[name]
-		}
-	}
-
-	// Critical path: resources with zero slack
-	critical: {
-		for name, s in slack
-		if s == 0 {
-			(name): {
-				start:    _earliest[name]
-				finish:   _finish[name]
-				duration: _dur[name]
-			}
-		}
-	}
-
-	// Ordered critical path (by start time)
-	critical_sequence: list.Sort([
-		for name, c in critical {
-			{resource: name} & c
-		},
-	], {x: {}, y: {}, less: x.start < y.start})
-
-	// Hidden intermediaries to avoid self-reference inside summary
-	// (same pattern as charter.cue — field names shadow outer scope)
-	_total_dur:  total_duration
-	_crit_count: len([for c, _ in critical {c}])
-	_res_count:  len(Graph.resources)
-	_max_slack: [
-		if len([for _, s in slack {s}]) > 0 {
-			list.Max([for _, s in slack {s}])
-		},
-		0,
-	][0]
-
-	summary: {
-		total_duration:  _total_dur
-		critical_count:  _crit_count
-		total_resources: _res_count
-		max_slack:       _max_slack
-	}
-
-	// ── OWL-Time projection ───────────────────────────────────────
-	// W3C OWL-Time (Recommendation, 2017 / CRD 2022): express
-	// scheduled intervals using Allen's temporal algebra.
-	// Domain extensions: quicue:slack, quicue:isCritical.
-	//
-	// Export: cue export -e cpm.time_report --out json
-	time_report: {
-		for name, _ in Graph.resources {
-			(name): {
-				"@type":             "time:Interval"
-				"time:hasBeginning": _earliest[name]
-				"time:hasEnd":       _finish[name]
-				"time:hasDuration": {
-					"@type":                "time:Duration"
-					"time:numericDuration": _dur[name]
-				}
-				"quicue:slack":      slack[name]
-				"quicue:isCritical": critical[name] != _|_
-			}
-		}
-	}
-}
+// #CriticalPathPrecomputed — CPM with Python-precomputed scheduling data.
+//
+// CUE's recursive fixpoint evaluation is too slow for forward/backward
+// passes on graphs >20 nodes. This pattern takes precomputed earliest,
+// latest, and duration values from Python and produces the same outputs
+// (summary, critical path, OWL-Time projection).
+//
+// Usage:
+//   python3 tools/toposort.py ./dir/ --cue --cpm > precomputed.cue
+//   cpm: #CriticalPathPrecomputed & {
+//     Graph: graph
+//     Precomputed: _precomputed_cpm
+//   }
+//
+#CriticalPathPrecomputed: apercue_patterns.#CriticalPathPrecomputed

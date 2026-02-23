@@ -27,7 +27,7 @@ import "quicue.ca/vocab@v0"
 myResources: [Name=string]: vocab.#Resource & {
 	name: Name
 	"@type": {DNSServer: true, VirtualizationPlatform: true}
-	ip: "10.1.1.5"
+	ip: "198.51.100.5"
 	ssh_user: "root"
 	depends_on: {router: true, storage: true}
 }

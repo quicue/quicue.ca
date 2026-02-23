@@ -10,7 +10,7 @@ web_server: {
 	vm:        patterns.#VMActions & _webServer
 	lifecycle: patterns.#VMLifecycle & _webServer
 	snapshots: patterns.#VMSnapshots & _webServer
-	connect: patterns.#ConnectivityActions & {IP: "10.0.1.100", USER: "root"}
+	connect: patterns.#ConnectivityActions & {IP: "198.51.100.100", USER: "root"}
 }
 
 // LXC container

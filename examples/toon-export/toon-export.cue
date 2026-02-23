@@ -25,13 +25,13 @@ _resources: {
 	// DNS servers
 	"dns-primary": {
 		"@type": {DNSServer: true, LXCContainer: true}
-		ip:           "10.0.1.10"
+		ip:           "198.51.100.10"
 		host:         "pve-node-1"
 		container_id: 100
 	}
 	"dns-secondary": {
 		"@type": {DNSServer: true, LXCContainer: true}
-		ip:           "10.0.1.11"
+		ip:           "198.51.100.11"
 		host:         "pve-node-2"
 		container_id: 101
 		depends_on: {"dns-primary": true}
@@ -40,14 +40,14 @@ _resources: {
 	// Web tier
 	"web-server": {
 		"@type": {WebServer: true, LXCContainer: true}
-		ip:           "10.0.1.20"
+		ip:           "198.51.100.20"
 		host:         "pve-node-2"
 		container_id: 102
 		depends_on: {"dns-primary": true}
 	}
 	"proxy": {
 		"@type": {ReverseProxy: true, DockerContainer: true}
-		ip:   "10.0.1.30"
+		ip:   "198.51.100.30"
 		host: "docker-host"
 		depends_on: {"web-server": true, "dns-primary": true}
 	}
@@ -55,14 +55,14 @@ _resources: {
 	// Database tier (VMs)
 	"db-primary": {
 		"@type": {Database: true, VM: true, CriticalInfra: true}
-		ip:    "10.0.1.50"
+		ip:    "198.51.100.50"
 		host:  "pve-node-1"
 		vm_id: 200
 		depends_on: {"dns-primary": true}
 	}
 	"db-replica": {
 		"@type": {Database: true, VM: true}
-		ip:    "10.0.1.51"
+		ip:    "198.51.100.51"
 		host:  "pve-node-3"
 		vm_id: 201
 		depends_on: {"db-primary": true, "dns-primary": true}
@@ -71,7 +71,7 @@ _resources: {
 	// Monitoring (no container_id or vm_id)
 	"monitoring": {
 		"@type": {MonitoringServer: true}
-		ip:   "10.0.1.100"
+		ip:   "198.51.100.100"
 		host: "obs-host"
 		depends_on: {"dns-primary": true}
 	}

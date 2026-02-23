@@ -32,7 +32,7 @@ import "quicue.ca/vocab"
 
 // #DCATContext — extends quicue JSON-LD context with DCAT 3, FOAF,
 // PROV-O, SKOS, and Web Annotation namespaces for full W3C interop.
-#DCATContext: vocab.context."@context" & {
+#DCATContext: vocab.context["@context"] & {
 	"dcat":  "http://www.w3.org/ns/dcat#"
 	"dct":   "http://purl.org/dc/terms/"
 	"foaf":  "http://xmlns.com/foaf/0.1/"
