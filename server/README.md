@@ -110,4 +110,4 @@ curl https://api.quicue.ca/api/v1/resources/router-core/vyos/show_interfaces
 - `ou/` — Hydra API documentation schema
 - `patterns/` — Execution plan generation
 - [demo.quicue.ca](https://demo.quicue.ca/) — Operator dashboard (graph explorer, planner, resource browser, Hydra explorer)
-- [cat.quicue.ca](https://cat.quicue.ca/) — Provider catalogue (29 providers, architecture diagrams)
+

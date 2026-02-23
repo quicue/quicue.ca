@@ -126,7 +126,7 @@ _index_page: strings.Join([
 	    <a href="planner.html">Planner</a>
 	    <a href="browse.html">Browse</a>
 	    <a href="explore.html">Explore</a>
-	    <a href="https://cat.quicue.ca">Catalogue</a>
+	    <a href="https://api.quicue.ca/docs/">API Docs</a>
 	  </div>
 	  <div class="stats">
 	""",

@@ -161,9 +161,8 @@ The datacenter example (30 resources, 29 providers, 654 resolved commands) is de
 | **Swagger docs** | [api.quicue.ca/docs](https://api.quicue.ca/docs/) | Interactive API documentation for all 654 operations |
 | **Hydra JSON-LD** | [api.quicue.ca/api/v1/hydra](https://api.quicue.ca/api/v1/hydra) | W3C Hydra vocabulary — self-describing linked data API |
 | **Infrastructure graph** | [api.quicue.ca/api/v1/graph.jsonld](https://api.quicue.ca/api/v1/graph.jsonld) | Full graph as JSON-LD with typed IRIs |
-| **Provider catalogue** | [cat.quicue.ca](https://cat.quicue.ca) | All 29 providers with architecture diagrams |
 | **KG spec** | [kg.quicue.ca](https://kg.quicue.ca) | W3C ReSpec specification for the knowledge graph framework |
-| **Pattern docs** | [docs.quicue.ca](https://docs.quicue.ca) | Module documentation — patterns, charter, linked data, architecture |
+| **Pattern docs** | [docs.quicue.ca](https://docs.quicue.ca) | Module documentation -- patterns, charter, linked data, architecture |
 
 The API is a "universe cheat sheet" — CUE comprehensions compute all possible answers at eval time, then the build script (`server/build-static-api.sh`) shapes them as 727 static JSON files served from Cloudflare Pages. The same pattern that makes SPARQL unnecessary makes a server unnecessary.
 
