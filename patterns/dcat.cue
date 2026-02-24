@@ -61,7 +61,7 @@ _#W3CSpecMap: {
 
 	// Catalog metadata
 	CatalogID:   string | *"https://quicue.ca/catalog"
-	Publisher:    string | *"quicue"
+	Publisher:   string | *"quicue"
 	Title:       string | *"Infrastructure Catalog"
 	Description: string | *"DCAT 3 catalog of infrastructure resources"
 	Version:     string | *"1.0.0"
@@ -188,7 +188,7 @@ _#W3CSpecMap: {
 
 	// Catalog metadata
 	CatalogID:   string | *"https://quicue.ca/kb"
-	Publisher:    string | *Manifest.context.name
+	Publisher:   string | *Manifest.context.name
 	Title:       string | *"\(Manifest.context.name) Knowledge Base"
 	Description: string | *Manifest.context.description
 	License?:    string
@@ -228,10 +228,10 @@ _#W3CSpecMap: {
 		// Each .kb/ graph → dcat:Dataset
 		"dcat:dataset": [
 			for gname, graph in Manifest.graphs {
-				"@type":          "dcat:Dataset"
-				"@id":            "\(BaseIRI)\(graph.directory)"
-				"dct:title":      "\(gname) — \(graph.semantic)"
-				"dct:identifier": gname
+				"@type":           "dcat:Dataset"
+				"@id":             "\(BaseIRI)\(graph.directory)"
+				"dct:title":       "\(gname) — \(graph.semantic)"
+				"dct:identifier":  gname
 				"dct:description": graph.description
 
 				// W3C spec conformance from semantic mapping

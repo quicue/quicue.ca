@@ -28,57 +28,57 @@ import (
 _resources: {
 	// Gate 0: Schema validation
 	"schema-validation": {
-		name:   "schema-validation"
+		name: "schema-validation"
 		"@type": {CI: true}
 	}
 
 	// Gate 1: Binding CI
 	"binding-ci": {
-		name:   "binding-ci"
+		name: "binding-ci"
 		"@type": {CI: true}
 		depends_on: {"schema-validation": true}
 	}
 
 	// Gate 2: Server integration CI
 	"server-ci": {
-		name:   "server-ci"
+		name: "server-ci"
 		"@type": {CI: true}
 		depends_on: {"binding-ci": true}
 	}
 
 	// Security audit (root — no deps)
 	"github-audit": {
-		name:   "github-audit"
+		name: "github-audit"
 		"@type": {Security: true}
 	}
 
 	// Gate 3 deliverables (public surfaces with safe data)
 	"cat-public": {
-		name:   "cat-public"
+		name: "cat-public"
 		"@type": {Deployment: true}
 		depends_on: {"schema-validation": true}
 	}
 
 	"kg-public": {
-		name:   "kg-public"
+		name: "kg-public"
 		"@type": {Deployment: true}
 		depends_on: {"schema-validation": true}
 	}
 
 	"cmhc-public": {
-		name:   "cmhc-public"
+		name: "cmhc-public"
 		"@type": {Deployment: true}
 		depends_on: {"schema-validation": true}
 	}
 
 	"imp-safe-data": {
-		name:   "imp-safe-data"
+		name: "imp-safe-data"
 		"@type": {Deployment: true, Security: true}
 		depends_on: {"server-ci": true, "github-audit": true}
 	}
 
 	"api-safe-data": {
-		name:   "api-safe-data"
+		name: "api-safe-data"
 		"@type": {Deployment: true, Security: true}
 		depends_on: {"server-ci": true, "github-audit": true}
 	}
@@ -128,20 +128,20 @@ _charter: charter.#Charter & {
 		total_resources: 14
 		root: {"schema-validation": true, "github-audit": true}
 		required_resources: {
-			"schema-validation": true
-			"binding-ci":        true
-			"server-ci":         true
-			"github-audit":      true
-			"cat-public":        true
-			"kg-public":         true
-			"cmhc-public":       true
-			"imp-safe-data":     true
-			"api-safe-data":     true
-			"imp-public":        true
-			"api-public":        true
+			"schema-validation":  true
+			"binding-ci":         true
+			"server-ci":          true
+			"github-audit":       true
+			"cat-public":         true
+			"kg-public":          true
+			"cmhc-public":        true
+			"imp-safe-data":      true
+			"api-safe-data":      true
+			"imp-public":         true
+			"api-public":         true
 			"interactive-upload": true
-			"graph-editor":      true
-			"oxigraph":          true
+			"graph-editor":       true
+			"oxigraph":           true
 		}
 		required_types: {
 			CI:          true
@@ -189,7 +189,7 @@ _charter: charter.#Charter & {
 			description: "Upload JSON-LD and edit graphs in the catalogue"
 			requires: {
 				"interactive-upload": true
-				"graph-editor":      true
+				"graph-editor":       true
 			}
 			depends_on: {"public-showcase": true}
 		}

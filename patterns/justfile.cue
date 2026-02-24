@@ -17,7 +17,7 @@ import "strings"
 
 // #JustfileProjection generates a justfile from infraGraph actions and project actions.
 #JustfileProjection: {
-	InfraGraph: [string]: _
+	InfraGraph: [string]:     _
 	ProjectActions: [string]: #ProjectAction
 	ProjectName:        string
 	ProjectDescription: string | *"Infrastructure management"

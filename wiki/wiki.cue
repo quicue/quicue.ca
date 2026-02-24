@@ -12,9 +12,9 @@ import "strings"
 	name:        string
 	description: string | *""
 	"@type": {[string]: true}
-	ip:        string | *""
-	hostname:  string | *""
-	host:      string | *""
+	ip:       string | *""
+	hostname: string | *""
+	host:     string | *""
 	depends_on: {[string]: true} | *{}
 	...
 }
@@ -376,7 +376,7 @@ import "strings"
 
 // #FullExport for convenience
 #FullExport: {
-	Resources:       [string]: #Resource
+	Resources: [string]: #Resource
 	SiteTitle:       string | *"Infrastructure Wiki"
 	SiteDescription: string | *"Auto-generated from quicue infrastructure graph"
 	SiteURL:         string | *""

@@ -163,7 +163,7 @@ _kubevirtTerraform: {
 										}
 										if r._resource.network == _|_ {
 											interfaces: [{
-												name:       "default"
+												name: "default"
 												masquerade: {}
 											}]
 										}

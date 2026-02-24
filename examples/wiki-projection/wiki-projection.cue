@@ -17,42 +17,42 @@ _resources: {
 	"router-core": {
 		name:        "router-core"
 		description: "VyOS core router"
-		"@type":     {Router: true}
-		ip:          "198.51.100.1"
-		host:        "pve-node-1"
-		depends_on:  {}
+		"@type": {Router: true}
+		ip:   "198.51.100.1"
+		host: "pve-node-1"
+		depends_on: {}
 	}
 	"dns-internal": {
 		name:        "dns-internal"
 		description: "PowerDNS internal resolver"
-		"@type":     {DNSServer: true, LXCContainer: true}
-		ip:          "198.51.100.10"
-		host:        "pve-node-1"
-		depends_on:  {"router-core": true}
+		"@type": {DNSServer: true, LXCContainer: true}
+		ip:   "198.51.100.10"
+		host: "pve-node-1"
+		depends_on: {"router-core": true}
 	}
 	"caddy-proxy": {
 		name:        "caddy-proxy"
 		description: "Caddy reverse proxy with automatic HTTPS"
-		"@type":     {ReverseProxy: true, LXCContainer: true}
-		ip:          "198.51.100.11"
-		host:        "pve-node-1"
-		depends_on:  {"dns-internal": true}
+		"@type": {ReverseProxy: true, LXCContainer: true}
+		ip:   "198.51.100.11"
+		host: "pve-node-1"
+		depends_on: {"dns-internal": true}
 	}
 	"gitlab-scm": {
 		name:        "gitlab-scm"
 		description: "GitLab source control and CI/CD"
-		"@type":     {SourceControlManagement: true, LXCContainer: true}
-		ip:          "198.51.100.20"
-		host:        "pve-node-2"
-		depends_on:  {"dns-internal": true, "caddy-proxy": true}
+		"@type": {SourceControlManagement: true, LXCContainer: true}
+		ip:   "198.51.100.20"
+		host: "pve-node-2"
+		depends_on: {"dns-internal": true, "caddy-proxy": true}
 	}
 	"postgres-main": {
 		name:        "postgres-main"
 		description: "Primary PostgreSQL database"
-		"@type":     {Database: true}
-		ip:          "198.51.100.30"
-		host:        "pve-node-2"
-		depends_on:  {"dns-internal": true}
+		"@type": {Database: true}
+		ip:   "198.51.100.30"
+		host: "pve-node-2"
+		depends_on: {"dns-internal": true}
 	}
 }
 

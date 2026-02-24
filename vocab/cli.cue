@@ -42,7 +42,7 @@ package vocab
 
 	// Output format - what the command produces
 	output: {
-		format: "text" | "json" | "yaml" | "table" | "graph"
+		format:  "text" | "json" | "yaml" | "table" | "graph"
 		schema?: string // CUE schema reference for structured output
 	}
 

@@ -36,7 +36,7 @@ _categoryTypes: {
 // becomes an activity. The operator role is the actor, the resource is
 // the object, and the provider/action pair is the instrument.
 #ActivityStream: {
-	ctx: _   // receives the #InteractionCtx
+	ctx: _ // receives the #InteractionCtx
 
 	stream: {
 		"@context": #ASContext

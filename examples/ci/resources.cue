@@ -15,7 +15,7 @@ _resources: {
 	"stage-build": {
 		name: "stage-build"
 		"@type": {CIStage: true}
-		stage_name: "build"
+		stage_name:  "build"
 		stage_index: 0
 	}
 	"pipeline": {
@@ -26,7 +26,7 @@ _resources: {
 		name: "stage-test"
 		"@type": {CIStage: true}
 		depends_on: {"stage-build": true}
-		stage_name: "test"
+		stage_name:  "test"
 		stage_index: 1
 	}
 	"build_app": {
@@ -43,7 +43,7 @@ _resources: {
 		name: "stage-deploy"
 		"@type": {CIStage: true}
 		depends_on: {"stage-test": true}
-		stage_name: "deploy"
+		stage_name:  "deploy"
 		stage_index: 2
 	}
 	"unit_tests": {
@@ -73,23 +73,23 @@ _resources: {
 		"@type": {CIJob: true}
 		depends_on: {"integration_tests": true, "stage-deploy": true, "unit_tests": true}
 		environment: "production"
-		manual: true
+		manual:      true
 	}
 }
 
 _precomputed: {
 	depth: {
-		"pipeline": 0
-		"stage-build": 0
-		"build_app": 1
-		"build_lib": 1
-		"stage-test": 1
+		"pipeline":          0
+		"stage-build":       0
+		"build_app":         1
+		"build_lib":         1
+		"stage-test":        1
 		"integration_tests": 2
-		"lint": 2
-		"stage-deploy": 2
-		"unit_tests": 2
+		"lint":              2
+		"stage-deploy":      2
+		"unit_tests":        2
 		"deploy_production": 3
-		"deploy_staging": 3
+		"deploy_staging":    3
 	}
 }
 

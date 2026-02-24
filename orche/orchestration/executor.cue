@@ -27,18 +27,18 @@ import (
 
 // #ExecutionPlan - Ordered list of steps grouped by layer
 #ExecutionPlan: {
-	name:   string
+	name: string
 	layers: [...{
-		layer:     int
+		layer: int
 		resources: [...string]
-		steps:     [...#ExecutionStep]
+		steps: [...#ExecutionStep]
 	}]
 
 	// Flattened step list for execution
 	all_steps: [...#ExecutionStep]
 	all_steps: [
 		for l in layers
-		for s in l.steps {s}
+		for s in l.steps {s},
 	]
 
 	// Summary
@@ -116,14 +116,14 @@ command: destroy: {
 // Supports arbitrary depth (no hardcoded layer limit).
 #DependencyGraph: {
 	resources: [string]: {
-		name:       string
+		name: string
 		depends_on: {[string]: true}
 		actions?: [string]: {command: string, ...}
 		...
 	}
 
 	_graph: patterns.#InfraGraph & {Input: resources}
-	_plan:  patterns.#DeploymentPlan & {Graph: _graph}
+	_plan: patterns.#DeploymentPlan & {Graph: _graph}
 
 	// Execution order: resources sorted by dependency layer
 	execution_order: [
@@ -137,7 +137,7 @@ command: destroy: {
 // =============================================================================
 #GenerateDeploySteps: {
 	Resources: [string]: {
-		name:       string
+		name: string
 		depends_on: {[string]: true}
 		actions: [string]: {command: string, ...}
 		...

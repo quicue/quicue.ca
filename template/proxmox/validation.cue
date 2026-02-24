@@ -19,12 +19,12 @@ package proxmox
 #ProxmoxIDValidation: {
 	// Input: VMs and LXCs collections
 	_vms: [string]: {
-		vmid?: int
+		vmid?:  int
 		vm_id?: int
 		...
 	}
 	_lxcs: [string]: {
-		lxcid?: int
+		lxcid?:        int
 		container_id?: int
 		...
 	}
@@ -65,8 +65,8 @@ package proxmox
 		for i, nameA in _vmidNames
 		for j, nameB in _vmidNames
 		if i < j && _vmidMap[nameA].id == _vmidMap[nameB].id {
-			id:      _vmidMap[nameA].id
-			vms:     [nameA, nameB]
+			id: _vmidMap[nameA].id
+			vms: [nameA, nameB]
 			message: "VMID conflict: \(_vmidMap[nameA].id) used by '\(nameA)' and '\(nameB)'"
 		},
 	]
@@ -77,8 +77,8 @@ package proxmox
 		for i, nameA in _lxcidNames
 		for j, nameB in _lxcidNames
 		if i < j && _lxcidMap[nameA].id == _lxcidMap[nameB].id {
-			id:      _lxcidMap[nameA].id
-			lxcs:    [nameA, nameB]
+			id: _lxcidMap[nameA].id
+			lxcs: [nameA, nameB]
 			message: "LXCID conflict: \(_lxcidMap[nameA].id) used by '\(nameA)' and '\(nameB)'"
 		},
 	]
@@ -181,9 +181,9 @@ package proxmox
 		for i, a in _gpuAssignments
 		for j, b in _gpuAssignments
 		if i < j && a.node == b.node && a.gpu == b.gpu {
-			gpu:     a.gpu
-			node:    a.node
-			vms:     [a.vmname, b.vmname]
+			gpu:  a.gpu
+			node: a.node
+			vms: [a.vmname, b.vmname]
 			message: "GPU conflict: \(a.gpu) on node \(a.node) assigned to both '\(a.vmname)' and '\(b.vmname)'"
 		},
 	]
@@ -198,8 +198,8 @@ package proxmox
 	}
 
 	// Expose results
-	valid:   len(_conflicts) == 0
-	issues:  _conflicts
+	valid:  len(_conflicts) == 0
+	issues: _conflicts
 	summary: {
 		total_gpu_vms: len(_gpuAssignments)
 		conflicts:     len(_conflicts)

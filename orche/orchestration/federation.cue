@@ -12,7 +12,7 @@ import "list"
 	// Network configuration
 	network: {
 		prefix: string // e.g., "198.51.100.0/24"
-		dns:    [...string]
+		dns: [...string]
 		gateway?: string
 	}
 
@@ -32,9 +32,9 @@ import "list"
 
 	// Global resources (span multiple sites)
 	global_resources?: [string]: {
-		type:        string
-		primary_dc:  string
-		replica_dcs: [...string]  // ordered — JSON-LD @list
+		type:       string
+		primary_dc: string
+		replica_dcs: [...string] // ordered — JSON-LD @list
 	}
 
 	// Sync policy
@@ -60,10 +60,10 @@ import "list"
 
 // #CrossSiteResource - Resource that spans sites
 #CrossSiteResource: {
-	name:          string
-	type:          {[string]: true}  // Set membership like other types
-	primary_site:  string
-	replica_sites: {[string]: true}  // Set of site names
+	name: string
+	type: {[string]: true} // Set membership like other types
+	primary_site: string
+	replica_sites: {[string]: true} // Set of site names
 
 	// Replication mode
 	replication: {
@@ -74,7 +74,7 @@ import "list"
 	// Failover configuration
 	failover: {
 		automatic: bool | *false
-		priority:  [...string] // ordered list — order matters for failover chain
+		priority: [...string] // ordered list — order matters for failover chain
 	}
 }
 

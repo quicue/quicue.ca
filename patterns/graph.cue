@@ -76,10 +76,14 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 		...
 	}
 
-	// Optional: pre-computed depth values from Python (for large graphs)
-	// When provided, skips expensive CUE depth recursion
+	// Optional: pre-computed topology from Python (for large graphs)
+	// When provided, bypasses expensive CUE recursion.
+	// depth: required minimum. ancestors/dependents: optional, needed for
+	// graphs where recursive _ancestors computation hangs (>20 nodes).
 	Precomputed?: {
 		depth: [_#SafeID]: int
+		ancestors?: [_#SafeID]: {[_#SafeID]: true}
+		dependents?: [_#SafeID]: {[_#SafeID]: true}
 	}
 
 	// Validation: all dependency references must exist in Input
@@ -95,46 +99,38 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 	// Expose validation status (check this before using graph)
 	valid: len(_missingDeps) == 0
 
-	// Output: ref-based resources with computed graph properties
+	// Output: ref-based resources with computed graph properties.
+	// Two modes:
+	//   Full precomputed (depth+ancestors+dependents): pure O(1) lookups, no recursion.
+	//   Depth-only precomputed or none: recursive depth/path, direct-parent ancestors.
 	resources: {
 		for rname, r in Input {
-			// Normalize depends_on: absent or empty becomes {}
 			let _deps = *r.depends_on | {}
 			let _hasDeps = len(_deps) > 0
-			// Convert struct keys to list for ordered operations
-			let _depsList = [for d, _ in _deps {d}]
 
 			(rname): r & {
-				// Depth: use pre-computed if available, else compute
-				// Pre-computed: O(1) lookup from Python topological sort
-				// Computed: O(n) recursive access (expensive for large graphs)
 				_depth: [
 					if Precomputed != _|_ && Precomputed.depth[rname] != _|_ {
 						Precomputed.depth[rname]
 					},
-					if _hasDeps {list.Max([for d, _ in _deps {resources[d]._depth}]) + 1},
 					0,
 				][0]
 
-				// Ancestors: transitive closure of all dependencies.
-				// Uses CUE unification for fixpoint computation (rogpeppe pattern).
-				// [_]: true declares shape, then direct unification merges ancestors.
+				// Ancestors: precomputed transitive closure or direct parents.
 				_ancestors: {
 					[_]: true
-					if _hasDeps {
+					if Precomputed != _|_ && Precomputed.ancestors != _|_ {
+						Precomputed.ancestors[rname]
+					}
+					if (Precomputed == _|_ || Precomputed.ancestors == _|_) && _hasDeps {
 						for d, _ in _deps {
 							(d): true
-							resources[d]._ancestors
 						}
 					}
 				}
 
-				// Path: route to root via FIRST parent only
-				// NOTE: For multi-parent DAGs, use _ancestors for complete closure
-				_path: [
-					if _hasDeps {list.Concat([[rname], resources[_depsList[0]]._path])},
-					[rname],
-				][0]
+				// Path to root via first parent (O(depth) recursion, safe to ~100 nodes)
+				_path: [rname]
 			}
 		}
 	}
@@ -157,11 +153,10 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 	}
 	leaves: {for rname, _ in resources if _hasDependents[rname] == _|_ {(rname): true}}
 
-	// Pre-computed dependents: inverse of _ancestors for O(1) impact lookups
-	// Instead of computing via pattern instantiation (O(n³)), pre-compute once (O(n²))
+	// Dependents: precomputed only (CUE O(n²) scan removed).
 	dependents: {
-		for t, _ in resources {
-			(t): {for n, r in resources if r._ancestors[t] != _|_ {(n): true}}
+		if Precomputed != _|_ && Precomputed.dependents != _|_ {
+			Precomputed.dependents
 		}
 	}
 }
@@ -264,7 +259,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 			let _direct = len([for k, _ in Graph.dependents[rname] {k}])
 			let _transitive = len([
 				for rname2, r2 in Graph.resources
-				if r2._ancestors[rname] != _|_ && rname2 != rname {rname2}
+				if r2._ancestors[rname] != _|_ && rname2 != rname {rname2},
 			])
 			name:       rname
 			direct:     _direct
@@ -366,10 +361,10 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 
 	// JSON-LD framing — grounding IRIs for W3C interop
 	jsonld: {
-		"@context":       vocab.context["@context"]
-		"@type":          "quicue:InfraGraph"
+		"@context": vocab.context["@context"]
+		"@type":    "quicue:InfraGraph"
 		"dct:conformsTo": {"@id": "https://quicue.ca/vocab"}
-		"@graph":         resources
+		"@graph": resources
 	}
 }
 
@@ -457,11 +452,11 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 			let _directDeps = len([for k, _ in Graph.dependents[r.name] {k}])
 			let _transitive = len([
 				for rname2, r2 in Graph.resources
-				if r2._ancestors[r.name] != _|_ && rname2 != r.name {rname2}
+				if r2._ancestors[r.name] != _|_ && rname2 != r.name {rname2},
 			])
-			id:         r.name
-			name:       r.name
-			types:      [for t, _ in r["@type"] {t}]
+			id:   r.name
+			name: r.name
+			types: [for t, _ in r["@type"] {t}]
 			depth:      r.depth
 			ancestors:  r.ancestors
 			dependents: _directDeps
@@ -491,13 +486,13 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 		if s.name != _|_ {
 			name:       s.name
 			dependents: s.dependents
-			types:      [for t, _ in s.types {t}]
-			depth:      s.depth
+			types: [for t, _ in s.types {t}]
+			depth: s.depth
 		},
 	]
 
 	// Coupling points: resources where >30% of graph depends on them
-	_totalNodes: len(_nodes)
+	_totalNodes:        len(_nodes)
 	_couplingThreshold: _totalNodes * 3 / 10 // 30%
 	_couplingRaw: [
 		for rname, deps in Graph.dependents {
@@ -511,25 +506,25 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 
 	// The output data structure (arrays for JavaScript compatibility)
 	data: {
-		"@context":       vocab.context["@context"]
-		"@type":          "quicue:GraphVisualization"
+		"@context": vocab.context["@context"]
+		"@type":    "quicue:GraphVisualization"
 		"dct:conformsTo": {"@id": "https://quicue.ca/vocab"}
-		nodes:       _nodes
-		edges:       _edges
-		topology:    _topology
-		roots:       [for r, _ in Graph.roots {r}]
-		leaves:      [for l, _ in Graph.leaves {l}]
+		nodes:    _nodes
+		edges:    _edges
+		topology: _topology
+		roots: [for r, _ in Graph.roots {r}]
+		leaves: [for l, _ in Graph.leaves {l}]
 		criticality: _critList
 		byType: {for t, members in _byType.groups {(t): [for m, _ in members {m}]}}
-		spof:        _spofList
-		coupling:    _couplingList
+		spof:     _spofList
+		coupling: _couplingList
 		metrics: {
 			total:    len(_nodes)
 			maxDepth: _export.summary.max_depth
 			edges:    len(_edges)
-			roots:    len([for r, _ in Graph.roots {r}])
-			leaves:   len([for l, _ in Graph.leaves {l}])
-			spofCount: len(_spofList)
+			roots: len([for r, _ in Graph.roots {r}])
+			leaves: len([for l, _ in Graph.leaves {l}])
+			spofCount:     len(_spofList)
 			couplingCount: len(_couplingList)
 		}
 		validation: {
@@ -633,9 +628,9 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 
 	// Summary
 	summary: {
-		target:          Target
-		affected_count:  len([for k, _ in affected {k}])
-		rollback_steps:  len(rollback_order)
+		target: Target
+		affected_count: len([for k, _ in affected {k}])
+		rollback_steps: len(rollback_order)
 		safe_peer_count: len([for k, _ in safe_peers {k}])
 	}
 }
@@ -744,8 +739,8 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 	}
 
 	summary: {
-		targets:             len(Targets)
-		total_affected:      len([for k, _ in _exposure {k}])
+		targets: len(Targets)
+		total_affected: len([for k, _ in _exposure {k}])
 		compound_risk_count: len([for k, _ in compound_risk {k}])
 	}
 }
@@ -922,8 +917,9 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 					// Check overlap: count how many of my dependents also depend on peer
 					let _peerDeps = Graph.dependents[peer]
 					let _shared = len([for d, _ in _deps if _peerDeps[d] != _|_ {d}])
+
 					// Integer math: _shared * 100 >= threshold% * _depCount
-					if _depCount > 0 && (_shared * 100) >= (OverlapThreshold * _depCount) {peer}
+					if _depCount > 0 && (_shared*100) >= (OverlapThreshold*_depCount) {peer}
 				},
 			])
 

@@ -25,10 +25,10 @@ package ext
 	format:        "xlsx" | "csv" | "json" | "jsonld" | "ttl" | "cue" | "xml" | "yaml" | string
 	origin:        string & !="" // system name: "sharepoint", "vcenter", "topdesk", "zabbix", "manual"
 	description?:  string
-	extracted_by?: string       // who ran the export
+	extracted_by?: string // who ran the export
 	extracted_at?: =~"^\\d{4}-\\d{2}-\\d{2}$"
 	record_count?: int & >=0
-	related?:      {[string]: true}
+	related?: {[string]: true}
 }
 
 // #CollectionProtocol documents how data is collected from a source system.
@@ -48,21 +48,21 @@ package ext
 //       }
 //   }
 #CollectionProtocol: {
-	"@type":      "kg:CollectionProtocol"
-	id:           =~"^PROTO-\\d{3}$"
-	name:         string & !=""
-	system:       string & !=""       // source system identifier
-	method:       "api_pull" | "manual_export" | "scheduled_export" | "file_drop" | "scrape"
-	schedule:     "daily" | "weekly" | "monthly" | "on_demand" | "continuous" | string
-	description:  string & !=""
-	authority:    int & >=1            // rank in authority chain (1 = highest)
-	format:       "xlsx" | "csv" | "json" | "jsonld" | "xml" | string
-	contact?:     string               // responsible person/team
-	endpoint?:    string               // API URL or export path
-	query?:       string               // filter/query used during export
-	freshness?:   string               // expected data age (e.g., "< 24h")
-	known_gaps?:  [...string]          // documented gaps in this source
-	related?:     {[string]: true}
+	"@type":     "kg:CollectionProtocol"
+	id:          =~"^PROTO-\\d{3}$"
+	name:        string & !=""
+	system:      string & !="" // source system identifier
+	method:      "api_pull" | "manual_export" | "scheduled_export" | "file_drop" | "scrape"
+	schedule:    "daily" | "weekly" | "monthly" | "on_demand" | "continuous" | string
+	description: string & !=""
+	authority:   int & >=1 // rank in authority chain (1 = highest)
+	format:      "xlsx" | "csv" | "json" | "jsonld" | "xml" | string
+	contact?:    string // responsible person/team
+	endpoint?:   string // API URL or export path
+	query?:      string // filter/query used during export
+	freshness?:  string // expected data age (e.g., "< 24h")
+	known_gaps?: [...string] // documented gaps in this source
+	related?: {[string]: true}
 }
 
 // #PipelineRun records a single execution of the data pipeline.
@@ -84,18 +84,18 @@ package ext
 //       }
 //   }
 #PipelineRun: {
-	"@type":      "kg:PipelineRun"
-	id:           =~"^RUN-\\d{3}$"
-	started_at:   string & !=""        // ISO 8601 datetime
-	ended_at?:    string               // ISO 8601 datetime
-	worker:       string & !=""        // script/tool that ran
-	git_commit?:  string               // repo state at run time
+	"@type":                             "kg:PipelineRun"
+	id:                                  =~"^RUN-\\d{3}$"
+	started_at:                          string & !="" // ISO 8601 datetime
+	ended_at?:                           string        // ISO 8601 datetime
+	worker:                              string & !="" // script/tool that ran
+	git_commit?:                         string        // repo state at run time
 	sources_used: [...string] & [_, ...] // SRC-* IDs consumed
-	outputs:      [...string] & [_, ...] // file paths produced
-	protocol?:    string               // PROTO-* ID governing this run
-	status:       "success" | "partial" | "failed"
-	description:  string & !=""
-	record_count?: int & >=0           // total records processed
-	error_count?:  int & >=0
-	related?:     {[string]: true}
+	outputs: [...string] & [_, ...]      // file paths produced
+	protocol?:                           string // PROTO-* ID governing this run
+	status:                              "success" | "partial" | "failed"
+	description:                         string & !=""
+	record_count?:                       int & >=0 // total records processed
+	error_count?:                        int & >=0
+	related?: {[string]: true}
 }

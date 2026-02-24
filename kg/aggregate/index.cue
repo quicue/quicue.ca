@@ -12,14 +12,14 @@ import (
 	project: string & !=""
 
 	decisions: {[string]: core.#Decision}
-	insights:  {[string]: core.#Insight}
-	rejected:  {[string]: core.#Rejected}
-	patterns:  {[string]: core.#Pattern}
+	insights: {[string]: core.#Insight}
+	rejected: {[string]: core.#Rejected}
+	patterns: {[string]: core.#Pattern}
 
 	// Provenance tracking (optional — projects opt in)
-	sources?:   {[string]: ext.#SourceFile}
+	sources?: {[string]: ext.#SourceFile}
 	protocols?: {[string]: ext.#CollectionProtocol}
-	runs?:      {[string]: ext.#PipelineRun}
+	runs?: {[string]: ext.#PipelineRun}
 	derivations?: {[string]: ext.#Derivation}
 
 	summary: {

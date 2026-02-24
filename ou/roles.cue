@@ -16,7 +16,7 @@ package ou
 // #OperatorRole — defines which action categories an operator can see.
 // Categories match vocab.#Action.category values: info, connect, monitor, admin.
 #OperatorRole: {
-	name:                string
+	name: string
 	visible_categories: {[string]: true}
 }
 

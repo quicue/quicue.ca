@@ -30,7 +30,7 @@ import "quicue.ca/kg/ext@v0"
 	dataset: {
 		"@context": #DCATContext
 
-		"@id":   [if context["@id"] != _|_ {context["@id"]}, "kg:\(index.project)"][0]
+		"@id": [if context["@id"] != _|_ {context["@id"]}, "kg:\(index.project)"][0]
 		"@type": "dcat:Dataset"
 
 		"dcterms:title":       context.name
@@ -74,10 +74,10 @@ import "quicue.ca/kg/ext@v0"
 	catalog: {
 		"@context": #DCATContext
 
-		"@type":              "dcat:Catalog"
-		"dcterms:title":      "quicue Knowledge Graph Federation"
+		"@type":               "dcat:Catalog"
+		"dcterms:title":       "quicue Knowledge Graph Federation"
 		"dcterms:description": "Federated catalog of CUE-native knowledge graphs"
-		"dcat:dataset":       datasets
+		"dcat:dataset":        datasets
 	}
 
 	summary: {

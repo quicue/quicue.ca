@@ -15,8 +15,9 @@ package vocab
 // ASCII-safe identifier constraints — prevents zero-width unicode injection,
 // homoglyph attacks (Cyrillic "a" vs Latin "a"), and invisible characters
 // that would break CUE unification silently. cue vet catches violations.
-#SafeID:    =~"^[a-zA-Z][a-zA-Z0-9_.-]*$"   // resource names, depends_on keys
-#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"     // @type keys, tag keys, type registry
+#SafeID: =~"^[a-zA-Z][a-zA-Z0-9_.-]*$" // resource names, depends_on keys
+
+#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$" // @type keys, tag keys, type registry
 
 // #Resource - Core resource definition
 // Every infrastructure resource conforms to this schema

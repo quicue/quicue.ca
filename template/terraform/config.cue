@@ -21,7 +21,7 @@ package terraform
 
 // #Backend - Terraform state backend
 #Backend: {
-	type:   "local" | "s3" | "http"
+	type: "local" | "s3" | "http"
 	config: {...}
 }
 

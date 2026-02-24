@@ -109,7 +109,7 @@ _lifecyclePhaseList: ["package", "bootstrap", "bind", "deploy", "verify", "drift
 				"echo \"Creating \(name)...\"\n\(res.lifecycle.create)"
 			}]
 			if len(cmds) > 0 {
-				strings.Join(["echo \"=== Layer \(layer_str) ===\""] + cmds + [
+				strings.Join(["echo \"=== Layer \(layer_str) ===\""]+cmds+[
 					"echo \"Layer \(layer_str) complete.\"",
 					"",
 				], "\n")
@@ -123,18 +123,18 @@ _lifecyclePhaseList: ["package", "bootstrap", "bind", "deploy", "verify", "drift
 	//
 	// Export: cue export -e bootstrap.prov_report --out json
 	prov_report: {
-		"@type":      "prov:Activity"
-		"prov:type":  "quicue:Bootstrap"
+		"@type":     "prov:Activity"
+		"prov:type": "quicue:Bootstrap"
 		"prov:generated": [
 			for name, res in resources {
-				"@type":     "prov:Entity"
-				"@id":       "quicue:resource/" + name
-				"prov:type": "quicue:BootstrapResource"
+				"@type":         "prov:Entity"
+				"@id":           "quicue:resource/" + name
+				"prov:type":     "quicue:BootstrapResource"
 				"dcterms:title": name
 				if res.lifecycle != _|_ if res.lifecycle.create != _|_ {
 					"prov:wasGeneratedBy": {
-						"@type":     "prov:Activity"
-						"prov:type": "quicue:CreateResource"
+						"@type":           "prov:Activity"
+						"prov:type":       "quicue:CreateResource"
 						"prov:atLocation": "layer-\(_depths[name])"
 					}
 				}
@@ -199,15 +199,15 @@ _lifecyclePhaseList: ["package", "bootstrap", "bind", "deploy", "verify", "drift
 	//
 	// Export: cue export -e drift.prov_report --out json
 	prov_report: {
-		"@type":        "prov:Activity"
-		"prov:type":    "quicue:DriftDetection"
+		"@type":     "prov:Activity"
+		"prov:type": "quicue:DriftDetection"
 		"prov:used": [
 			{"@type": "prov:Entity", "prov:type": "quicue:DeclaredState", "prov:value": summary.total_declared},
 			{"@type": "prov:Entity", "prov:type": "quicue:ObservedState", "prov:value": summary.total_observed},
 		]
 		"prov:generated": {
-			"@type":       "prov:Entity"
-			"prov:type":   "quicue:DriftReport"
+			"@type":     "prov:Entity"
+			"prov:type": "quicue:DriftReport"
 			"prov:value": {
 				missing: summary.total_missing
 				extra:   summary.total_extra
@@ -242,11 +242,11 @@ _lifecyclePhaseList: ["package", "bootstrap", "bind", "deploy", "verify", "drift
 		"PASS=0; FAIL=0",
 		"check() { local label=\"$1\" cmd=\"$2\" exp=\"$3\"; result=$(eval \"$cmd\" 2>&1); if echo \"$result\" | grep -q \"$exp\"; then echo \"  PASS: $label\"; PASS=$((PASS+1)); else echo \"  FAIL: $label\"; FAIL=$((FAIL+1)); fi; }",
 		"",
-	] + [
+	]+[
 		for c in checks {
 			"check \"\(c.label)\" \"\(c.command)\" \"\(c.expected)\""
 		},
-	] + [
+	]+[
 		"",
 		"echo \"\"",
 		"echo \"Results: $PASS passed, $FAIL failed\"",
@@ -266,12 +266,12 @@ _lifecyclePhaseList: ["package", "bootstrap", "bind", "deploy", "verify", "drift
 		for c in checks {
 			"@type": "earl:Assertion"
 			"earl:test": {
-				"@type":        "earl:TestCriterion"
+				"@type":         "earl:TestCriterion"
 				"dcterms:title": c.label
 				"earl:command":  c.command
 			}
 			"earl:result": {
-				"@type":        "earl:TestResult"
+				"@type": "earl:TestResult"
 				"earl:outcome": {"@id": "earl:untested"}
 				"earl:expected": c.expected
 			}
@@ -306,5 +306,5 @@ _lifecyclePhaseList: ["package", "bootstrap", "bind", "deploy", "verify", "drift
 	// Metadata
 	name:    string
 	version: string | *"0.1.0"
-	phases:  [...#LifecyclePhase]
+	phases: [...#LifecyclePhase]
 }

@@ -1,9 +1,10 @@
 package terraform
 
-import "list"
+import ( "list"
 
-// Validation constraints for #TerraformOutput
-// These run at evaluation time and produce errors for conflicts.
+	// Validation constraints for #TerraformOutput
+	// These run at evaluation time and produce errors for conflicts.
+)
 
 #TerraformOutput: {
 	// Forward-declare so references resolve across files

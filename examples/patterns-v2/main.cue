@@ -57,100 +57,100 @@ _tasks: {
 	// Independent of each other — can run in parallel.
 
 	"exercise-cycle-detector": {
-		name:         "exercise-cycle-detector"
-		"@type":      {Test: true, Analysis: true}
-		description:  "Exercise #CycleDetector against 3-layer and datacenter examples — verify acyclic detection and cycle reporting"
-		gate:         "exercising-tests"
+		name: "exercise-cycle-detector"
+		"@type": {Test: true, Analysis: true}
+		description: "Exercise #CycleDetector against 3-layer and datacenter examples — verify acyclic detection and cycle reporting"
+		gate:        "exercising-tests"
 		derived_from: ["INSIGHT-010"]
-		weight:       2
+		weight: 2
 	}
 	"exercise-connected-components": {
-		name:         "exercise-connected-components"
-		"@type":      {Test: true, Analysis: true}
-		description:  "Exercise #ConnectedComponents — find orphans, verify is_connected, test isolated detection"
-		gate:         "exercising-tests"
+		name: "exercise-connected-components"
+		"@type": {Test: true, Analysis: true}
+		description: "Exercise #ConnectedComponents — find orphans, verify is_connected, test isolated detection"
+		gate:        "exercising-tests"
 		derived_from: ["INSIGHT-010"]
-		weight:       2
+		weight: 2
 	}
 	"exercise-subgraph": {
-		name:         "exercise-subgraph"
-		"@type":      {Test: true, Analysis: true}
-		description:  "Exercise #Subgraph extraction — roots mode, target+radius mode, both directions"
-		gate:         "exercising-tests"
+		name: "exercise-subgraph"
+		"@type": {Test: true, Analysis: true}
+		description: "Exercise #Subgraph extraction — roots mode, target+radius mode, both directions"
+		gate:        "exercising-tests"
 		derived_from: ["INSIGHT-010"]
-		weight:       3
+		weight: 3
 	}
 	"exercise-graph-diff": {
-		name:         "exercise-graph-diff"
-		"@type":      {Test: true, Analysis: true}
-		description:  "Exercise #GraphDiff with before/after datacenter pair — added nodes, removed edges, type changes"
-		gate:         "exercising-tests"
+		name: "exercise-graph-diff"
+		"@type": {Test: true, Analysis: true}
+		description: "Exercise #GraphDiff with before/after datacenter pair — added nodes, removed edges, type changes"
+		gate:        "exercising-tests"
 		derived_from: ["INSIGHT-010"]
-		weight:       3
+		weight: 3
 	}
 	"exercise-critical-path": {
-		name:         "exercise-critical-path"
-		"@type":      {Test: true, Analysis: true}
-		description:  "Exercise #CriticalPath against datacenter with realistic weights — verify slack and critical sequence"
-		gate:         "exercising-tests"
+		name: "exercise-critical-path"
+		"@type": {Test: true, Analysis: true}
+		description: "Exercise #CriticalPath against datacenter with realistic weights — verify slack and critical sequence"
+		gate:        "exercising-tests"
 		derived_from: ["INSIGHT-010"]
-		weight:       2
+		weight: 2
 	}
 	"exercise-compliance-check": {
-		name:         "exercise-compliance-check"
-		"@type":      {Test: true, Validation: true}
-		description:  "Exercise #ComplianceCheck with structural rules — databases need monitoring, no orphan load balancers"
-		gate:         "exercising-tests"
+		name: "exercise-compliance-check"
+		"@type": {Test: true, Validation: true}
+		description: "Exercise #ComplianceCheck with structural rules — databases need monitoring, no orphan load balancers"
+		gate:        "exercising-tests"
 		derived_from: ["INSIGHT-010"]
-		weight:       3
+		weight: 3
 	}
 	"exercise-bootstrap-plan": {
-		name:         "exercise-bootstrap-plan"
-		"@type":      {Test: true, Lifecycle: true}
-		description:  "Exercise fixed #BootstrapPlan against non-trivial topology — verify correct layer ordering"
-		gate:         "exercising-tests"
+		name: "exercise-bootstrap-plan"
+		"@type": {Test: true, Lifecycle: true}
+		description: "Exercise fixed #BootstrapPlan against non-trivial topology — verify correct layer ordering"
+		gate:        "exercising-tests"
 		derived_from: ["INSIGHT-010"]
-		weight:       2
+		weight: 2
 	}
 
 	// ── Phase 1: Rename audit ────────────────────────────────────────
 	// #ValidateGraph→#ValidateTypes rename must propagate to all consumers.
 
 	"audit-validate-rename": {
-		name:         "audit-validate-rename"
-		"@type":      {Audit: true}
-		description:  "Update #ValidateGraph→#ValidateTypes across consumers: datacenter.cue, devbox.cue, homelab.cue, cue-topology.yml, nightly-validation.yml, cli.cue, docs/patterns.md"
-		gate:         "rename-audit"
+		name: "audit-validate-rename"
+		"@type": {Audit: true}
+		description: "Update #ValidateGraph→#ValidateTypes across consumers: datacenter.cue, devbox.cue, homelab.cue, cue-topology.yml, nightly-validation.yml, cli.cue, docs/patterns.md"
+		gate:        "rename-audit"
 		derived_from: ["INSIGHT-010"]
-		weight:       2
+		weight: 2
 	}
 
 	// ── Phase 2: Compliance wiring ───────────────────────────────────
 	// #ComplianceCheck integration into real examples and CI.
 
 	"wire-compliance-datacenter": {
-		name:        "wire-compliance-datacenter"
-		"@type":     {Wiring: true, Validation: true}
+		name: "wire-compliance-datacenter"
+		"@type": {Wiring: true, Validation: true}
 		description: "Define meaningful compliance rules for datacenter example — databases need backup, services need monitoring, no orphan resources"
-		depends_on:  {"exercise-compliance-check": true}
-		gate:        "compliance-wiring"
-		weight:      3
+		depends_on: {"exercise-compliance-check": true}
+		gate:   "compliance-wiring"
+		weight: 3
 	}
 	"wire-compliance-ci": {
-		name:        "wire-compliance-ci"
-		"@type":     {Wiring: true, CI: true}
+		name: "wire-compliance-ci"
+		"@type": {Wiring: true, CI: true}
 		description: "Add #ComplianceCheck evaluation to GitLab CI pipeline — fail on critical violations"
-		depends_on:  {"wire-compliance-datacenter": true}
-		gate:        "compliance-wiring"
-		weight:      2
+		depends_on: {"wire-compliance-datacenter": true}
+		gate:   "compliance-wiring"
+		weight: 2
 	}
 
 	// ── Phase 3: Documentation ───────────────────────────────────────
 	// Docs lag implementation — update after patterns are exercised.
 
 	"update-patterns-docs": {
-		name:        "update-patterns-docs"
-		"@type":     {Documentation: true}
+		name: "update-patterns-docs"
+		"@type": {Documentation: true}
 		description: "Update docs/patterns.md — add analysis patterns, compliance checking, lifecycle types, critical path"
 		depends_on: {
 			"exercise-cycle-detector":       true
@@ -164,20 +164,20 @@ _tasks: {
 		weight: 3
 	}
 	"update-graph-patterns-readme": {
-		name:        "update-graph-patterns-readme"
-		"@type":     {Documentation: true}
+		name: "update-graph-patterns-readme"
+		"@type": {Documentation: true}
 		description: "Update examples/graph-patterns/README.md with new analysis and compliance patterns"
-		depends_on:  {"exercise-cycle-detector": true}
-		gate:        "docs-update"
-		weight:      1
+		depends_on: {"exercise-cycle-detector": true}
+		gate:   "docs-update"
+		weight: 1
 	}
 
 	// ── Phase 2: Projection ──────────────────────────────────────────
 	// The GitLab projection itself is a deliverable.
 
 	"create-gitlab-projection": {
-		name:        "create-gitlab-projection"
-		"@type":     {Projection: true}
+		name: "create-gitlab-projection"
+		"@type": {Projection: true}
 		description: "Write CUE→GitLab issue projection — cue export produces glab-compatible JSON"
 		gate:        "gitlab-projection"
 		weight:      2
@@ -349,9 +349,9 @@ gitlab_issues: [
 // ═══════════════════════════════════════════════════════════════════════════
 
 summary: {
-	charter:    _charter.name
-	total:      len(_tasks)
-	phases:     [1, 2, 3]
+	charter: _charter.name
+	total:   len(_tasks)
+	phases: [1, 2, 3]
 	gap: {
 		complete:               gaps.complete
 		missing_resource_count: gaps.missing_resource_count

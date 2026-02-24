@@ -30,18 +30,18 @@ package aggregate
 		"@graph": [
 			// Insights as annotations — commentary on the knowledge domain
 			for id, ins in index.insights {
-				"@id":   "kg:\(id)"
-				"@type": "oa:Annotation"
-				"oa:motivatedBy": "oa:commenting"
+				"@id":             "kg:\(id)"
+				"@type":           "oa:Annotation"
+				"oa:motivatedBy":  "oa:commenting"
 				"dcterms:created": ins.discovered
 
 				"oa:hasBody": {
-					"@type":  "oa:TextualBody"
-					"oa:text": ins.statement
+					"@type":               "oa:TextualBody"
+					"oa:text":             ins.statement
 					"dcterms:description": ins.implication
-					"kg:confidence": ins.confidence
-					"kg:method":     ins.method
-					"kg:evidence": ins.evidence
+					"kg:confidence":       ins.confidence
+					"kg:method":           ins.method
+					"kg:evidence":         ins.evidence
 				}
 
 				// Related entries become annotation targets
@@ -57,7 +57,7 @@ package aggregate
 					"as:result": [
 						for item in ins.action_items {
 							{
-								"@type": "as:Note"
+								"@type":      "as:Note"
 								"as:content": item
 							}
 						},
@@ -67,27 +67,27 @@ package aggregate
 
 			// Rejected approaches as annotations — questioning previous directions
 			for id, rej in index.rejected {
-				"@id":   "kg:\(id)"
-				"@type": "oa:Annotation"
-				"oa:motivatedBy": "oa:questioning"
+				"@id":             "kg:\(id)"
+				"@type":           "oa:Annotation"
+				"oa:motivatedBy":  "oa:questioning"
 				"dcterms:created": rej.date
 
 				"oa:hasBody": [
 					{
-						"@type":   "oa:TextualBody"
-						"oa:text": rej.approach
+						"@type":      "oa:TextualBody"
+						"oa:text":    rej.approach
 						"oa:purpose": "describing"
 						"rdfs:label": "Rejected approach"
 					},
 					{
-						"@type":   "oa:TextualBody"
-						"oa:text": rej.reason
+						"@type":      "oa:TextualBody"
+						"oa:text":    rej.reason
 						"oa:purpose": "commenting"
 						"rdfs:label": "Reason for rejection"
 					},
 					{
-						"@type":   "oa:TextualBody"
-						"oa:text": rej.alternative
+						"@type":      "oa:TextualBody"
+						"oa:text":    rej.alternative
 						"oa:purpose": "replying"
 						"rdfs:label": "Recommended alternative"
 					},

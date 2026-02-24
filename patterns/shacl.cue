@@ -31,7 +31,7 @@ import "quicue.ca/vocab"
 	"sh:minCount"?: int
 	"sh:maxCount"?: int
 	"sh:pattern"?:  string
-	"sh:in"?:       [...string]
+	"sh:in"?: [...string]
 	"rdfs:comment"?: string
 }
 
@@ -42,7 +42,7 @@ import "quicue.ca/vocab"
 	"sh:targetClass": string
 	"rdfs:label":     string
 	"rdfs:comment"?:  string
-	"sh:property":    [...#SHACLPropertyShape]
+	"sh:property": [...#SHACLPropertyShape]
 }
 
 // #SHACLShapes — generates SHACL shapes from the quicue vocabulary.
@@ -63,84 +63,84 @@ import "quicue.ca/vocab"
 			"rdfs:comment":   "Shape constraint for quicue #Resource — validates RDF serializations of infrastructure resources."
 			"sh:property": [
 				{
-					"sh:path":     "quicue:name"
-					"sh:name":     "name"
-					"sh:datatype": "xsd:string"
-					"sh:minCount": 1
-					"sh:maxCount": 1
+					"sh:path":      "quicue:name"
+					"sh:name":      "name"
+					"sh:datatype":  "xsd:string"
+					"sh:minCount":  1
+					"sh:maxCount":  1
 					"rdfs:comment": "Resource identifier, unique within the graph"
 				},
 				{
-					"sh:path":     "quicue:ipAddress"
-					"sh:name":     "ip"
-					"sh:datatype": "xsd:string"
-					"sh:maxCount": 1
-					"sh:pattern":  "^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$"
+					"sh:path":      "quicue:ipAddress"
+					"sh:name":      "ip"
+					"sh:datatype":  "xsd:string"
+					"sh:maxCount":  1
+					"sh:pattern":   "^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$"
 					"rdfs:comment": "IPv4 address"
 				},
 				{
-					"sh:path":     "quicue:fqdn"
-					"sh:name":     "fqdn"
-					"sh:datatype": "xsd:string"
-					"sh:maxCount": 1
+					"sh:path":      "quicue:fqdn"
+					"sh:name":      "fqdn"
+					"sh:datatype":  "xsd:string"
+					"sh:maxCount":  1
 					"rdfs:comment": "Fully qualified domain name"
 				},
 				{
-					"sh:path":     "quicue:host"
-					"sh:name":     "host"
-					"sh:datatype": "xsd:string"
-					"sh:maxCount": 1
+					"sh:path":      "quicue:host"
+					"sh:name":      "host"
+					"sh:datatype":  "xsd:string"
+					"sh:maxCount":  1
 					"rdfs:comment": "Hypervisor or host node name"
 				},
 				{
-					"sh:path":     "quicue:containerId"
-					"sh:name":     "container_id"
-					"sh:maxCount": 1
+					"sh:path":      "quicue:containerId"
+					"sh:name":      "container_id"
+					"sh:maxCount":  1
 					"rdfs:comment": "Container identifier (LXC ID, Docker name)"
 				},
 				{
-					"sh:path":     "quicue:vmId"
-					"sh:name":     "vm_id"
-					"sh:maxCount": 1
+					"sh:path":      "quicue:vmId"
+					"sh:name":      "vm_id"
+					"sh:maxCount":  1
 					"rdfs:comment": "Virtual machine identifier"
 				},
 				{
-					"sh:path":     "quicue:hostedOn"
-					"sh:name":     "hosted_on"
-					"sh:nodeKind": "sh:IRI"
-					"sh:maxCount": 1
+					"sh:path":      "quicue:hostedOn"
+					"sh:name":      "hosted_on"
+					"sh:nodeKind":  "sh:IRI"
+					"sh:maxCount":  1
 					"rdfs:comment": "Parent resource (IRI reference)"
 				},
 				{
-					"sh:path":     "quicue:dependsOn"
-					"sh:name":     "depends_on"
-					"sh:nodeKind": "sh:IRI"
+					"sh:path":      "quicue:dependsOn"
+					"sh:name":      "depends_on"
+					"sh:nodeKind":  "sh:IRI"
 					"rdfs:comment": "Dependency targets (IRI references, set-valued)"
 				},
 				{
-					"sh:path":     "quicue:sshUser"
-					"sh:name":     "ssh_user"
-					"sh:datatype": "xsd:string"
-					"sh:maxCount": 1
+					"sh:path":      "quicue:sshUser"
+					"sh:name":      "ssh_user"
+					"sh:datatype":  "xsd:string"
+					"sh:maxCount":  1
 					"rdfs:comment": "SSH username for remote access"
 				},
 				{
-					"sh:path":     "quicue:provides"
-					"sh:name":     "provides"
-					"sh:datatype": "xsd:string"
+					"sh:path":      "quicue:provides"
+					"sh:name":      "provides"
+					"sh:datatype":  "xsd:string"
 					"rdfs:comment": "Capabilities this resource provides (set-valued)"
 				},
 				{
-					"sh:path":     "quicue:tags"
-					"sh:name":     "tags"
-					"sh:datatype": "xsd:string"
+					"sh:path":      "quicue:tags"
+					"sh:name":      "tags"
+					"sh:datatype":  "xsd:string"
 					"rdfs:comment": "Metadata tags (set-valued)"
 				},
 				{
-					"sh:path":     "dcterms:description"
-					"sh:name":     "description"
-					"sh:datatype": "xsd:string"
-					"sh:maxCount": 1
+					"sh:path":      "dcterms:description"
+					"sh:name":      "description"
+					"sh:datatype":  "xsd:string"
+					"sh:maxCount":  1
 					"rdfs:comment": "Human-readable resource description"
 				},
 			]
@@ -152,8 +152,8 @@ import "quicue.ca/vocab"
 				"sh:targetClass": "quicue:\(typeName)"
 				"rdfs:label":     "\(typeName) Resource"
 				"sh:property": [{
-					"sh:path": "rdf:type"
-					"sh:hasValue": "quicue:\(typeName)"
+					"sh:path":      "rdf:type"
+					"sh:hasValue":  "quicue:\(typeName)"
 					"rdfs:comment": "Must declare @type \(typeName)"
 				}]
 			}},

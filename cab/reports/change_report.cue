@@ -83,14 +83,14 @@ import "strings"
 	// Summary statistics
 	_currentCount: len([for _, _ in Current {1}])
 	summary: {
-		total_current:     _currentCount
-		total_previous:    len([for _, _ in Previous {1}])
+		total_current: _currentCount
+		total_previous: len([for _, _ in Previous {1}])
 		added_count:       len(added)
 		removed_count:     len(removed)
 		modified_count:    len(modified)
 		total_changes:     len(added) + len(removed) + len(modified)
 		change_percentage: _changePercentage
-		has_changes:       len(added) + len(removed) + len(modified) > 0
+		has_changes:       len(added)+len(removed)+len(modified) > 0
 	}
 
 	// Calculate change percentage safely
@@ -194,8 +194,8 @@ import "strings"
 
 	_sourceCount: len([for _, _ in Source {1}])
 	summary: {
-		source_count:   _sourceCount
-		target_count:   len([for _, _ in Target {1}])
+		source_count: _sourceCount
+		target_count: len([for _, _ in Target {1}])
 		only_in_source: len(only_in_source)
 		only_in_target: len(only_in_target)
 		in_both:        len(in_both)

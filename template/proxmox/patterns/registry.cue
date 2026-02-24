@@ -202,7 +202,7 @@ import "quicue.ca/vocab"
 		description: "List all VMs on node"
 		category:    "info"
 		params: {
-			ip:   {from_field: "ip"}
+			ip: {from_field: "ip"}
 			user: {from_field: "ssh_user", required: false}
 		}
 		command_template: "ssh {user}@{ip} 'qm list'"
@@ -214,7 +214,7 @@ import "quicue.ca/vocab"
 		description: "List all LXC containers on node"
 		category:    "info"
 		params: {
-			ip:   {from_field: "ip"}
+			ip: {from_field: "ip"}
 			user: {from_field: "ssh_user", required: false}
 		}
 		command_template: "ssh {user}@{ip} 'pct list'"
@@ -226,7 +226,7 @@ import "quicue.ca/vocab"
 		description: "Show Proxmox cluster status"
 		category:    "monitor"
 		params: {
-			ip:   {from_field: "ip"}
+			ip: {from_field: "ip"}
 			user: {from_field: "ssh_user", required: false}
 		}
 		command_template: "ssh {user}@{ip} 'pvecm status'"
@@ -238,7 +238,7 @@ import "quicue.ca/vocab"
 		description: "Show storage pool status"
 		category:    "monitor"
 		params: {
-			ip:   {from_field: "ip"}
+			ip: {from_field: "ip"}
 			user: {from_field: "ssh_user", required: false}
 		}
 		command_template: "ssh {user}@{ip} 'pvesm status'"
@@ -250,7 +250,7 @@ import "quicue.ca/vocab"
 		description: "Show node resource usage"
 		category:    "monitor"
 		params: {
-			ip:   {from_field: "ip"}
+			ip: {from_field: "ip"}
 			user: {from_field: "ssh_user", required: false}
 		}
 		command_template: "ssh {user}@{ip} 'pveversion && pvesh get /nodes/localhost/status'"
@@ -334,9 +334,9 @@ import "quicue.ca/vocab"
 	// ========== Connectivity ==========
 
 	ping: vocab.#ActionDef & {
-		name:             "Ping"
-		description:      "Test network connectivity"
-		category:         "connect"
+		name:        "Ping"
+		description: "Test network connectivity"
+		category:    "connect"
 		params: ip: {from_field: "ip"}
 		command_template: "ping -c 3 {ip}"
 		idempotent:       true
@@ -347,7 +347,7 @@ import "quicue.ca/vocab"
 		description: "SSH into resource"
 		category:    "connect"
 		params: {
-			ip:   {from_field: "ip"}
+			ip: {from_field: "ip"}
 			user: {from_field: "ssh_user", required: false}
 		}
 		command_template: "ssh {user}@{ip}"

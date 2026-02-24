@@ -40,31 +40,31 @@ package patterns
 // pre-normalize keys before lookup or use external tooling.
 #ZoneAliases: {
 	// Restricted zone variants
-	"restricted":       "Restricted"
-	"restricted zone":  "Restricted"
-	"trusted zone":     "Restricted"
-	"trusted":          "Restricted"
+	"restricted":      "Restricted"
+	"restricted zone": "Restricted"
+	"trusted zone":    "Restricted"
+	"trusted":         "Restricted"
 
 	// Intranet zone variants
-	"intranet":         "Intranet"
-	"intranet zone":    "Intranet"
-	"common zone":      "Intranet"
+	"intranet":      "Intranet"
+	"intranet zone": "Intranet"
+	"common zone":   "Intranet"
 
 	// Campus LAN variants
-	"campus lan":       "Campus LAN"
-	"campus":           "Campus LAN"
-	"lan":              "Campus LAN"
+	"campus lan": "Campus LAN"
+	"campus":     "Campus LAN"
+	"lan":        "Campus LAN"
 
 	// Internet
-	"internet":         "Internet"
+	"internet": "Internet"
 
 	// DMZ variants
-	"dmz":              "DMZ"
-	"paz":              "DMZ"
+	"dmz": "DMZ"
+	"paz": "DMZ"
 
 	// Admin VDI variants
-	"admin vdi":        "Admin VDI"
-	"vdi":              "Admin VDI"
+	"admin vdi": "Admin VDI"
+	"vdi":       "Admin VDI"
 
 	// Allow extension for additional zones
 	[string]: #NetworkZone
@@ -245,7 +245,7 @@ package patterns
 	// Summary counts
 	summary: {
 		internet_exposed: len([for r, _ in internet_exposed {r}])
-		unknown_zone:     len([for r, _ in unknown_zone {r}])
+		unknown_zone: len([for r, _ in unknown_zone {r}])
 		cross_zone_flows: len(cross_zone)
 	}
 }

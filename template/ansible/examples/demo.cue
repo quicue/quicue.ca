@@ -23,7 +23,7 @@ _resources: {
 		ssh_user: "git"
 		tags: {SourceControlManagement: true}
 		monitoring: exporters: {
-			node:   port: 9100
+			node: port:   9100
 			gitlab: port: 9168
 		}
 	}
@@ -54,7 +54,7 @@ _resources: {
 		tags: {Monitoring: true, CriticalInfra: true}
 		owner: "infra-team"
 		monitoring: exporters: {
-			node:       port: 9100
+			node: port:       9100
 			prometheus: port: 9090
 		}
 	}
@@ -75,7 +75,7 @@ alertmanager: ansible.#AlertManagerRoutes & {
 	Resources: _resources
 	Receivers: {
 		"infra-team": webhook_url: "https://ntfy.example.com/infra-alerts"
-		"dev-team":   email:       "dev@example.com"
+		"dev-team": email:         "dev@example.com"
 	}
 }
 

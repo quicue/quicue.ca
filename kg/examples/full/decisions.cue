@@ -25,9 +25,9 @@ decisions: {
 		status: "accepted"
 		date:   "2026-02-15"
 
-		context:      "Cross-project knowledge querying could use SPARQL (external infra) or CUE unification (zero infra)."
-		decision:     "Use CUE unification for federation. No external database or query engine."
-		rationale:    "CUE's lattice model gives conflict detection for free. SPARQL requires infrastructure. Zero-infra means adoption friction is zero."
+		context:   "Cross-project knowledge querying could use SPARQL (external infra) or CUE unification (zero infra)."
+		decision:  "Use CUE unification for federation. No external database or query engine."
+		rationale: "CUE's lattice model gives conflict detection for free. SPARQL requires infrastructure. Zero-infra means adoption friction is zero."
 		consequences: ["Federation is a CUE import, not a service call"]
 		related: {"ADR-001": true, "struct-as-set": true}
 	}
@@ -38,9 +38,9 @@ decisions: {
 		status: "accepted"
 		date:   "2026-02-15"
 
-		context:      "Pattern.used_in and related fields represent sets. Arrays allow duplicates."
-		decision:     "Use {[string]: true} for all set-valued fields."
-		rationale:    "O(1) membership, clean unification, no duplicates. Struct keys are unique by construction."
+		context:   "Pattern.used_in and related fields represent sets. Arrays allow duplicates."
+		decision:  "Use {[string]: true} for all set-valued fields."
+		rationale: "O(1) membership, clean unification, no duplicates. Struct keys are unique by construction."
 		consequences: ["All set fields use struct syntax, not array syntax"]
 	}
 }

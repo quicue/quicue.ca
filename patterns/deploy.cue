@@ -26,7 +26,7 @@ package patterns
 		"providers": providers
 	}
 	graph: #InfraGraph & {Input: resources}
-	plan:  #DeploymentPlan & {Graph: graph}
+	plan: #DeploymentPlan & {Graph: graph}
 
 	// Optional category constraint — consumer narrows if desired
 	category: string | *""

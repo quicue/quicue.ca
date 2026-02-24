@@ -24,9 +24,9 @@ package ou
 // #SessionScope — constrains which resources are visible.
 // Absent fields mean no filtering on that dimension.
 #SessionScope: {
-	include_types?:  {[string]: true}
+	include_types?: {[string]: true}
 	include_layers?: {[string]: true}
-	include_names?:  {[string]: true}
+	include_names?: {[string]: true}
 }
 
 // #FlowPosition — where the operator is in the deployment sequence.
@@ -39,10 +39,10 @@ package ou
 // Returns true if filter is absent (no constraint).
 _typeOverlap: {
 	filter: {...} | *{}
-	types:  {...}
+	types: {...}
 	_hasFilter: bool
 	_hasFilter: len(filter) > 0
-	result: bool
+	result:     bool
 	if !_hasFilter {
 		result: true
 	}
@@ -59,10 +59,10 @@ _typeOverlap: {
 // Returns true if filter is absent (no constraint).
 _scopeContains: {
 	filter: {...} | *{}
-	key:    string
+	key:        string
 	_hasFilter: bool
 	_hasFilter: len(filter) > 0
-	result: bool
+	result:     bool
 	if !_hasFilter {
 		result: true
 	}
@@ -79,8 +79,8 @@ _scopeContains: {
 #InteractionCtx: {
 	bound: {[string]: _}
 	plan: {layers: [...], ...}
-	role:     #OperatorRole | *#Roles.ops
-	scope:    #SessionScope | *{}
+	role: #OperatorRole | *#Roles.ops
+	scope: #SessionScope | *{}
 	position: #FlowPosition | *{current_layer: 0, gates: {}}
 
 	// Precompute: which resources appear in which layers

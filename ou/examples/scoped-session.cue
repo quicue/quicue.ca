@@ -135,14 +135,14 @@ ops_hydra: (ou.#ApiDocumentation & {ctx: {
 
 summary: {
 	layer3: {
-		total_resources: _plan.cluster.summary.total_resources
-		total_providers: _plan.cluster.summary.total_providers
+		total_resources:   _plan.cluster.summary.total_resources
+		total_providers:   _plan.cluster.summary.total_providers
 		resolved_commands: _plan.cluster.summary.resolved_commands
 		deployment_layers: _plan.plan.summary.total_layers
 	}
 	layer4: {
-		ops: ops_session.summary
-		dev: dev_session.summary
+		ops:      ops_session.summary
+		dev:      dev_session.summary
 		readonly: readonly_session.summary
 	}
 }

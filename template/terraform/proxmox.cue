@@ -103,8 +103,8 @@ _proxmoxTerraform: {
 				}
 				if r._resource.disks == _|_ {
 					disk: [{
-						interface: "scsi0"
-						size:      _diskGB[r._resource.disk]
+						interface:    "scsi0"
+						size:         _diskGB[r._resource.disk]
 						datastore_id: *r._target.datastore | "local-lvm"
 					}]
 				}

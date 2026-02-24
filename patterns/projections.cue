@@ -91,7 +91,7 @@ import (
 						"# === \(rname) ===\n",
 						strings.Join(_cmdLines, "\n\n") + "\n",
 					]
-					metadata:        {}
+					metadata: {}
 					execution_count: null
 					outputs: []
 				}},
@@ -102,9 +102,9 @@ import (
 				source: [
 					"# Gate check — verify layer \(l.layer) before proceeding\n",
 					"print(\"Layer \(l.layer) complete: \(strings.Join(l.resources, ", "))\")\n",
-					"# input(\"Press Enter to proceed to layer \(l.layer + 1)...\")\n",
+					"# input(\"Press Enter to proceed to layer \(l.layer+1)...\")\n",
 				]
-				metadata:        {}
+				metadata: {}
 				execution_count: null
 				outputs: []
 			}
@@ -354,10 +354,10 @@ import (
 					"\(a.command) &  # \(rname)/\(pname)/\(aname)"
 				},
 				"wait",
-				if l.layer < len(plan.layers) - 1 {
+				if l.layer < len(plan.layers)-1 {
 					"read -p \"Gate: \(l.gate). Continue? [y/N] \" confirm"
 				},
-				if l.layer < len(plan.layers) - 1 {
+				if l.layer < len(plan.layers)-1 {
 					"[[ \"$confirm\" =~ ^[Yy] ]] || exit 1"
 				},
 			], "\n")
@@ -398,7 +398,7 @@ import (
 							"@type": _bound["@type"]
 						}
 						description: a.description
-						category:    [if a.category != _|_ {a.category}, "info"][0]
+						category: [if a.category != _|_ {a.category}, "info"][0]
 						destructive: [if a.destructive != _|_ {a.destructive}, false][0]
 						if a.idempotent != _|_ {
 							idempotent: a.idempotent
