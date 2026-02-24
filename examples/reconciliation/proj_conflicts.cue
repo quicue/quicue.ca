@@ -17,7 +17,7 @@ _ip_conflict: {for k, v in vms {
 
 ip_conflicts: {
 	conflicts: [for k, v in vms if _ip_conflict[k] {
-		name: k
+		name:       k
 		alpha_ip:   v.alpha_ip
 		bravo_ip:   v.bravo_ip
 		charlie_ip: v.charlie_ip

@@ -24,8 +24,8 @@ d002: core.#Decision & {
 	status: "proposed"
 	date:   "2026-02-15"
 
-	context:      "PostgreSQL has a default connection limit of 100."
-	decision:     "Use PgBouncer for connection pooling."
-	rationale:    "Reduces connection overhead and allows more concurrent clients."
+	context:   "PostgreSQL has a default connection limit of 100."
+	decision:  "Use PgBouncer for connection pooling."
+	rationale: "Reduces connection overhead and allows more concurrent clients."
 	consequences: ["Must deploy PgBouncer alongside PostgreSQL"]
 }

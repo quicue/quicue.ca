@@ -99,12 +99,12 @@ _buildActions: {
 					// Bind parameters from resource fields
 					let _cmd = def.command_template
 					command: strings.Replace(
-						strings.Replace(
 							strings.Replace(
-								strings.Replace(_cmd, "{ip}", "\(*res.ip | "")", -1),
-								"{user}", "\(*res.ssh_user | "")", -1),
+							strings.Replace(
+							strings.Replace(_cmd, "{ip}", "\(*res.ip | "")", -1),
+							"{user}", "\(*res.ssh_user | "")", -1),
 							"{container_id}", "\(*res.container_id | 0)", -1),
-						"{host}", "\(*res.host | "")", -1)
+							"{host}", "\(*res.host | "")", -1)
 				}
 			}
 
@@ -143,7 +143,7 @@ output: {
 				depends_on: r.depends_on
 			}
 			actions: [for aname, _ in r.actions {aname}]
-			grants:  _contracts[name].grants
+			grants: _contracts[name].grants
 		}
 	}
 }
@@ -201,7 +201,7 @@ _graphResources: {
 }
 
 infra: patterns.#InfraGraph & {Input: _graphResources}
-_viz:  patterns.#VizData & {Graph: infra, Resources: _graphResources}
+_viz: patterns.#VizData & {Graph: infra, Resources: _graphResources}
 
 // Action data per resource (for explorer sidebar)
 _actionData: {

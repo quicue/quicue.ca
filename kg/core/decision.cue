@@ -11,9 +11,9 @@ package core
 	status:  "proposed" | "accepted" | "deprecated" | "superseded"
 	date:    =~"^\\d{4}-\\d{2}-\\d{2}$"
 
-	context:      string & !=""
-	decision:     string & !=""
-	rationale:    string & !=""
+	context:                             string & !=""
+	decision:                            string & !=""
+	rationale:                           string & !=""
 	consequences: [...string] & [_, ...] // at least one
 
 	supersedes?: =~"^ADR-\\d{3}$"

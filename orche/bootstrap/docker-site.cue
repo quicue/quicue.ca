@@ -9,12 +9,12 @@ import "strings"
 	name:  string
 	image: string
 
-	network?:     string
-	ports?:       [...string]
-	volumes?:     [...string]
+	network?: string
+	ports?: [...string]
+	volumes?: [...string]
 	environment?: [string]: string
-	command?:     string
-	restart:      "no" | "always" | "unless-stopped" | "on-failure" | *"unless-stopped"
+	command?: string
+	restart:  "no" | "always" | "unless-stopped" | "on-failure" | *"unless-stopped"
 
 	// Computed flags
 	_envFlags:    string | *""
@@ -63,7 +63,7 @@ import "strings"
 			name:    "Stop"
 			command: _stopCmd
 		}
-		do_restart: {  // Renamed to avoid shadowing
+		do_restart: {// Renamed to avoid shadowing
 			name:    "Restart"
 			command: _restartCmd
 		}
@@ -139,17 +139,17 @@ import "strings"
 	// Computed: all resources for graph
 	resources: {
 		"\(_siteName)-network": {
-			"@type":     {Network: true}
-			name:        network
-			depends_on:  {}  // Network has no dependencies
-			actions:     network_config.actions
+			"@type": {Network: true}
+			name: network
+			depends_on: {} // Network has no dependencies
+			actions: network_config.actions
 		}
 		for sname, svc in services {
 			(sname): {
-				"@type":     svc.type
-				name:        svc._container.name
-				depends_on:  svc.depends_on & {"\(_siteName)-network": true}  // Merge with network dep
-				actions:     svc._container.actions
+				"@type":                                                    svc.type
+				name:                                                       svc._container.name
+				depends_on: svc.depends_on & {"\(_siteName)-network": true} // Merge with network dep
+				actions:                                                    svc._container.actions
 				if svc.ip != _|_ {
 					ip: svc.ip
 				}
@@ -161,15 +161,15 @@ import "strings"
 
 // #DockerService - Single service in a Docker site
 #DockerService: {
-	name:       string
-	type:       {...}
-	image:      string
-	depends_on: {[string]: true} | *{}  // Set membership, defaults to empty
-	ip?:        string
-	ports:      [...string] | *[]
-	volumes:    [...string] | *[]
+	name: string
+	type: {...}
+	image:                             string
+	depends_on: {[string]: true} | *{} // Set membership, defaults to empty
+	ip?:                               string
+	ports: [...string] | *[]
+	volumes: [...string] | *[]
 	environment: [string]: string
-	command?:   string
+	command?: string
 
 	_container: #Container & {
 		"name":        name
@@ -189,13 +189,13 @@ import "strings"
 
 // Service templates with overridable defaults
 #DNSService: #DockerService & {
-	type:  {DNSServer: true, Container: true}
+	type: {DNSServer: true, Container: true}
 	image: string | *"coredns/coredns:latest"
 	// ports intentionally not defaulted - must be specified
 }
 
 #PostgresService: #DockerService & {
-	type:  {Database: true, PostgreSQL: true, Container: true}
+	type: {Database: true, PostgreSQL: true, Container: true}
 	image: string | *"postgres:16-alpine"
 	ports: [...string] | *["5432:5432"]
 	environment: {
@@ -206,19 +206,19 @@ import "strings"
 }
 
 #RedisService: #DockerService & {
-	type:  {Cache: true, Redis: true, Container: true}
+	type: {Cache: true, Redis: true, Container: true}
 	image: string | *"redis:7-alpine"
 	ports: [...string] | *["6379:6379"]
 }
 
 #PrometheusService: #DockerService & {
-	type:  {Monitoring: true, Prometheus: true, Container: true}
+	type: {Monitoring: true, Prometheus: true, Container: true}
 	image: string | *"prom/prometheus:latest"
 	ports: [...string] | *["9090:9090"]
 }
 
 #GrafanaService: #DockerService & {
-	type:  {Monitoring: true, Grafana: true, Container: true}
+	type: {Monitoring: true, Grafana: true, Container: true}
 	image: string | *"grafana/grafana:latest"
 	ports: [...string] | *["3000:3000"]
 	environment: {
@@ -227,7 +227,7 @@ import "strings"
 }
 
 #NginxService: #DockerService & {
-	type:  {ReverseProxy: true, Nginx: true, Container: true}
+	type: {ReverseProxy: true, Nginx: true, Container: true}
 	image: string | *"nginx:alpine"
 	// ports intentionally not defaulted - varies by deployment
 }

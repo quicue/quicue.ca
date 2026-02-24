@@ -64,21 +64,21 @@ _resources: {
 			vlan:   100
 		}]
 		cloudinit: {
-			user:     "deploy"
+			user: "deploy"
 			ssh_keys: ["ssh-ed25519 AAAA... admin@infra"]
-			ip:       "198.51.100.50/24"
-			gateway:  "198.51.100.1"
+			ip:      "198.51.100.50/24"
+			gateway: "198.51.100.1"
 			dns_servers: ["198.51.100.1", "1.1.1.1"]
 		}
 		proxmox: {
-			node:     "pve-beta"
-			vmid:     200
-			template: "9000"
-			onboot:   true
-			bios:     "ovmf"
-			machine:  "q35"
-			os_type:  "l26"
-			cpu_type: "host"
+			node:          "pve-beta"
+			vmid:          200
+			template:      "9000"
+			onboot:        true
+			bios:          "ovmf"
+			machine:       "q35"
+			os_type:       "l26"
+			cpu_type:      "host"
 			serial_device: true
 			boot_order: ["scsi0", "net0"]
 			tags: ["web", "prod"]
@@ -132,8 +132,8 @@ _resources: {
 			}]
 			tags: ["gpu", "ml"]
 			startup: {
-				order:     1
-				up_delay:  60
+				order:      1
+				up_delay:   60
 				down_delay: 30
 			}
 		}
@@ -160,16 +160,16 @@ _resources: {
 		memory: "16Gi"
 		disk:   "100Gi"
 		cloudinit: {
-			user:     "kube"
+			user: "kube"
 			ssh_keys: ["ssh-ed25519 AAAA... ops@infra"]
-			ip:       "203.0.113.20/24"
-			gateway:  "203.0.113.1"
+			ip:      "203.0.113.20/24"
+			gateway: "203.0.113.1"
 		}
 		proxmox: {
-			node:     "pve-alpha"
-			vmid:     300
-			template: "9000"
-			onboot:   true
+			node:          "pve-alpha"
+			vmid:          300
+			template:      "9000"
+			onboot:        true
 			serial_device: true
 			agent: enabled: true
 			tags: ["k8s", "worker"]

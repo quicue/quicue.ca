@@ -29,25 +29,25 @@ infra: orchestration.#Federation & {
 				router: {
 					name: "vyos-core"
 					"@type": {Router: true}
-					ip:         "198.51.100.1"
+					ip: "198.51.100.1"
 					depends_on: {}
 				}
 				dns: {
 					name: "powerdns"
 					"@type": {DNSServer: true, LXCContainer: true}
-					ip:         "198.51.100.10"
+					ip: "198.51.100.10"
 					depends_on: {router: true}
 				}
 				proxy: {
 					name: "caddy-proxy"
 					"@type": {ReverseProxy: true, LXCContainer: true}
-					ip:         "198.51.100.11"
+					ip: "198.51.100.11"
 					depends_on: {dns: true}
 				}
 				gitlab: {
 					name: "gitlab-scm"
 					"@type": {SourceControlManagement: true, LXCContainer: true}
-					ip:         "198.51.100.20"
+					ip: "198.51.100.20"
 					depends_on: {dns: true, proxy: true}
 				}
 			}
@@ -65,13 +65,13 @@ infra: orchestration.#Federation & {
 				tunnel: {
 					name: "wireguard-tunnel"
 					"@type": {TunnelEndpoint: true}
-					ip:         "203.0.113.1"
+					ip: "203.0.113.1"
 					depends_on: {}
 				}
 				backup: {
 					name: "restic-offsite"
 					"@type": {BackupService: true}
-					ip:         "203.0.113.10"
+					ip: "203.0.113.10"
 					depends_on: {tunnel: true}
 				}
 			}
@@ -81,9 +81,9 @@ infra: orchestration.#Federation & {
 
 // Cross-site: GitLab replicated to edge for disaster recovery
 gitlab_replica: orchestration.#CrossSiteResource & {
-	name:          "gitlab-scm"
-	type:          {SourceControlManagement: true}
-	primary_site:  "dc-core"
+	name: "gitlab-scm"
+	type: {SourceControlManagement: true}
+	primary_site: "dc-core"
 	replica_sites: {"edge-remote": true}
 	replication: {
 		mode:       "async"
@@ -91,7 +91,7 @@ gitlab_replica: orchestration.#CrossSiteResource & {
 	}
 	failover: {
 		automatic: false
-		priority: ["dc-core", "edge-remote"]  // ordered — failover chain
+		priority: ["dc-core", "edge-remote"] // ordered — failover chain
 	}
 }
 

@@ -93,8 +93,8 @@ import "time"
 
 	// What to include in artifacts
 	include: {
-		configs:     bool | *true // Generated configs (Ansible, Prometheus, etc.)
-		reports:     bool | *true // CAB reports
+		configs:     bool | *true  // Generated configs (Ansible, Prometheus, etc.)
+		reports:     bool | *true  // CAB reports
 		source:      bool | *false // Original CUE source
 		git_history: bool | *false // Git log for the period
 	}
@@ -131,13 +131,13 @@ import "time"
 	// Notification channels
 	channels: {
 		email?: {
-			enabled:    bool | *false
+			enabled: bool | *false
 			recipients: [...string]
 		}
 		slack?: {
-			enabled:    bool | *false
-			webhook:    string
-			channel:    string
+			enabled: bool | *false
+			webhook: string
+			channel: string
 		}
 		webhook?: {
 			enabled: bool | *false
@@ -148,10 +148,10 @@ import "time"
 
 	// When to send notifications
 	triggers: {
-		on_validation_failure: bool | *true
-		on_artifact_ready:     bool | *true
-		on_high_risk_change:   bool | *true
-		on_deployment_start:   bool | *false
+		on_validation_failure:  bool | *true
+		on_artifact_ready:      bool | *true
+		on_high_risk_change:    bool | *true
+		on_deployment_start:    bool | *false
 		on_deployment_complete: bool | *false
 	}
 }
@@ -178,8 +178,8 @@ import "time"
 
 	// Validation status
 	validation: {
-		passed:  bool
-		errors:  [...string]
+		passed: bool
+		errors: [...string]
 		warnings: [...string]
 	}
 

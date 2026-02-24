@@ -17,8 +17,8 @@ import (
 )
 
 validate: patterns.#ValidateGraph & {Input: _resources}
-metrics:  patterns.#GraphMetrics & {Graph: infra}
-spof:     patterns.#SinglePointsOfFailure & {Graph: infra}
+metrics: patterns.#GraphMetrics & {Graph: infra}
+spof: patterns.#SinglePointsOfFailure & {Graph: infra}
 
 output: {
 	summary: {

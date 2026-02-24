@@ -48,9 +48,9 @@ import "quicue.ca/vocab"
 
 // #ODRLPolicy — generates an ODRL 2.2 policy document.
 #ODRLPolicy: {
-	PolicyID:     string
-	Label:        string | *""
-	Permissions:  [...#ODRLPermission]
+	PolicyID: string
+	Label:    string | *""
+	Permissions: [...#ODRLPermission]
 	Prohibitions: [...#ODRLProhibition]
 
 	policy: {

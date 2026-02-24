@@ -47,9 +47,9 @@ package schema
 // #Resource - Base resource with enforced conventions
 #Resource: {
 	name:       string
-	depends_on: #DependsOn  // Enforced as set
-	type?:      #TypeSet    // Enforced as set
-	tags?:      #Tags       // Enforced as set
+	depends_on: #DependsOn // Enforced as set
+	type?:      #TypeSet   // Enforced as set
+	tags?:      #Tags      // Enforced as set
 	...
 }
 
@@ -88,5 +88,5 @@ package schema
 // #NotAList - Constraint that rejects lists
 // Use: field: #NotAList & actual_value
 #NotAList: {
-	[string]: _  // Must be a struct, not a list
+	[string]: _ // Must be a struct, not a list
 }

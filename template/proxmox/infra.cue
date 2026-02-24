@@ -89,7 +89,7 @@ import (
 // Uses defaults (*value) so actions-specific.cue can override
 #ActionTemplates: {
 	info: vocab.#Action & {
-		Name: string
+		Name:        string
 		name:        *"Info" | string
 		description: *"Show resource \(Name) information" | string
 		command:     *"echo 'Resource: \(Name)'" | string
@@ -97,7 +97,7 @@ import (
 	}
 
 	ping: vocab.#Action & {
-		IP: string
+		IP:          string
 		name:        *"Ping" | string
 		description: *"Test network connectivity to \(IP)" | string
 		command:     *"ping -c 3 \(IP)" | string
@@ -106,8 +106,8 @@ import (
 	}
 
 	ssh: vocab.#Action & {
-		IP:   string
-		User: string
+		IP:          string
+		User:        string
 		name:        *"SSH" | string
 		description: *"SSH to \(User)@\(IP)" | string
 		command:     *"ssh \(User)@\(IP)" | string
@@ -116,8 +116,8 @@ import (
 
 	// LXC container actions
 	pct_status: vocab.#Action & {
-		LXCID: int
-		Node:  string
+		LXCID:       int
+		Node:        string
 		name:        *"Container Status" | string
 		description: *"Check LXC \(LXCID) status on \(Node)" | string
 		command:     *"ssh \(Node) 'pct status \(LXCID)'" | string
@@ -126,8 +126,8 @@ import (
 	}
 
 	pct_console: vocab.#Action & {
-		LXCID: int
-		Node:  string
+		LXCID:       int
+		Node:        string
 		name:        *"Console" | string
 		description: *"Attach to LXC \(LXCID) console" | string
 		command:     *"ssh -t \(Node) 'pct enter \(LXCID)'" | string
@@ -136,8 +136,8 @@ import (
 
 	// VM actions
 	qm_status: vocab.#Action & {
-		VMID: int
-		Node: string
+		VMID:        int
+		Node:        string
 		name:        *"VM Status" | string
 		description: *"Check VM \(VMID) status on \(Node)" | string
 		command:     *"ssh \(Node) 'qm status \(VMID)'" | string
@@ -146,8 +146,8 @@ import (
 	}
 
 	qm_console: vocab.#Action & {
-		VMID: int
-		Node: string
+		VMID:        int
+		Node:        string
 		name:        *"Console" | string
 		description: *"Open VM \(VMID) console" | string
 		command:     *"ssh -t \(Node) 'qm terminal \(VMID)'" | string
@@ -155,8 +155,8 @@ import (
 	}
 
 	qm_config: vocab.#Action & {
-		VMID: int
-		Node: string
+		VMID:        int
+		Node:        string
 		name:        *"Configuration" | string
 		description: *"Show VM \(VMID) configuration" | string
 		command:     *"ssh \(Node) 'qm config \(VMID)'" | string
@@ -166,8 +166,8 @@ import (
 
 	// Hypervisor/node actions
 	list_vms: vocab.#Action & {
-		IP:   string
-		User: string
+		IP:          string
+		User:        string
 		name:        *"List VMs" | string
 		description: *"List all VMs on this node" | string
 		command:     *"ssh \(User)@\(IP) 'qm list'" | string
@@ -176,8 +176,8 @@ import (
 	}
 
 	list_containers: vocab.#Action & {
-		IP:   string
-		User: string
+		IP:          string
+		User:        string
 		name:        *"List Containers" | string
 		description: *"List all LXC containers on this node" | string
 		command:     *"ssh \(User)@\(IP) 'pct list'" | string
@@ -186,8 +186,8 @@ import (
 	}
 
 	cluster_status: vocab.#Action & {
-		IP:   string
-		User: string
+		IP:          string
+		User:        string
 		name:        *"Cluster Status" | string
 		description: *"Show Proxmox cluster status" | string
 		command:     *"ssh \(User)@\(IP) 'pvecm status'" | string
@@ -196,8 +196,8 @@ import (
 	}
 
 	storage_status: vocab.#Action & {
-		IP:   string
-		User: string
+		IP:          string
+		User:        string
 		name:        *"Storage Status" | string
 		description: *"Show storage pool status" | string
 		command:     *"ssh \(User)@\(IP) 'pvesm status'" | string

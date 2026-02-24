@@ -11,11 +11,11 @@ import "quicue.ca/vocab"
 
 #NetBoxRegistry: {
 	devices: vocab.#ActionDef & {
-		name:             "devices"
-		description:      "List DCIM devices"
-		category:         "info"
+		name:        "devices"
+		description: "List DCIM devices"
+		category:    "info"
 		params: {
-			api_url:   {from_field: "netbox_url"}
+			api_url: {from_field: "netbox_url"}
 			api_token: {from_field: "netbox_token"}
 		}
 		command_template: "curl -s -H 'Authorization: Token {api_token}' {api_url}/api/dcim/devices/"
@@ -23,11 +23,11 @@ import "quicue.ca/vocab"
 	}
 
 	racks: vocab.#ActionDef & {
-		name:             "racks"
-		description:      "List datacenter racks"
-		category:         "info"
+		name:        "racks"
+		description: "List datacenter racks"
+		category:    "info"
 		params: {
-			api_url:   {from_field: "netbox_url"}
+			api_url: {from_field: "netbox_url"}
 			api_token: {from_field: "netbox_token"}
 		}
 		command_template: "curl -s -H 'Authorization: Token {api_token}' {api_url}/api/dcim/racks/"
@@ -35,11 +35,11 @@ import "quicue.ca/vocab"
 	}
 
 	sites: vocab.#ActionDef & {
-		name:             "sites"
-		description:      "List physical sites (buildings, campuses)"
-		category:         "info"
+		name:        "sites"
+		description: "List physical sites (buildings, campuses)"
+		category:    "info"
 		params: {
-			api_url:   {from_field: "netbox_url"}
+			api_url: {from_field: "netbox_url"}
 			api_token: {from_field: "netbox_token"}
 		}
 		command_template: "curl -s -H 'Authorization: Token {api_token}' {api_url}/api/dcim/sites/"
@@ -47,11 +47,11 @@ import "quicue.ca/vocab"
 	}
 
 	prefixes: vocab.#ActionDef & {
-		name:             "prefixes"
-		description:      "List IP prefixes (subnets)"
-		category:         "info"
+		name:        "prefixes"
+		description: "List IP prefixes (subnets)"
+		category:    "info"
 		params: {
-			api_url:   {from_field: "netbox_url"}
+			api_url: {from_field: "netbox_url"}
 			api_token: {from_field: "netbox_token"}
 		}
 		command_template: "curl -s -H 'Authorization: Token {api_token}' {api_url}/api/ipam/prefixes/"
@@ -59,11 +59,11 @@ import "quicue.ca/vocab"
 	}
 
 	addresses: vocab.#ActionDef & {
-		name:             "addresses"
-		description:      "List IP addresses"
-		category:         "info"
+		name:        "addresses"
+		description: "List IP addresses"
+		category:    "info"
 		params: {
-			api_url:   {from_field: "netbox_url"}
+			api_url: {from_field: "netbox_url"}
 			api_token: {from_field: "netbox_token"}
 		}
 		command_template: "curl -s -H 'Authorization: Token {api_token}' {api_url}/api/ipam/ip-addresses/"
@@ -71,11 +71,11 @@ import "quicue.ca/vocab"
 	}
 
 	vlans: vocab.#ActionDef & {
-		name:             "vlans"
-		description:      "List VLANs"
-		category:         "info"
+		name:        "vlans"
+		description: "List VLANs"
+		category:    "info"
 		params: {
-			api_url:   {from_field: "netbox_url"}
+			api_url: {from_field: "netbox_url"}
 			api_token: {from_field: "netbox_token"}
 		}
 		command_template: "curl -s -H 'Authorization: Token {api_token}' {api_url}/api/ipam/vlans/"
@@ -83,11 +83,11 @@ import "quicue.ca/vocab"
 	}
 
 	circuits: vocab.#ActionDef & {
-		name:             "circuits"
-		description:      "List network circuits"
-		category:         "info"
+		name:        "circuits"
+		description: "List network circuits"
+		category:    "info"
 		params: {
-			api_url:   {from_field: "netbox_url"}
+			api_url: {from_field: "netbox_url"}
 			api_token: {from_field: "netbox_token"}
 		}
 		command_template: "curl -s -H 'Authorization: Token {api_token}' {api_url}/api/circuits/circuits/"
@@ -95,11 +95,11 @@ import "quicue.ca/vocab"
 	}
 
 	tenants: vocab.#ActionDef & {
-		name:             "tenants"
-		description:      "List tenants (departments, faculties)"
-		category:         "info"
+		name:        "tenants"
+		description: "List tenants (departments, faculties)"
+		category:    "info"
 		params: {
-			api_url:   {from_field: "netbox_url"}
+			api_url: {from_field: "netbox_url"}
 			api_token: {from_field: "netbox_token"}
 		}
 		command_template: "curl -s -H 'Authorization: Token {api_token}' {api_url}/api/tenancy/tenants/"
@@ -107,11 +107,11 @@ import "quicue.ca/vocab"
 	}
 
 	vms: vocab.#ActionDef & {
-		name:             "vms"
-		description:      "List virtual machines"
-		category:         "info"
+		name:        "vms"
+		description: "List virtual machines"
+		category:    "info"
 		params: {
-			api_url:   {from_field: "netbox_url"}
+			api_url: {from_field: "netbox_url"}
 			api_token: {from_field: "netbox_token"}
 		}
 		command_template: "curl -s -H 'Authorization: Token {api_token}' {api_url}/api/virtualization/virtual-machines/"
@@ -119,11 +119,11 @@ import "quicue.ca/vocab"
 	}
 
 	clusters: vocab.#ActionDef & {
-		name:             "clusters"
-		description:      "List virtualization clusters"
-		category:         "info"
+		name:        "clusters"
+		description: "List virtualization clusters"
+		category:    "info"
 		params: {
-			api_url:   {from_field: "netbox_url"}
+			api_url: {from_field: "netbox_url"}
 			api_token: {from_field: "netbox_token"}
 		}
 		command_template: "curl -s -H 'Authorization: Token {api_token}' {api_url}/api/virtualization/clusters/"
@@ -131,13 +131,13 @@ import "quicue.ca/vocab"
 	}
 
 	search: vocab.#ActionDef & {
-		name:             "search"
-		description:      "Global search across all NetBox objects"
-		category:         "info"
+		name:        "search"
+		description: "Global search across all NetBox objects"
+		category:    "info"
 		params: {
-			api_url:   {from_field: "netbox_url"}
+			api_url: {from_field: "netbox_url"}
 			api_token: {from_field: "netbox_token"}
-			query:     {}
+			query: {}
 		}
 		command_template: "curl -s -H 'Authorization: Token {api_token}' '{api_url}/api/dcim/devices/?q={query}'"
 		idempotent:       true

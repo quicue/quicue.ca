@@ -1,11 +1,12 @@
 // Docker provider tests - validates pattern implementations
 package tests
 
-import "quicue.ca/template/docker/patterns"
+import ( "quicue.ca/template/docker/patterns"
 
-// =============================================================================
-// TEST: #ContainerActions generates correct commands
-// =============================================================================
+	// =============================================================================
+	// TEST: #ContainerActions generates correct commands
+	// =============================================================================
+)
 
 _testContainerActions: patterns.#ContainerActions & {
 	CONTAINER: "nginx"

@@ -587,28 +587,28 @@ infra: patterns.#InfraGraph & {Input: _resources}
 validate: patterns.#ValidateGraph & {Input: _resources}
 
 // Impact queries — "What breaks if X fails?"
-impact_router:  patterns.#ImpactQuery & {Graph: infra, Target: "router-core"}
-impact_dns:     patterns.#ImpactQuery & {Graph: infra, Target: "dns-internal"}
-impact_vault:   patterns.#ImpactQuery & {Graph: infra, Target: "vault"}
-impact_pg:      patterns.#ImpactQuery & {Graph: infra, Target: "postgresql"}
-impact_gitlab:  patterns.#ImpactQuery & {Graph: infra, Target: "gitlab-scm"}
-impact_k8s:     patterns.#ImpactQuery & {Graph: infra, Target: "k8s-prod"}
+impact_router: patterns.#ImpactQuery & {Graph: infra, Target: "router-core"}
+impact_dns: patterns.#ImpactQuery & {Graph: infra, Target: "dns-internal"}
+impact_vault: patterns.#ImpactQuery & {Graph: infra, Target: "vault"}
+impact_pg: patterns.#ImpactQuery & {Graph: infra, Target: "postgresql"}
+impact_gitlab: patterns.#ImpactQuery & {Graph: infra, Target: "gitlab-scm"}
+impact_k8s: patterns.#ImpactQuery & {Graph: infra, Target: "k8s-prod"}
 
 // Dependency chains — "What is the startup path?"
-chain_argocd:  patterns.#DependencyChain & {Graph: infra, Target: "argocd"}
-chain_gitlab:  patterns.#DependencyChain & {Graph: infra, Target: "gitlab-scm"}
+chain_argocd: patterns.#DependencyChain & {Graph: infra, Target: "argocd"}
+chain_gitlab: patterns.#DependencyChain & {Graph: infra, Target: "gitlab-scm"}
 chain_opentofu: patterns.#DependencyChain & {Graph: infra, Target: "opentofu-iac"}
 
 // Operational patterns
 criticality: patterns.#CriticalityRank & {Graph: infra}
-deployment:  patterns.#DeploymentPlan & {Graph: infra}
-spof:        patterns.#SinglePointsOfFailure & {Graph: infra}
-by_type:     patterns.#GroupByType & {Graph: infra}
-metrics:     patterns.#GraphMetrics & {Graph: infra}
+deployment: patterns.#DeploymentPlan & {Graph: infra}
+spof: patterns.#SinglePointsOfFailure & {Graph: infra}
+by_type: patterns.#GroupByType & {Graph: infra}
+metrics: patterns.#GraphMetrics & {Graph: infra}
 
 // Blast radius — "Router goes down, what's the damage?"
 blast_router: patterns.#BlastRadius & {Graph: infra, Target: "router-core"}
-blast_dns:    patterns.#BlastRadius & {Graph: infra, Target: "dns-internal"}
+blast_dns: patterns.#BlastRadius & {Graph: infra, Target: "dns-internal"}
 
 // Health simulation — "What if vault is down?"
 health_vault_down: patterns.#HealthStatus & {
@@ -634,36 +634,36 @@ execution: patterns.#ExecutionPlan & {
 // Documents which resource exercises which provider(s).
 // This is metadata — not consumed by graph analysis.
 _providerMap: {
-	"router-core":        ["vyos"]
-	"pve-node1":          ["proxmox"]
-	"pve-node2":          ["proxmox"]
-	"pve-node3":          ["proxmox"]
-	"vcenter":            ["govc", "powercli"]
-	"dns-internal":       ["powerdns"]
-	"dns-external":       ["cloudflare"]
-	"netbox":             ["netbox"]
-	"foreman":            ["foreman"]
-	"backup-pbs":         ["pbs"]
-	"vault":              ["vault"]
-	"keycloak":           ["keycloak"]
-	"postgresql":         ["postgresql"]
-	"caddy-proxy":        ["caddy"]
-	"nginx-web":          ["nginx"]
-	"docker-host":        ["docker"]
-	"incus-cluster":      ["incus"]
-	"k3d-dev":            ["k3d"]
-	"k8s-prod":           ["kubectl"]
-	"kubevirt-vms":       ["kubevirt"]
-	"argocd":             ["argocd"]
-	"gitlab-scm":         ["gitlab"]
-	"gitlab-runner":      ["gitlab"]
-	"awx":                ["awx"]
-	"dagger-ci":          ["dagger"]
+	"router-core": ["vyos"]
+	"pve-node1": ["proxmox"]
+	"pve-node2": ["proxmox"]
+	"pve-node3": ["proxmox"]
+	"vcenter": ["govc", "powercli"]
+	"dns-internal": ["powerdns"]
+	"dns-external": ["cloudflare"]
+	"netbox": ["netbox"]
+	"foreman": ["foreman"]
+	"backup-pbs": ["pbs"]
+	"vault": ["vault"]
+	"keycloak": ["keycloak"]
+	"postgresql": ["postgresql"]
+	"caddy-proxy": ["caddy"]
+	"nginx-web": ["nginx"]
+	"docker-host": ["docker"]
+	"incus-cluster": ["incus"]
+	"k3d-dev": ["k3d"]
+	"k8s-prod": ["kubectl"]
+	"kubevirt-vms": ["kubevirt"]
+	"argocd": ["argocd"]
+	"gitlab-scm": ["gitlab"]
+	"gitlab-runner": ["gitlab"]
+	"awx": ["awx"]
+	"dagger-ci": ["dagger"]
 	"ansible-controller": ["ansible"]
-	"terraform-state":    ["terraform"]
-	"opentofu-iac":       ["opentofu"]
-	"zabbix":             ["zabbix"]
-	"restic-offsite":     ["restic"]
+	"terraform-state": ["terraform"]
+	"opentofu-iac": ["opentofu"]
+	"zabbix": ["zabbix"]
+	"restic-offsite": ["restic"]
 }
 
 // Verify all 29 providers are represented
@@ -774,7 +774,7 @@ output: {
 	// Risk Analysis
 	// ─────────────────────────────────────────────────────────────────────
 	blast_radius: {
-		"router-core": blast_router.summary
+		"router-core":  blast_router.summary
 		"dns-internal": blast_dns.summary
 	}
 
@@ -880,9 +880,9 @@ jsonld: {
 
 	"@graph": [
 		for _, r in _resources {{
-			"@id":   r."@id"
+			"@id": r."@id"
 			"@type": [for t, _ in r."@type" {t}]
-			name:    r.name
+			name: r.name
 			if r.ip != _|_ {ip: r.ip}
 			if r.url != _|_ {url: r.url}
 			if r.fqdn != _|_ {fqdn: r.fqdn}
@@ -901,7 +901,7 @@ jsonld: {
 _dcat: patterns.#DCAT3Catalog & {
 	Graph:       infra
 	CatalogID:   _base + "catalog"
-	Publisher:    "Example Datacenter Operations"
+	Publisher:   "Example Datacenter Operations"
 	Title:       "Datacenter Infrastructure Catalog"
 	Description: "DCAT 3 catalog of datacenter infrastructure resources — \(metrics.total_resources) resources, \(metrics.max_depth) layers deep"
 	BaseIRI:     _base

@@ -11,7 +11,7 @@ package core
 	solution: string & !=""
 	context:  string & !=""
 	example?: string
-	used_in:  {[string]: true} // struct-as-set: projects using this pattern
+	used_in: {[string]: true} // struct-as-set: projects using this pattern
 	related?: {[string]: true} // struct-as-set: related patterns
 	...
 }

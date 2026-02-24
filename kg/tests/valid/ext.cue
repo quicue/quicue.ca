@@ -3,17 +3,17 @@ package valid
 import "quicue.ca/kg/ext@v0"
 
 deriv001: ext.#Derivation & {
-	id:                 "DERIV-001"
-	worker:             "workers/bulk_export.py"
-	output_file:        "derived/export.json"
-	date:               "2026-02-15"
-	description:        "Bulk export of all records"
-	canon_purity:       "mixed"
-	canon_sources:      ["HGNC complete gene set"]
+	id:           "DERIV-001"
+	worker:       "workers/bulk_export.py"
+	output_file:  "derived/export.json"
+	date:         "2026-02-15"
+	description:  "Bulk export of all records"
+	canon_purity: "mixed"
+	canon_sources: ["HGNC complete gene set"]
 	non_canon_elements: ["Filtering heuristic"]
-	action_required:    "Review filtered records before promotion"
-	input_files:        ["data/raw.json"]
-	record_count:       500
+	action_required: "Review filtered records before promotion"
+	input_files: ["data/raw.json"]
+	record_count: 500
 }
 
 ws001: ext.#Workspace & {
@@ -69,17 +69,17 @@ proto001: ext.#CollectionProtocol & {
 	contact:     "infrastructure-team"
 	endpoint:    "cmdb.example.com"
 	freshness:   "< 7 days"
-	known_gaps:  ["Offline assets may have stale IP addresses"]
+	known_gaps: ["Offline assets may have stale IP addresses"]
 }
 
 run001: ext.#PipelineRun & {
-	id:           "RUN-001"
-	started_at:   "2026-02-13T14:30:00Z"
-	ended_at:     "2026-02-13T14:35:22Z"
-	worker:       "scripts/run_pipeline.sh"
-	git_commit:   "abc1234"
+	id:         "RUN-001"
+	started_at: "2026-02-13T14:30:00Z"
+	ended_at:   "2026-02-13T14:35:22Z"
+	worker:     "scripts/run_pipeline.sh"
+	git_commit: "abc1234"
 	sources_used: ["SRC-001"]
-	outputs:      ["canonical/output_main.cue", "canonical/output_001.cue"]
+	outputs: ["canonical/output_main.cue", "canonical/output_001.cue"]
 	protocol:     "PROTO-001"
 	status:       "success"
 	description:  "Full pipeline run: parse → merge → canonicalize → export"

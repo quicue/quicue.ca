@@ -15,7 +15,7 @@ package ansible
 #MonitoringConfig: {
 	enabled?: bool | *true
 	exporters?: [string]: {
-		port: int
+		port:  int
 		path?: string | *"/metrics"
 	}
 }
@@ -24,19 +24,19 @@ package ansible
 // Not enforced (Resources uses open struct) but documents what fields
 // the generators consume across all four outputs.
 #AnsibleResource: {
-	ip?:           string
-	ssh_user?:     string
-	user?:         string
-	ssh_port?:     int
-	tags?:         {[string]: true}
-	vm_id?:        int
-	vmid?:         int
-	container_id?: int
-	host?:         string
-	node?:         string
-	owner?:        string
-	severity?:     string
-	monitoring?:   #MonitoringConfig
+	ip?:       string
+	ssh_user?: string
+	user?:     string
+	ssh_port?: int
+	tags?: {[string]: true}
+	vm_id?:                      int
+	vmid?:                       int
+	container_id?:               int
+	host?:                       string
+	node?:                       string
+	owner?:                      string
+	severity?:                   string
+	monitoring?:                 #MonitoringConfig
 	ansible_become?:             bool
 	ansible_python_interpreter?: string
 	...

@@ -11,6 +11,6 @@ package core
 	reason:      string & !=""
 	date:        =~"^\\d{4}-\\d{2}-\\d{2}$"
 	alternative: string & !="" // what to do instead (required — forces constructive rejection)
-	related?:    {[string]: true}
+	related?: {[string]: true}
 	...
 }

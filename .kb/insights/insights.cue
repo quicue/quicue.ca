@@ -253,23 +253,22 @@ i013: core.#Insight & {
 
 i014: core.#Insight & {
 	id:        "INSIGHT-014"
-	statement: "Existing config can be projected into quicue.ca graph shape without modifying original code"
+	statement: "Cloudflare API tokens are stored in ~/.ssh/ alongside SSH keys — the working token is cf-tk.token, not ~/.cf_env"
 	evidence: [
-		"grdn has custom K8s/Proxmox schemas with hostname/ip/role fields -- no @type or depends_on",
-		"A single graph.cue file (65 lines) projects nested config into 9 flat resources with @type and depends_on",
-		"CUE comprehensions iterate proxmox_cluster.nodes and k8s_cluster.nodes to generate the resource map",
-		"Original config.cue, schemas/, and GitLab CI are untouched -- graph.cue is purely additive",
-		"CUE version bump from v0.9.0 to v0.15.4 required for @v0 import syntax, no breakage in existing code",
+		"~/.cf_env exports CF_API_KEY=3YT66X... — wrangler rejects it with 'Invalid access token [code: 9109]'",
+		"~/.ssh/cf-tk.token contains yKFDS... — wrangler pages deploy succeeds with this as CLOUDFLARE_API_TOKEN",
+		"Memory file infrastructure.md had them swapped (cf-tk.token listed as broken, cf_env as working) — corrected 2026-02-20",
+		"Wrangler requires CLOUDFLARE_API_TOKEN env var name, not CF_API_KEY — naming mismatch was the root cause of confusion",
 	]
-	method:     "experiment"
+	method:     "observation"
 	confidence: "high"
-	discovered: "2026-02-23"
-	implication: "Adopting quicue.ca patterns does not require rewriting existing infrastructure code. A projection file can wrap any CUE config into graph-compatible shape. This lowers the adoption barrier for existing CUE users."
+	discovered: "2026-02-20"
+	implication: "Token management needs a single source of truth. The ~/.ssh/ directory is an unconventional but reasonable location (already permissioned for secrets). The CF_API_KEY vs CLOUDFLARE_API_TOKEN naming mismatch caused repeated deploy failures across sessions."
 	action_items: [
-		"Document the projection pattern as a migration guide",
-		"Add grdn as a worked example of incremental adoption",
+		"Standardize on CLOUDFLARE_API_TOKEN=$(cat ~/.ssh/cf-tk.token) in all deploy scripts",
+		"Remove or clearly mark ~/.cf_env as deprecated",
 	]
-	related: {"INSIGHT-001": true}
+	related: {"INSIGHT-004": true}
 }
 
 i010: core.#Insight & {

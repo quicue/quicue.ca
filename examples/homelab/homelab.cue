@@ -35,7 +35,7 @@ import (
 _site: {
 	domain:  string | *"lab.example.com"
 	base_id: string | *"https://\(domain)/resources/"
-	subnet:  string | *"198.51.100"  // RFC 5737 documentation range
+	subnet:  string | *"198.51.100" // RFC 5737 documentation range
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -236,20 +236,20 @@ infra: patterns.#InfraGraph & {Input: _resources}
 validate: patterns.#ValidateGraph & {Input: _resources}
 
 // Impact queries
-impact_router:   patterns.#ImpactQuery & {Graph: infra, Target: "router"}
-impact_dns:      patterns.#ImpactQuery & {Graph: infra, Target: "dns"}
-impact_vault:    patterns.#ImpactQuery & {Graph: infra, Target: "vault"}
+impact_router: patterns.#ImpactQuery & {Graph: infra, Target: "router"}
+impact_dns: patterns.#ImpactQuery & {Graph: infra, Target: "dns"}
+impact_vault: patterns.#ImpactQuery & {Graph: infra, Target: "vault"}
 impact_database: patterns.#ImpactQuery & {Graph: infra, Target: "database"}
 
 // Risk analysis
 criticality: patterns.#CriticalityRank & {Graph: infra}
-deployment:  patterns.#DeploymentPlan & {Graph: infra}
-spof:        patterns.#SinglePointsOfFailure & {Graph: infra}
-metrics:     patterns.#GraphMetrics & {Graph: infra}
+deployment: patterns.#DeploymentPlan & {Graph: infra}
+spof: patterns.#SinglePointsOfFailure & {Graph: infra}
+metrics: patterns.#GraphMetrics & {Graph: infra}
 
 // Blast radius
 blast_router: patterns.#BlastRadius & {Graph: infra, Target: "router"}
-blast_dns:    patterns.#BlastRadius & {Graph: infra, Target: "dns"}
+blast_dns: patterns.#BlastRadius & {Graph: infra, Target: "dns"}
 
 // Health simulation
 health_vault_down: patterns.#HealthStatus & {
@@ -258,7 +258,7 @@ health_vault_down: patterns.#HealthStatus & {
 }
 
 // Dependency chains
-chain_gitea:   patterns.#DependencyChain & {Graph: infra, Target: "gitea"}
+chain_gitea: patterns.#DependencyChain & {Graph: infra, Target: "gitea"}
 chain_monitor: patterns.#DependencyChain & {Graph: infra, Target: "monitoring"}
 
 // Rollback
@@ -373,9 +373,9 @@ jsonld: {
 
 	"@graph": [
 		for _, r in _resources {{
-			"@id":   r."@id"
+			"@id": r."@id"
 			"@type": [for t, _ in r."@type" {t}]
-			name:    r.name
+			name: r.name
 			if r.ip != _|_ {ip: r.ip}
 			if r.fqdn != _|_ {fqdn: r.fqdn}
 			if r.host != _|_ {host: r.host}

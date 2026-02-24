@@ -461,7 +461,7 @@ package vocab
 // #TypeEntry - Schema for type registry entries
 #TypeEntry: {
 	description: string
-	requires?: {...}       // Fields that resources of this type MUST have
-	grants?: [...string]   // Action names this type grants
-	structural_deps?: [...string]  // Fields that auto-create depends_on
+	requires?: {...} // Fields that resources of this type MUST have
+	grants?: [...string] // Action names this type grants
+	structural_deps?: [...string] // Fields that auto-create depends_on
 }

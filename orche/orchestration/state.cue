@@ -38,16 +38,16 @@ import (
 
 // #StateReport - Full drift report for a site
 #StateReport: {
-	site:       string
-	timestamp:  string
+	site:      string
+	timestamp: string
 	resources: [string]: #ResourceState
 
 	summary: {
-		total:     int
-		in_sync:   int
-		missing:   int
-		changed:   int
-		extra:     int
+		total:   int
+		in_sync: int
+		missing: int
+		changed: int
+		extra:   int
 	}
 }
 

@@ -8,6 +8,6 @@
 package main
 
 // Completed tasks — one line per task.
-_tasks: "create-gitlab-projection":     status: "done"
-_tasks: "update-patterns-docs":         status: "done"
+_tasks: "create-gitlab-projection": status:     "done"
+_tasks: "update-patterns-docs": status:         "done"
 _tasks: "update-graph-patterns-readme": status: "done"

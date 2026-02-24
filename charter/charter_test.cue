@@ -10,26 +10,26 @@ import "quicue.ca/patterns@v0"
 // ── Test graph (5 nodes, 2 layers) ─────────────────────────────
 _test_resources: {
 	"docker": {
-		name:    "docker"
+		name: "docker"
 		"@type": {DockerHost: true}
 	}
 	"postgres": {
-		name:    "postgres"
+		name: "postgres"
 		"@type": {Database: true}
 		depends_on: {"docker": true}
 	}
 	"redis": {
-		name:    "redis"
+		name: "redis"
 		"@type": {Cache: true}
 		depends_on: {"docker": true}
 	}
 	"api": {
-		name:    "api"
+		name: "api"
 		"@type": {AppWorkload: true}
 		depends_on: {"postgres": true, "redis": true}
 	}
 	"frontend": {
-		name:    "frontend"
+		name: "frontend"
 		"@type": {AppWorkload: true}
 		depends_on: {"api": true}
 	}
@@ -51,11 +51,11 @@ _complete_charter: #Charter & {
 	}
 	gates: {
 		"db-ready": {
-			phase:    1
+			phase: 1
 			requires: {"docker": true, "postgres": true}
 		}
 		"api-ready": {
-			phase:    2
+			phase: 2
 			requires: {"api": true, "redis": true}
 			depends_on: {"db-ready": true}
 		}
@@ -84,7 +84,7 @@ _incomplete_charter: #Charter & {
 	}
 	gates: {
 		"monitoring-ready": {
-			phase:    1
+			phase: 1
 			requires: {"monitoring": true, "logging": true}
 		}
 	}

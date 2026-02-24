@@ -34,18 +34,18 @@ import "strings"
 		"@graph": [
 			// The concept scheme itself
 			{
-				"@id":                "kg:\(index.project)/patterns"
-				"@type":              "skos:ConceptScheme"
-				"dcterms:title":      "\(index.project) Pattern Language"
+				"@id":           "kg:\(index.project)/patterns"
+				"@type":         "skos:ConceptScheme"
+				"dcterms:title": "\(index.project) Pattern Language"
 				"skos:hasTopConcept": [for cat, _ in _categories {{"@id": "kg:\(index.project)/category/\(cat)"}}]
 			},
 
 			// Categories as top concepts
 			for cat, _ in _categories {
-				"@id":   "kg:\(index.project)/category/\(cat)"
-				"@type": "skos:Concept"
-				"skos:prefLabel":    cat
-				"skos:inScheme":     {"@id": "kg:\(index.project)/patterns"}
+				"@id":            "kg:\(index.project)/category/\(cat)"
+				"@type":          "skos:Concept"
+				"skos:prefLabel": cat
+				"skos:inScheme": {"@id": "kg:\(index.project)/patterns"}
 				"skos:topConceptOf": {"@id": "kg:\(index.project)/patterns"}
 				"skos:narrower": [
 					for pid, p in index.patterns if p.category == cat {
@@ -56,13 +56,13 @@ import "strings"
 
 			// Individual patterns as concepts
 			for id, p in index.patterns {
-				"@id":   "kg:\(id)"
-				"@type": "skos:Concept"
+				"@id":             "kg:\(id)"
+				"@type":           "skos:Concept"
 				"skos:prefLabel":  p.name
 				"skos:definition": p.problem
 				"skos:note":       p.solution
-				"skos:broader":    {"@id": "kg:\(index.project)/category/\(p.category)"}
-				"skos:inScheme":   {"@id": "kg:\(index.project)/patterns"}
+				"skos:broader": {"@id": "kg:\(index.project)/category/\(p.category)"}
+				"skos:inScheme": {"@id": "kg:\(index.project)/patterns"}
 				if p.related != _|_ {
 					"skos:related": [for rel, _ in p.related {{"@id": "kg:\(rel)"}}]
 				}
@@ -101,7 +101,7 @@ import "strings"
 	], "\n")
 
 	summary: {
-		total_concepts:  len(index.patterns) + len(_categories)
+		total_concepts:   len(index.patterns) + len(_categories)
 		total_categories: len(_categories)
 		total_patterns:   len(index.patterns)
 	}

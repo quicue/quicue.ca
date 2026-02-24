@@ -100,14 +100,14 @@ package ansible
 						h: 3
 						w: 6
 						x: (i * 6) mod 24
-						y: 1 + div((i * 6), 24) * 3
+						y: 1 + div((i*6), 24)*3
 					}
 				}
 			},
 
 			// Row: Resource Details
 			{
-				let _statusRows = div((len(_resourceList) * 6 + 23), 24) * 3
+				let _statusRows = div((len(_resourceList)*6+23), 24) * 3
 				id:        2
 				title:     "Resource Details"
 				type:      "row"
@@ -118,7 +118,7 @@ package ansible
 
 			// CPU Usage
 			{
-				let _statusRows = div((len(_resourceList) * 6 + 23), 24) * 3
+				let _statusRows = div((len(_resourceList)*6+23), 24) * 3
 				id:         200
 				title:      "CPU Usage"
 				type:       "timeseries"
@@ -136,7 +136,7 @@ package ansible
 
 			// Memory Usage
 			{
-				let _statusRows = div((len(_resourceList) * 6 + 23), 24) * 3
+				let _statusRows = div((len(_resourceList)*6+23), 24) * 3
 				id:         201
 				title:      "Memory Usage"
 				type:       "timeseries"
@@ -154,7 +154,7 @@ package ansible
 
 			// Disk Usage
 			{
-				let _statusRows = div((len(_resourceList) * 6 + 23), 24) * 3
+				let _statusRows = div((len(_resourceList)*6+23), 24) * 3
 				id:         202
 				title:      "Disk Usage"
 				type:       "gauge"
@@ -180,7 +180,7 @@ package ansible
 
 			// Network I/O
 			{
-				let _statusRows = div((len(_resourceList) * 6 + 23), 24) * 3
+				let _statusRows = div((len(_resourceList)*6+23), 24) * 3
 				id:         203
 				title:      "Network I/O"
 				type:       "timeseries"

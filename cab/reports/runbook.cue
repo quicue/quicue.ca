@@ -31,7 +31,7 @@ import (
 			...
 		}
 		topology: [string]: {[string]: true}
-		roots:  [...string]
+		roots: [...string]
 		leaves: [...string]
 		...
 	}
@@ -60,8 +60,8 @@ import (
 					{
 						name: name
 						types: [for t, _ in r["@type"] {t}]
-						ip:    r.ip | *""
-						host:  r.host | *""
+						ip:   r.ip | *""
+						host: r.host | *""
 					}
 				},
 			]
@@ -231,10 +231,10 @@ import (
 
 	// Summary
 	summary: {
-		failed_at:      FailedAt
-		rollback_count: len(rollback_sequence)
-		safe_count:     len(safe_resources)
-		total_layers:   _maxDepth + 1
+		failed_at:       FailedAt
+		rollback_count:  len(rollback_sequence)
+		safe_count:      len(safe_resources)
+		total_layers:    _maxDepth + 1
 		layers_affected: _maxDepth + 1 - FailedAt
 	}
 
@@ -301,7 +301,7 @@ import (
 		resources: [string]: {
 			name: string
 			"@type": {[string]: true}
-			_depth:     int
+			_depth: int
 			_ancestors: {[string]: bool}
 			depends_on?: {[string]: true}
 			...
@@ -348,11 +348,11 @@ import (
 
 	// Summary
 	summary: {
-		target:               Target
-		maintenance_type:     MaintenanceType
-		affected_count:       len(affected)
-		estimated_duration:   "\(2 + len(affected)*2) minutes" // 2 min base + 2 min per resource
-		downtime_scope:       "\(len(affected)+1) resources"
+		target:             Target
+		maintenance_type:   MaintenanceType
+		affected_count:     len(affected)
+		estimated_duration: "\(2+len(affected)*2) minutes" // 2 min base + 2 min per resource
+		downtime_scope:     "\(len(affected)+1) resources"
 	}
 
 	// Generate markdown
@@ -415,9 +415,9 @@ import (
 		"""
 
 	json: {
-		summary:               summary
-		pre_maintenance_stops: pre_maintenance_stops
+		summary:                 summary
+		pre_maintenance_stops:   pre_maintenance_stops
 		post_maintenance_starts: post_maintenance_starts
-		affected:              affected
+		affected:                affected
 	}
 }

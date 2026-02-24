@@ -18,8 +18,8 @@ import (
 
 // Analysis projections — all computed from the same graph
 validate: patterns.#ValidateGraph & {Input: _resources}
-metrics:  patterns.#GraphMetrics & {Graph: infra}
-spof:     patterns.#SinglePointsOfFailure & {Graph: infra}
+metrics: patterns.#GraphMetrics & {Graph: infra}
+spof: patterns.#SinglePointsOfFailure & {Graph: infra}
 
 // Output summary
 output: {

@@ -11,10 +11,10 @@ import "list"
 //   cue export -e prometheus.targets --out json > targets.json
 #PrometheusTargets: {
 	Resources: [string]: {
-		ip?:   string
+		ip?: string
 		tags?: {[string]: true}
-		host?: string
-		node?: string
+		host?:       string
+		node?:       string
 		owner?:      string
 		monitoring?: #MonitoringConfig
 		...

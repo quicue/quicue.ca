@@ -30,23 +30,23 @@ import (
 
 // #HydraOperation — a single executable operation on a resource.
 #HydraOperation: {
-	"@type":               "hydra:Operation"
-	"hydra:method":        "GET"
-	"hydra:title":         string
-	"rdfs:comment":        string
-	"hydra:returns":       "quicue:ActionResult"
-	"quicue:provider":     string
-	"quicue:action":       string
-	"quicue:category":     string
-	"quicue:idempotent":   bool | *false
-	"quicue:destructive":  bool | *false
-	"quicue:command"?:     string
+	"@type":              "hydra:Operation"
+	"hydra:method":       "GET"
+	"hydra:title":        string
+	"rdfs:comment":       string
+	"hydra:returns":      "quicue:ActionResult"
+	"quicue:provider":    string
+	"quicue:action":      string
+	"quicue:category":    string
+	"quicue:idempotent":  bool | *false
+	"quicue:destructive": bool | *false
+	"quicue:command"?:    string
 }
 
 // #HydraSupportedProperty — a property descriptor for a resource field.
 #HydraSupportedProperty: {
-	"@type":           "hydra:SupportedProperty"
-	"hydra:property":  string | {...}
+	"@type": "hydra:SupportedProperty"
+	"hydra:property": string | {...}
 	"hydra:title":     string
 	"hydra:required":  bool | *false
 	"hydra:readable":  bool | *true
@@ -64,11 +64,11 @@ import (
 
 // #HydraClass — a resource with its operations and navigation links.
 #HydraClass: {
-	"@id":                         string
-	"@type":                       "hydra:Class"
-	"rdfs:label":                  string
-	"hydra:supportedOperation":    [...#HydraOperation]
-	"hydra:supportedProperty":     [...#HydraSupportedProperty]
+	"@id":        string
+	"@type":      "hydra:Class"
+	"rdfs:label": string
+	"hydra:supportedOperation": [...#HydraOperation]
+	"hydra:supportedProperty": [...#HydraSupportedProperty]
 }
 
 // _apiBase — canonical prefix for dereferenceable resource URLs.
@@ -77,7 +77,7 @@ _apiBase: "https://api.quicue.ca/api/v1/resources/"
 // #ApiDocumentation — generates Hydra JSON-LD from an #InteractionCtx.
 // This is the top-level export — a complete, self-describing API surface.
 #ApiDocumentation: {
-	ctx: _   // receives the #InteractionCtx
+	ctx: _ // receives the #InteractionCtx
 
 	doc: {
 		"@context": #HydraContext
@@ -102,11 +102,11 @@ _apiBase: "https://api.quicue.ca/api/v1/resources/"
 						for pname, pactions in rv.actions
 						for aname, act in pactions {
 							#HydraOperation & {
-								"hydra:title":        act.name
-								"rdfs:comment":       act.description
-								"quicue:provider":    pname
-								"quicue:action":      aname
-								"quicue:category":    act.category
+								"hydra:title":     act.name
+								"rdfs:comment":    act.description
+								"quicue:provider": pname
+								"quicue:action":   aname
+								"quicue:category": act.category
 								if act.idempotent != _|_ {
 									"quicue:idempotent": act.idempotent
 								}
@@ -173,8 +173,8 @@ _apiBase: "https://api.quicue.ca/api/v1/resources/"
 		"@id":      "https://api.quicue.ca/api/v1/"
 
 		"hydra:collection": {
-			"@id":   "https://api.quicue.ca/api/v1/resources"
-			"@type": "hydra:Collection"
+			"@id":              "https://api.quicue.ca/api/v1/resources"
+			"@type":            "hydra:Collection"
 			"hydra:totalItems": ctx.total_resources
 			"hydra:manages": {
 				"hydra:property": "rdf:type"
@@ -196,8 +196,8 @@ _apiBase: "https://api.quicue.ca/api/v1/resources/"
 		"hydra:totalItems": ctx.total_resources
 		"hydra:member": [
 			for rname, rv in ctx.view.resources {
-				"@id":   "\(_apiBase)\(rname)"
-				"@type": [ for t, _ in rv.resource."@type" {t}]
+				"@id": "\(_apiBase)\(rname)"
+				"@type": [for t, _ in rv.resource."@type" {t}]
 				"name": rname
 			},
 		]

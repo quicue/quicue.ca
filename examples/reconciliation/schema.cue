@@ -45,21 +45,21 @@ package reconciliation
 	_in_charlie: *false | true
 
 	// Source Alpha facts: hypervisor inventory (highest authority)
-	state?: string
-	cpus?:  int
+	state?:     string
+	cpus?:      int
 	memory_gb?: number
 	os?:        string
 	cluster?:   string
 	host?:      string
 
 	// Source Bravo facts: asset management / CMDB
-	asset_type?:     string
-	model?:          string
-	serial_number?:  string
-	location?:       string
-	rack?:           string
-	managed_by?:     string
-	bravo_status?:   string
+	asset_type?:    string
+	model?:         string
+	serial_number?: string
+	location?:      string
+	rack?:          string
+	managed_by?:    string
+	bravo_status?:  string
 
 	// Source Charlie facts: dependency graph / application inventory
 	urn?:              string

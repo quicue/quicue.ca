@@ -22,8 +22,8 @@ _exactly_one: {for k, v in vms
 		(!v._in_alpha && !v._in_bravo && v._in_charlie) {(k): true}}
 
 // Struct-as-set for missing counts (avoids incomplete list len())
-_not_alpha:   {for k, v in vms if !v._in_alpha {(k): true}}
-_not_bravo:   {for k, v in vms if !v._in_bravo {(k): true}}
+_not_alpha: {for k, v in vms if !v._in_alpha {(k): true}}
+_not_bravo: {for k, v in vms if !v._in_bravo {(k): true}}
 _not_charlie: {for k, v in vms if !v._in_charlie {(k): true}}
 
 gap_report: {

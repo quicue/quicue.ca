@@ -187,18 +187,18 @@ infra: patterns.#InfraGraph & {Input: _resources}
 validate: patterns.#ValidateGraph & {Input: _resources}
 
 // Impact queries for critical resources
-impact_docker:   patterns.#ImpactQuery & {Graph: infra, Target: "docker"}
+impact_docker: patterns.#ImpactQuery & {Graph: infra, Target: "docker"}
 impact_postgres: patterns.#ImpactQuery & {Graph: infra, Target: "postgres"}
-impact_traefik:  patterns.#ImpactQuery & {Graph: infra, Target: "traefik"}
+impact_traefik: patterns.#ImpactQuery & {Graph: infra, Target: "traefik"}
 
 // Risk analysis
 criticality: patterns.#CriticalityRank & {Graph: infra}
-deployment:  patterns.#DeploymentPlan & {Graph: infra}
-spof:        patterns.#SinglePointsOfFailure & {Graph: infra}
-metrics:     patterns.#GraphMetrics & {Graph: infra}
+deployment: patterns.#DeploymentPlan & {Graph: infra}
+spof: patterns.#SinglePointsOfFailure & {Graph: infra}
+metrics: patterns.#GraphMetrics & {Graph: infra}
 
 // Blast radius
-blast_docker:   patterns.#BlastRadius & {Graph: infra, Target: "docker"}
+blast_docker: patterns.#BlastRadius & {Graph: infra, Target: "docker"}
 blast_postgres: patterns.#BlastRadius & {Graph: infra, Target: "postgres"}
 
 // Health simulation: what happens when the database goes down?
@@ -208,7 +208,7 @@ health_postgres_down: patterns.#HealthStatus & {
 }
 
 // Dependency chains
-chain_runner:  patterns.#DependencyChain & {Graph: infra, Target: "runner"}
+chain_runner: patterns.#DependencyChain & {Graph: infra, Target: "runner"}
 chain_grafana: patterns.#DependencyChain & {Graph: infra, Target: "grafana"}
 
 // Sort criticality by dependents
@@ -310,9 +310,9 @@ jsonld: {
 
 	"@graph": [
 		for _, r in _resources {{
-			"@id":   r."@id"
+			"@id": r."@id"
 			"@type": [for t, _ in r."@type" {t}]
-			name:    r.name
+			name: r.name
 			if r.ip != _|_ {ip: r.ip}
 			if r.description != _|_ {description: r.description}
 			if r.depends_on != _|_ {depends_on: [for d, _ in r.depends_on {d}]}

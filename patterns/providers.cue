@@ -19,17 +19,18 @@
 
 package patterns
 
-import "quicue.ca/vocab"
+import ( "quicue.ca/vocab"
 
-// ============================================================================
-// ACTION TEMPLATES - Generic parameterized actions
-// ============================================================================
+	// ============================================================================
+	// ACTION TEMPLATES - Generic parameterized actions
+	// ============================================================================
+)
 
 // #ActionTemplates - UPPERCASE params for cross-package visibility
 // Uses defaults (*value) to allow overrides
 #ActionTemplates: {
 	info: vocab.#Action & {
-		Name: string
+		Name:        string
 		name:        *"Info" | string
 		description: *"Show resource \(Name) information" | string
 		command:     *"echo 'Resource: \(Name)'" | string
@@ -37,7 +38,7 @@ import "quicue.ca/vocab"
 	}
 
 	ping: vocab.#Action & {
-		IP: string
+		IP:          string
 		name:        *"Ping" | string
 		description: *"Test network connectivity to \(IP)" | string
 		command:     *"ping -c 3 \(IP)" | string
@@ -46,8 +47,8 @@ import "quicue.ca/vocab"
 	}
 
 	ssh: vocab.#Action & {
-		IP:   string
-		User: string
+		IP:          string
+		User:        string
 		name:        *"SSH" | string
 		description: *"SSH to \(User)@\(IP)" | string
 		command:     *"ssh \(User)@\(IP)" | string
@@ -56,8 +57,8 @@ import "quicue.ca/vocab"
 
 	// LXC container actions
 	pct_status: vocab.#Action & {
-		LXCID: int
-		Node:  string
+		LXCID:       int
+		Node:        string
 		name:        *"Container Status" | string
 		description: *"Check LXC \(LXCID) status on \(Node)" | string
 		command:     *"ssh \(Node) 'pct status \(LXCID)'" | string
@@ -66,8 +67,8 @@ import "quicue.ca/vocab"
 	}
 
 	pct_console: vocab.#Action & {
-		LXCID: int
-		Node:  string
+		LXCID:       int
+		Node:        string
 		name:        *"Console" | string
 		description: *"Attach to LXC \(LXCID) console" | string
 		command:     *"ssh -t \(Node) 'pct enter \(LXCID)'" | string
@@ -76,8 +77,8 @@ import "quicue.ca/vocab"
 
 	// Docker host actions
 	docker_ps: vocab.#Action & {
-		IP:   string
-		User: string
+		IP:          string
+		User:        string
 		name:        *"Docker Containers" | string
 		description: *"List running containers on \(IP)" | string
 		command:     *"ssh \(User)@\(IP) 'docker ps --format \"table {{.Names}}\t{{.Status}}\t{{.Ports}}\"'" | string
@@ -86,8 +87,8 @@ import "quicue.ca/vocab"
 	}
 
 	disk_usage: vocab.#Action & {
-		IP:   string
-		User: string
+		IP:          string
+		User:        string
 		name:        *"Disk Usage" | string
 		description: *"Check disk usage on \(IP)" | string
 		command:     *"ssh \(User)@\(IP) 'df -h'" | string

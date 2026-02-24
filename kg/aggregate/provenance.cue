@@ -34,9 +34,9 @@ package aggregate
 		"@graph": [
 			// Decisions as prov:Activity — the act of making a decision
 			for id, d in index.decisions {
-				"@id":       "kg:\(id)"
-				"@type":     ["prov:Activity", "kg:Decision"]
-				"rdfs:label": d.title
+				"@id": "kg:\(id)"
+				"@type": ["prov:Activity", "kg:Decision"]
+				"rdfs:label":         d.title
 				"prov:startedAtTime": d.date
 				"prov:wasAssociatedWith": {
 					"@type":      "prov:Agent"
@@ -44,8 +44,8 @@ package aggregate
 				}
 				"dcterms:description": d.context
 				"prov:generated": {
-					"@id":   "kg:\(id)/outcome"
-					"@type": "prov:Entity"
+					"@id":        "kg:\(id)/outcome"
+					"@type":      "prov:Entity"
 					"rdfs:label": d.decision
 					"prov:wasGeneratedBy": {"@id": "kg:\(id)"}
 					"dcterms:description": d.rationale
@@ -60,12 +60,12 @@ package aggregate
 
 			// Insights as prov:Entity — discovered knowledge
 			for id, ins in index.insights {
-				"@id":       "kg:\(id)"
-				"@type":     ["prov:Entity", "kg:Insight"]
+				"@id": "kg:\(id)"
+				"@type": ["prov:Entity", "kg:Insight"]
 				"rdfs:label": ins.statement
 				"prov:wasGeneratedBy": {
-					"@type":      "prov:Activity"
-					"rdfs:label": "Discovery via \(ins.method)"
+					"@type":              "prov:Activity"
+					"rdfs:label":         "Discovery via \(ins.method)"
 					"prov:startedAtTime": ins.discovered
 				}
 				"kg:confidence": ins.confidence
@@ -73,10 +73,10 @@ package aggregate
 
 			// Source files as prov:Entity — raw data artifacts
 			if index.sources != _|_ for id, src in index.sources {
-				"@id":   "kg:\(id)"
+				"@id": "kg:\(id)"
 				"@type": ["prov:Entity", "kg:SourceFile"]
-				"rdfs:label": src.file
-				"kg:origin":  src.origin
+				"rdfs:label":     src.file
+				"kg:origin":      src.origin
 				"dcterms:format": src.format
 				if src.sha256 != _|_ {
 					"kg:sha256": src.sha256
@@ -97,14 +97,14 @@ package aggregate
 
 			// Collection protocols as prov:Plan — standing procedures
 			if index.protocols != _|_ for id, proto in index.protocols {
-				"@id":   "kg:\(id)"
+				"@id": "kg:\(id)"
 				"@type": ["prov:Plan", "kg:CollectionProtocol"]
-				"rdfs:label": proto.name
+				"rdfs:label":          proto.name
 				"dcterms:description": proto.description
-				"kg:system":    proto.system
-				"kg:method":    proto.method
-				"kg:schedule":  proto.schedule
-				"kg:authority": proto.authority
+				"kg:system":           proto.system
+				"kg:method":           proto.method
+				"kg:schedule":         proto.schedule
+				"kg:authority":        proto.authority
 				if proto.endpoint != _|_ {
 					"kg:endpoint": proto.endpoint
 				}
@@ -115,9 +115,9 @@ package aggregate
 
 			// Pipeline runs as prov:Activity — execution events
 			if index.runs != _|_ for id, run in index.runs {
-				"@id":   "kg:\(id)"
+				"@id": "kg:\(id)"
 				"@type": ["prov:Activity", "kg:PipelineRun"]
-				"rdfs:label": run.description
+				"rdfs:label":         run.description
 				"prov:startedAtTime": run.started_at
 				if run.ended_at != _|_ {
 					"prov:endedAtTime": run.ended_at
@@ -129,6 +129,7 @@ package aggregate
 				if run.git_commit != _|_ {
 					"kg:gitCommit": run.git_commit
 				}
+
 				// Link to consumed sources
 				"prov:used": [for srcId in run.sources_used {{"@id": "kg:\(srcId)"}}]
 				// Link to produced outputs
@@ -142,9 +143,9 @@ package aggregate
 
 			// Derivations as prov:Activity — pipeline audit trail
 			if index.derivations != _|_ for id, d in index.derivations {
-				"@id":   "kg:\(id)"
+				"@id": "kg:\(id)"
 				"@type": ["prov:Activity", "kg:Derivation"]
-				"rdfs:label": d.description
+				"rdfs:label":         d.description
 				"prov:startedAtTime": d.date
 				"prov:wasAssociatedWith": {
 					"@type":      "prov:SoftwareAgent"

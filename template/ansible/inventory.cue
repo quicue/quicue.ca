@@ -10,17 +10,17 @@ package ansible
 //   cue export -e inventory.all --out yaml
 #AnsibleInventory: {
 	Resources: [string]: {
-		ip?:           string
-		ssh_user?:     string
-		user?:         string
-		ssh_port?:     int
-		tags?:         {[string]: true}
-		vm_id?:        int
-		vmid?:         int
-		container_id?: int
-		host?:         string
-		node?:         string
-		owner?:        string
+		ip?:       string
+		ssh_user?: string
+		user?:     string
+		ssh_port?: int
+		tags?: {[string]: true}
+		vm_id?:                      int
+		vmid?:                       int
+		container_id?:               int
+		host?:                       string
+		node?:                       string
+		owner?:                      string
 		ansible_become?:             bool
 		ansible_python_interpreter?: string
 		...

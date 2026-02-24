@@ -32,9 +32,9 @@ import "quicue.ca/vocab"
 	Resources: [string]: {...}
 
 	// Event metadata
-	Timestamp:     string // ISO 8601
-	EventID:       string // IRI for this event page
-	StreamID:      string // IRI for the stream root
+	Timestamp:     string       // ISO 8601
+	EventID:       string       // IRI for this event page
+	StreamID:      string       // IRI for the stream root
 	PreviousEvent: string | *"" // IRI of previous event (empty for first)
 
 	event: {
@@ -49,8 +49,8 @@ import "quicue.ca/vocab"
 		// Relation to previous event (temporal navigation)
 		if PreviousEvent != "" {
 			"tree:relation": [{
-				"@type":      "tree:LessThanRelation"
-				"tree:node":  {"@id": PreviousEvent}
+				"@type": "tree:LessThanRelation"
+				"tree:node": {"@id": PreviousEvent}
 				"tree:path":  "dct:issued"
 				"tree:value": Timestamp
 			}]
@@ -91,8 +91,8 @@ import "quicue.ca/vocab"
 		"@id":      StreamID
 		"@type":    "ldes:EventStream"
 
-		"dct:title":          Description
-		"tree:view":          {"@id": LatestEvent}
+		"dct:title": Description
+		"tree:view": {"@id": LatestEvent}
 		"ldes:versionOfPath": "dct:isVersionOf"
 		"ldes:timestampPath": "dct:issued"
 	}

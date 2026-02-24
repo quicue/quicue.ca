@@ -19,76 +19,75 @@ import (
 _tasks: {
 	// ── Done (anchors for dependency edges) ───────────────────────
 	"safeid-propagation": {
-		name:        "safeid-propagation"
-		"@type":     {Security: true}
+		name: "safeid-propagation"
+		"@type": {Security: true}
 		description: "Propagate #SafeID/#SafeLabel from apercue.ca to all quicue.ca surfaces"
 	}
 	"kb-entries": {
-		name:        "kb-entries"
-		"@type":     {Documentation: true}
+		name: "kb-entries"
+		"@type": {Documentation: true}
 		description: "ADR-014, INSIGHT-012, ASCII-Safe Identifiers pattern in .kb/"
-		depends_on:  {"safeid-propagation": true}
+		depends_on: {"safeid-propagation": true}
 	}
 	"docs-security": {
-		name:        "docs-security"
-		"@type":     {Documentation: true}
+		name: "docs-security"
+		"@type": {Documentation: true}
 		description: "Security sections in README, architecture.md, patterns.md, index.md"
-		depends_on:  {"safeid-propagation": true}
+		depends_on: {"safeid-propagation": true}
 	}
 	"cross-links": {
-		name:        "cross-links"
-		"@type":     {Documentation: true}
+		name: "cross-links"
+		"@type": {Documentation: true}
 		description: "Ecosystem cross-links in README (Foundation section), org profile"
-		depends_on:  {"docs-security": true}
+		depends_on: {"docs-security": true}
 	}
 
 	// ── Remaining: Projection Completeness ────────────────────────
 	"specs-registry": {
-		name:        "specs-registry"
-		"@type":     {Schema: true, Projection: true}
+		name: "specs-registry"
+		"@type": {Schema: true, Projection: true}
 		description: "W3C + provider spec coverage as structured CUE (single source for README, site, spec)"
-		depends_on:  {"safeid-propagation": true}
+		depends_on: {"safeid-propagation": true}
 	}
 	"api-regen": {
-		name:        "api-regen"
-		"@type":     {CI: true}
+		name: "api-regen"
+		"@type": {CI: true}
 		description: "Regenerate static API (727 endpoints) with SafeID-constrained data"
-		depends_on:  {"safeid-propagation": true}
+		depends_on: {"safeid-propagation": true}
 	}
 	"demo-regen": {
-		name:        "demo-regen"
-		"@type":     {CI: true}
+		name: "demo-regen"
+		"@type": {CI: true}
 		description: "Regenerate demo.quicue.ca D3 dashboard data with latest patterns"
-		depends_on:  {"api-regen": true}
+		depends_on: {"api-regen": true}
 	}
-
 
 	// ── Remaining: CI ─────────────────────────────────────────────
 	"ci-workflow": {
-		name:        "ci-workflow"
-		"@type":     {CI: true}
+		name: "ci-workflow"
+		"@type": {CI: true}
 		description: "GitHub Actions: cue vet all packages, examples, templates, .kb/"
-		depends_on:  {"safeid-propagation": true}
+		depends_on: {"safeid-propagation": true}
 	}
 	"ci-ip-check": {
-		name:        "ci-ip-check"
-		"@type":     {CI: true, Security: true}
+		name: "ci-ip-check"
+		"@type": {CI: true, Security: true}
 		description: "CI step: verify no RFC 1918 IPs in generated artifacts"
-		depends_on:  {"ci-workflow": true}
+		depends_on: {"ci-workflow": true}
 	}
 
 	// ── Remaining: Import apercue.ca ──────────────────────────────
 	"apercue-import": {
-		name:        "apercue-import"
-		"@type":     {Schema: true}
+		name: "apercue-import"
+		"@type": {Schema: true}
 		description: "Import apercue.ca generic patterns, retire quicue.ca duplicates"
-		depends_on:  {"safeid-propagation": true}
+		depends_on: {"safeid-propagation": true}
 	}
 	"charter-alignment": {
-		name:        "charter-alignment"
-		"@type":     {Schema: true}
+		name: "charter-alignment"
+		"@type": {Schema: true}
 		description: "Align quicue.ca charter/ with apercue.ca charter/ (shared #Charter, #GapAnalysis)"
-		depends_on:  {"apercue-import": true}
+		depends_on: {"apercue-import": true}
 	}
 }
 
@@ -153,8 +152,8 @@ _charter: charter.#Charter & {
 			phase:       4
 			description: "quicue.ca imports apercue.ca, shared patterns deduplicated"
 			requires: {
-				"apercue-import":     true
-				"charter-alignment":  true
+				"apercue-import":    true
+				"charter-alignment": true
 			}
 			depends_on: {"projections-refreshed": true, "ci-hardened": true}
 		}

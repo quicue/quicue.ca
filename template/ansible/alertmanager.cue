@@ -14,7 +14,7 @@ package ansible
 	Resources: [string]: {
 		owner?:    string
 		severity?: string
-		tags?:     {[string]: true}
+		tags?: {[string]: true}
 		...
 	}
 
@@ -28,10 +28,10 @@ package ansible
 	DefaultReceiver: string | *"default-receiver"
 
 	// Group settings
-	GroupBy:         [...string] | *["alertname", "instance"]
-	GroupWait:       string | *"30s"
-	GroupInterval:   string | *"5m"
-	RepeatInterval:  string | *"4h"
+	GroupBy: [...string] | *["alertname", "instance"]
+	GroupWait:      string | *"30s"
+	GroupInterval:  string | *"5m"
+	RepeatInterval: string | *"4h"
 
 	// Tag name that identifies critical resources
 	CriticalTag: string | *"CriticalInfra"

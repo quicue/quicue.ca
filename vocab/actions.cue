@@ -169,7 +169,7 @@ package vocab
 		description: "Open SSH session"
 		category:    "connect"
 		params: {
-			ip:   {type: "string", from_field: "ip"}
+			ip: {type: "string", from_field: "ip"}
 			user: {type: "string", from_field: "ssh_user", required: false}
 		}
 		command_template: "ssh {user}@{ip}"
@@ -206,7 +206,7 @@ package vocab
 		description: "Get container status"
 		category:    "info"
 		params: {
-			host:         {type: "string", from_field: "host"}
+			host: {type: "string", from_field: "host"}
 			container_id: {type: "int", from_field: "container_id"}
 		}
 		command_template: "pct status {container_id}" // Provider overrides
@@ -218,7 +218,7 @@ package vocab
 		description: "Open container console"
 		category:    "connect"
 		params: {
-			host:         {type: "string", from_field: "host"}
+			host: {type: "string", from_field: "host"}
 			container_id: {type: "int", from_field: "container_id"}
 		}
 		command_template: "pct enter {container_id}"
@@ -229,7 +229,7 @@ package vocab
 		description: "View container logs"
 		category:    "info"
 		params: {
-			host:         {type: "string", from_field: "host"}
+			host: {type: "string", from_field: "host"}
 			container_id: {type: "int", from_field: "container_id"}
 		}
 		command_template: "pct exec {container_id} -- journalctl -n 100"
@@ -243,7 +243,7 @@ package vocab
 		description: "List virtual machines on node"
 		category:    "info"
 		params: {
-			ip:   {type: "string", from_field: "ip"}
+			ip: {type: "string", from_field: "ip"}
 			user: {type: "string", from_field: "ssh_user"}
 		}
 		command_template: "ssh {user}@{ip} 'qm list'"
@@ -255,7 +255,7 @@ package vocab
 		description: "List containers on node"
 		category:    "info"
 		params: {
-			ip:   {type: "string", from_field: "ip"}
+			ip: {type: "string", from_field: "ip"}
 			user: {type: "string", from_field: "ssh_user"}
 		}
 		command_template: "ssh {user}@{ip} 'pct list'"
@@ -267,7 +267,7 @@ package vocab
 		description: "Get hypervisor node status"
 		category:    "info"
 		params: {
-			ip:   {type: "string", from_field: "ip"}
+			ip: {type: "string", from_field: "ip"}
 			user: {type: "string", from_field: "ssh_user"}
 		}
 		command_template: "ssh {user}@{ip} 'pvesh get /nodes/localhost/status'"

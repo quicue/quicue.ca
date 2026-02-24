@@ -120,8 +120,8 @@ import "strings"
 	program: _facts + "\n\n" + _rules
 
 	summary: {
-		total_facts: len(index.decisions) + len(index.insights) + len(index.patterns) + _source_count + _protocol_count + _run_count + _deriv_count
-		total_rules: 6
+		total_facts:     len(index.decisions) + len(index.insights) + len(index.patterns) + _source_count + _protocol_count + _run_count + _deriv_count
+		total_rules:     6
 		_source_count:   *0 | int
 		_protocol_count: *0 | int
 		_run_count:      *0 | int

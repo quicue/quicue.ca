@@ -25,12 +25,12 @@ import (
 		resources: [string]: {
 			name: string
 			"@type": {[string]: true}
-			_depth:     int
+			_depth: int
 			_ancestors: {[string]: bool}
 			depends_on?: {[string]: true}
 			...
 		}
-		roots:  [...string]
+		roots: [...string]
 		leaves: [...string]
 		...
 	}
@@ -103,11 +103,11 @@ import (
 	// Summary
 	_impactCounts: [for i in impacts {i.affected_count}]
 	summary: {
-		changed_count:     len(ChangedResources)
-		total_affected:    len([for _, _ in _allAffected {1}])
+		changed_count: len(ChangedResources)
+		total_affected: len([for _, _ in _allAffected {1}])
 		max_single_impact: [if len(_impactCounts) > 0 {list.Max(_impactCounts)}, 0][0]
-		critical_count:    len([for i in impacts if i.risk == "critical" {1}])
-		high_risk_count:   len([for i in impacts if i.risk == "high" {1}])
+		critical_count: len([for i in impacts if i.risk == "critical" {1}])
+		high_risk_count: len([for i in impacts if i.risk == "high" {1}])
 	}
 
 	// Overall risk assessment
@@ -199,7 +199,7 @@ import (
 		resources: [string]: {
 			name: string
 			"@type": {[string]: true}
-			_depth:     int
+			_depth: int
 			_ancestors: {[string]: bool}
 			depends_on?: {[string]: true}
 			...
@@ -266,9 +266,9 @@ import (
 
 	// Summary
 	summary: {
-		target:          Target
-		target_depth:    _targetDepth
-		affected_count:  len(affected)
+		target:         Target
+		target_depth:   _targetDepth
+		affected_count: len(affected)
 		layers_affected: len([for _, _ in affected_by_layer {1}])
 		rollback_steps:  len(rollback_order)
 		safe_peer_count: len(safe_peers)
@@ -357,13 +357,13 @@ import (
 
 	// JSON output
 	json: {
-		target:          Target
-		summary:         summary
-		risk:            risk
-		affected:        affected
-		rollback_order:  rollback_order
-		startup_order:   startup_order
-		safe_peers:      safe_peers
+		target:         Target
+		summary:        summary
+		risk:           risk
+		affected:       affected
+		rollback_order: rollback_order
+		startup_order:  startup_order
+		safe_peers:     safe_peers
 		affected_by_layer: {
 			for layer, members in affected_by_layer {
 				(layer): [for m, _ in members {m}]
@@ -378,7 +378,7 @@ import (
 		resources: [string]: {
 			name: string
 			"@type": {[string]: true}
-			_depth:     int
+			_depth: int
 			_ancestors: {[string]: bool}
 			...
 		}
@@ -409,10 +409,10 @@ import (
 
 	// Categorize by criticality
 	critical: [for r in ranked if r.dependents > 10 {r}]
-	high:     [for r in ranked if r.dependents > 5 && r.dependents <= 10 {r}]
-	medium:   [for r in ranked if r.dependents > 2 && r.dependents <= 5 {r}]
-	low:      [for r in ranked if r.dependents > 0 && r.dependents <= 2 {r}]
-	leaf:     [for r in ranked if r.dependents == 0 {r}]
+	high: [for r in ranked if r.dependents > 5 && r.dependents <= 10 {r}]
+	medium: [for r in ranked if r.dependents > 2 && r.dependents <= 5 {r}]
+	low: [for r in ranked if r.dependents > 0 && r.dependents <= 2 {r}]
+	leaf: [for r in ranked if r.dependents == 0 {r}]
 
 	summary: {
 		total:          len(ranked)

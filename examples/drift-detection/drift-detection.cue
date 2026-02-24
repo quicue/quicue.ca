@@ -96,7 +96,7 @@ output: {
 
 	// Docker probe commands (would be executed to detect drift)
 	docker_probes: {
-		grafana: _docker_probes.checks["mon-grafana"].check_exists
+		grafana:  _docker_probes.checks["mon-grafana"].check_exists
 		postgres: _docker_probes.checks["mon-postgres"].check_status
 	}
 }

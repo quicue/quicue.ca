@@ -12,20 +12,20 @@ package terraform
 
 // Memory lookup table: human-readable → MB
 _memoryMB: {
-	"256Mi":  256
-	"512Mi":  512
-	"768Mi":  768
-	"1Gi":    1024
-	"2Gi":    2048
-	"4Gi":    4096
-	"8Gi":    8192
-	"16Gi":   16384
-	"32Gi":   32768
-	"64Gi":   65536
-	"128Gi":  131072
-	"256Gi":  262144
-	"384Gi":  393216
-	"512Gi":  524288
+	"256Mi": 256
+	"512Mi": 512
+	"768Mi": 768
+	"1Gi":   1024
+	"2Gi":   2048
+	"4Gi":   4096
+	"8Gi":   8192
+	"16Gi":  16384
+	"32Gi":  32768
+	"64Gi":  65536
+	"128Gi": 131072
+	"256Gi": 262144
+	"384Gi": 393216
+	"512Gi": 524288
 }
 
 // Disk lookup table: human-readable → GB
@@ -95,7 +95,7 @@ _diskGB: {
 
 // #CloudInit - Cloud-init provisioning configuration
 #CloudInit: {
-	user?:     string
+	user?: string
 	ssh_keys?: [...string]
 	password?: string
 
@@ -104,7 +104,7 @@ _diskGB: {
 	gateway?: string
 
 	// DNS
-	dns_domain?:  string
+	dns_domain?: string
 	dns_servers?: [...string]
 
 	// Custom snippets
@@ -122,7 +122,7 @@ _diskGB: {
 //   terraform plan
 #TerraformOutput: {
 	Resources: [string]: #Compute
-	Config?:   #TerraformConfig
+	Config?: #TerraformConfig
 
 	// Filter by platform
 	_forProxmox: {
@@ -144,7 +144,7 @@ _diskGB: {
 	}
 
 	// Generate platform-specific Terraform blocks
-	_proxmox:  _proxmoxTerraform & {_input: _forProxmox}
+	_proxmox: _proxmoxTerraform & {_input: _forProxmox}
 	_kubevirt: _kubevirtTerraform & {_input: _forKubeVirt}
 
 	// Generate terraform/provider blocks from Config
@@ -234,10 +234,10 @@ _diskGB: {
 	proxmox_only: [for name, r in Resources if r.proxmox != _|_ if r.kubevirt == _|_ {name}]
 	kubevirt_only: [for name, r in Resources if r.kubevirt != _|_ if r.proxmox == _|_ {name}]
 	summary: {
-		proxmox:       len([for name, r in Resources if r.proxmox != _|_ {name}])
-		kubevirt:      len([for name, r in Resources if r.kubevirt != _|_ {name}])
-		mirrored:      len([for name, r in Resources if r.proxmox != _|_ if r.kubevirt != _|_ {name}])
-		proxmox_only:  len([for name, r in Resources if r.proxmox != _|_ if r.kubevirt == _|_ {name}])
+		proxmox: len([for name, r in Resources if r.proxmox != _|_ {name}])
+		kubevirt: len([for name, r in Resources if r.kubevirt != _|_ {name}])
+		mirrored: len([for name, r in Resources if r.proxmox != _|_ if r.kubevirt != _|_ {name}])
+		proxmox_only: len([for name, r in Resources if r.proxmox != _|_ if r.kubevirt == _|_ {name}])
 		kubevirt_only: len([for name, r in Resources if r.kubevirt != _|_ if r.proxmox == _|_ {name}])
 	}
 }

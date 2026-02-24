@@ -16,12 +16,12 @@ package vocab
 
 // #VizNode - Minimal node representation for all visualization tools
 #VizNode: {
-	id:         #SafeID
-	name:       #SafeID
-	types:      [...#SafeLabel]  // Flattened from @type struct
-	depth:      int
-	ancestors:  [...#SafeID]
-	dependents: int              // Count, not list
+	id:   #SafeID
+	name: #SafeID
+	types: [...#SafeLabel] // Flattened from @type struct
+	depth:                 int
+	ancestors: [...#SafeID]
+	dependents: int // Count, not list
 
 	// Optional fields (present if resource has them)
 	ip?:           string
@@ -32,17 +32,17 @@ package vocab
 
 // #VizEdge - Dependency edge
 #VizEdge: {
-	source: #SafeID  // Resource name
-	target: #SafeID  // Resource name (depends on source)
+	source: #SafeID // Resource name
+	target: #SafeID // Resource name (depends on source)
 }
 
 // #VizData - Complete visualization payload
 #VizData: {
-	nodes:    [...#VizNode]
-	edges:    [...#VizEdge]
-	topology: [string]: [...string]  // layer_N: [resource names]
-	roots:    [...string]
-	leaves:   [...string]
+	nodes: [...#VizNode]
+	edges: [...#VizEdge]
+	topology: [string]: [...string] // layer_N: [resource names]
+	roots: [...string]
+	leaves: [...string]
 	metrics: {
 		total:    int
 		maxDepth: int

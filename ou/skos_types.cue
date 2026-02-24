@@ -20,8 +20,8 @@ import "quicue.ca/vocab"
 			"quicue": BaseIRI
 			"rdfs":   "http://www.w3.org/2000/01/rdf-schema#"
 		}
-		"@type": "skos:ConceptScheme"
-		"@id":   "\(BaseIRI)types"
+		"@type":          "skos:ConceptScheme"
+		"@id":            "\(BaseIRI)types"
 		"skos:prefLabel": "quicue.ca Infrastructure Type Vocabulary"
 
 		"skos:hasTopConcept": [
@@ -35,7 +35,7 @@ import "quicue.ca/vocab"
 					"quicue:grants": tentry.grants
 				}
 				if tentry.requires != _|_ {
-					"quicue:requires": [ for f, _ in tentry.requires {f}]
+					"quicue:requires": [for f, _ in tentry.requires {f}]
 				}
 			},
 		]

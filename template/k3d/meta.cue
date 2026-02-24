@@ -8,7 +8,7 @@ match: vocab.#ProviderMatch & {
 }
 
 project: {
-    "@id": "https://quicue.ca/project/quicue-k3d"
-    description: "CUE patterns for k3d (Kubernetes in Docker) - local Kubernetes development clusters."
-    status: "active"
+	"@id":       "https://quicue.ca/project/quicue-k3d"
+	description: "CUE patterns for k3d (Kubernetes in Docker) - local Kubernetes development clusters."
+	status:      "active"
 }
