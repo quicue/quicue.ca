@@ -1,9 +1,17 @@
-# Templates
+# templates
 
-12 modules include 29 provider templates across 13 categories. Each template teaches the system how to manage a specific platform.
+29 platform-specific providers, each a self-contained CUE module
+
+| Field | Value |
+|-------|-------|
+| Path | `template/*/` |
+| Layer | `template` |
+| Status | active |
 
 ## Categories
 
+| Category | Entries |
+|----------|--------|
 | compute | `proxmox`, `govc`, `powercli`, `kubevirt` |
 | container | `docker`, `incus`, `k3d`, `kubectl`, `argocd` |
 | cicd | `dagger`, `gitlab` |
@@ -17,16 +25,6 @@
 | monitoring | `zabbix` |
 | iac | `terraform`, `opentofu` |
 | backup | `restic`, `pbs` |
-
-## Directory Structure
-
-```
-template/<name>/
-  meta/meta.cue          # Provider metadata and type matching
-  patterns/<name>.cue    # Action registry
-  examples/demo.cue      # Working example
-  README.md
-```
 
 ---
 *Generated from quicue.ca registries by `#DocsProjection`*

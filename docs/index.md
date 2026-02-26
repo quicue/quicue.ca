@@ -2,43 +2,56 @@
 
 Model it in CUE. Validate by unification. Export to whatever the world expects.
 
-## What this is
+## Overview
 
-You declare resources — nodes in a graph — with types and dependencies. CUE computes the rest: dependency layers, transitive closure, blast radius, deployment plans, linked data exports. The gap between your constraints and your data IS the remaining work. When `cue vet` passes, you're done.
-
-```cue
-dns: #Resource & {
-    "@type":     {LXCContainer: true, DNSServer: true}
-    depends_on:  {router: true}
-    host:        "node-1"
-    container_id: 101
-}
-```
-
-No runtime. No state file. No plugins. CUE validates everything simultaneously, and the output is plain JSON.
+| Metric | Count |
+|--------|-------|
+| Modules | 12 |
+| Decisions (ADRs) | 14 |
+| KB Patterns | 14 |
+| Insights | 14 |
+| Semantic Types | 57 |
+| Downstream Consumers | 3 |
+| Deployed Sites | 7 |
 
 ## Modules
 
-| Module | What it models | What it answers |
-|--------|---------------|-----------------|
-| **[quicue.ca/patterns](patterns.md)** | Resources, dependencies, operations | What exists? What depends on what? What breaks if X goes down? |
-| **[quicue.ca/charter](charter.md)** | Scope, gates, completion criteria | What does "done" look like? What's missing? What's next? |
-| **[quicue.ca/kg](knowledge-graph.md)** | Decisions, patterns, insights, rejected approaches | Why does it exist? What was decided? What failed? |
+| Module | Layer | Description |
+|--------|-------|-------------|
+| [vocab](modules/vocab.md) | `definition` | Core schemas: #Resource, #Action, #TypeRegistry, #ActionDef |
+| [patterns](modules/patterns.md) | `definition` | Algorithms: graph, bind, deploy, health, SPOF, viz, TOON, OpenAPI, validation |
+| [templates](modules/templates.md) | `template` | 29 platform-specific providers, each a self-contained CUE module |
+| [orche](modules/orche.md) | `orchestration` | Orchestration schemas: execution steps, federation, drift detection, Docker site bootstrap |
+| [boot](modules/boot.md) | `orchestration` | Bootstrap schemas: #BootstrapResource, #BootstrapPlan, credential collectors |
+| [wiki](modules/wiki.md) | `projection` | #WikiProjection — MkDocs site generation from resource graphs |
+| [cab](modules/cab.md) | `reporting` | Change Advisory Board reports: impact, blast radius, runbooks |
+| [ou](modules/ou.md) | `interaction` | Role-scoped views: #InteractionCtx narrows #ExecutionPlan by role, type, name, layer. Hydra W3C JSON-LD export. |
+| [ci](modules/ci.md) | `ci` | Reusable GitLab CI templates for CUE validation, export, topology, impact |
+| [server](modules/server.md) | `operations` | FastAPI execution gateway for running infrastructure commands |
+| [charter](modules/charter.md) | `constraint` | Constraint-first project planning: declare scope, evaluate gaps, track gates. SHACL gap report projection. |
+| [examples](modules/examples.md) | `value` | 17 working examples from minimal 3-layer to full 30-resource datacenter |
 
-All three export to [W3C linked data standards](linked-data.md) — JSON-LD, PROV-O, DCAT, SHACL, SKOS, and more. The infrastructure graph and the knowledge graph share a single IRI space.
+## Downstream Consumers
 
-## Not just infrastructure
+| Project | Domain | Patterns Used |
+|---------|--------|---------------|
+| [grdn](https://quicue.ca/project/grdn) | Production infrastructure graph — multi-node cluster with ZFS storage, networking, and container orchestration | 14 |
+| [cmhc-retrofit](https://quicue.ca/project/cmhc-retrofit) | Construction program management (NHCF deep retrofit, Greener Homes processing platform) | 15 |
+| [maison-613](https://rfam.cc/project/maison-613) | Real estate operations — 7 graphs (transaction, referral, compliance, listing, operations, onboarding, client) | 14 |
 
-The graph patterns are domain-agnostic. `#BlastRadius`, `#ImpactQuery`, `#SinglePointsOfFailure`, and `#DeploymentPlan` don't know what domain they're in. "What breaks if X goes down?" works whether X is a DNS server, a construction phase, or a research gene.
+## Ecosystem Sites
 
-| Domain | What the graph models | Live |
-|--------|----------------------|------|
-| IT infrastructure | 30 servers, containers, and services across 7 dependency layers | [datacenter example](example/index.md) |
-| Construction management | Deep retrofit work packages for 270-unit community housing program | [CMHC Retrofit](https://cmhc-retrofit.quicue.ca/) |
-| Energy efficiency | 17-service processing platform for Ontario Greener Homes | [Greener Homes](https://cmhc-retrofit.quicue.ca/#greener-homes) |
-| Real estate operations | Transaction pipelines, referral networks, compliance workflows | [maison-613](https://maison613.quicue.ca/) |
+| Site | Description |
+|------|-------------|
+| [docs](https://docs.quicue.ca) | MkDocs Material documentation site |
+| [demo](https://demo.quicue.ca) | Operator dashboard — D3 graph, planner, resource browser |
+| [api](https://api.quicue.ca) | Static API showcase — 727 pre-computed JSON endpoints |
+| [cat](https://cat.quicue.ca) | DCAT 3 data catalogue |
+| [kg](https://kg.quicue.ca) | Knowledge graph framework spec |
+| [cmhc-retrofit](https://cmhc-retrofit.quicue.ca) | Construction program management showcase |
+| [maison613](https://maison613.quicue.ca) | Real estate operations showcase |
 
-## Quick start
+## Quick Start
 
 ```bash
 git clone https://github.com/quicue/quicue.ca.git
@@ -47,77 +60,19 @@ cd quicue.ca
 # Validate schemas
 cue vet ./vocab/ ./patterns/
 
-# Run the datacenter example (30 resources, 29 providers, 654 resolved commands)
+# Run the datacenter example
 cue eval ./examples/datacenter/ -e output.summary
 
 # What breaks if the router goes down?
-cue eval ./examples/datacenter/ -e output.impact.\"router-core\"
+cue eval ./examples/datacenter/ -e output.impact."router-core"
 
 # Export as JSON-LD
 cue export ./examples/datacenter/ -e jsonld --out json
 ```
 
-## What it computes
-
-| Pattern | What it answers |
-|---------|-----------------|
-| `#InfraGraph` | Dependency layers, transitive closure, topology |
-| `#BindCluster` | Which providers match which resources, resolved commands |
-| `#ImpactQuery` | "What breaks if X goes down?" |
-| `#BlastRadius` | Change impact with rollback order |
-| `#SinglePointsOfFailure` | Resources with no redundancy |
-| `#HealthStatus` | Simulated failure propagation |
-| `#DeploymentPlan` | Ordered layers with gates |
-| `#ExecutionPlan` | All of the above, unified |
-| `#Charter` | What "done" looks like — scope, gates, completion |
-| `#GapAnalysis` | What's missing, what's next, which gates are satisfied |
-
-See the [Pattern Catalog](patterns.md) for the full list and [Charter](charter.md) for project planning.
-
-## Contract-via-unification
-
-Verification IS unification. You write CUE constraints that must merge with the computed graph. If they can't unify, `cue vet` rejects everything:
-
-```cue
-// This must merge with the computed graph output.
-// If docker isn't the root, or validation fails, cue vet rejects.
-validate: valid: true
-infra: roots: {"docker": true}
-deployment: layers: [{layer: 0, resources: ["docker"]}, ...]
-```
-
-No assertion framework. No test runner. The contract IS CUE values. Unification IS the enforcement.
-
-## Security: ASCII-safe identifiers
-
-All graph identifiers (`name`, `@type` keys, `depends_on` keys, `tags` keys) are constrained to ASCII via `#SafeID` and `#SafeLabel` regex patterns in `vocab/resource.cue`. This prevents unicode homoglyph attacks and zero-width character injection at compile time. See the [apercue.ca README](https://github.com/quicue/apercue#security-ascii-safe-identifiers) for the threat model.
-
-## Providers (29)
-
-| Category | Providers |
-|----------|-----------|
-| Compute | proxmox, govc, powercli, kubevirt |
-| Container/Orchestration | docker, incus, k3d, kubectl, argocd |
-| CI/CD | dagger, gitlab |
-| Networking | vyos, caddy, nginx |
-| DNS | cloudflare, powerdns, technitium |
-| Identity/Secrets | vault, keycloak |
-| Database | postgresql |
-| DCIM/IPAM | netbox |
-| Provisioning | foreman |
-| Automation | ansible, awx |
-| Monitoring | zabbix |
-| IaC | terraform, opentofu |
-| Backup | restic, pbs |
-
-Each provider is a CUE package under `template/` with type matching and action definitions. See the [Template Guide](templates.md).
-
-## Example output
-
-The datacenter example defines 30 resources across 7 dependency layers.
-
-**[See the generated datacenter deployment wiki →](example/index.md)**
-
 ## License
 
 Apache 2.0
+
+---
+*Generated from quicue.ca registries by `#DocsProjection`*

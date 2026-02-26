@@ -42,4 +42,54 @@ nav:
   - Linked Data: linked-data.md
   - Templates: templates.md
   - Federation: federation.md
+  - Modules:
+      - Overview: modules/index.md
+      - vocab: modules/vocab.md
+      - patterns: modules/patterns.md
+      - templates: modules/templates.md
+      - orche: modules/orche.md
+      - boot: modules/boot.md
+      - wiki: modules/wiki.md
+      - cab: modules/cab.md
+      - ou: modules/ou.md
+      - ci: modules/ci.md
+      - server: modules/server.md
+      - charter: modules/charter.md
+      - examples: modules/examples.md
+  - Decisions:
+      - Overview: decisions/index.md
+      - ADR-001: decisions/adr-001.md
+      - ADR-002: decisions/adr-002.md
+      - ADR-003: decisions/adr-003.md
+      - ADR-004: decisions/adr-004.md
+      - ADR-005: decisions/adr-005.md
+      - ADR-006: decisions/adr-006.md
+      - ADR-007: decisions/adr-007.md
+      - ADR-008: decisions/adr-008.md
+      - ADR-009: decisions/adr-009.md
+      - ADR-010: decisions/adr-010.md
+      - ADR-011: decisions/adr-011.md
+      - ADR-012: decisions/adr-012.md
+      - ADR-013: decisions/adr-013.md
+      - ADR-014: decisions/adr-014.md
+  - KB Patterns:
+      - Overview: patterns-kb/index.md
+      - Struct-as-Set: patterns-kb/struct-as-set.md
+      - Three-Layer Architecture: patterns-kb/three-layer-architecture.md
+      - Compile-Time Binding: patterns-kb/compile-time-binding.md
+      - Hidden Wrapper: patterns-kb/hidden-wrapper-for-exports.md
+      - Contract-via-Unification: patterns-kb/contract-via-unification.md
+      - Gap-as-Backlog: patterns-kb/gap-as-backlog.md
+      - Universe Cheat Sheet: patterns-kb/universe-cheat-sheet.md
+      - Safe Deploy: patterns-kb/safe-deploy-pipeline.md
+      - Hidden Intermediary: patterns-kb/hidden-intermediary-for-nested-structs.md
+      - Graph Projection: patterns-kb/graph-projection-from-existing-config.md
+      - Everything-is-a-Projection: patterns-kb/everything-is-a-projection.md
+      - Idempotent-by-Construction: patterns-kb/idempotent-by-construction.md
+      - Types-Compose: patterns-kb/types-compose-scripts-don't.md
+      - Static-First: patterns-kb/static-first.md
+      - Airgapped Bundle: patterns-kb/airgapped-bundle.md
+      - ASCII-Safe Identifiers: patterns-kb/ascii-safe-identifiers.md
+  - Insights: insights/index.md
+  - Type Registry: types/index.md
   - Example Output: example/index.md
