@@ -61,6 +61,31 @@ package vocab
 		structural_deps: ["host"]
 	}
 
+	DockerHost: {
+		description: "Docker daemon host"
+		requires: {
+			ip: string
+		}
+		grants: ["container_list", "image_list", "volume_list", "network_list"]
+	}
+
+	KubernetesService: {
+		description: "Kubernetes workload (Deployment, StatefulSet, Service)"
+		requires: {
+			name:      string
+			namespace: string
+		}
+		grants: ["pod_logs", "pod_describe", "service_status"]
+	}
+
+	VMwareCluster: {
+		description: "VMware vSphere / vCenter cluster"
+		requires: {
+			ip: string
+		}
+		grants: ["cluster_status", "vm_list", "datastore_status"]
+	}
+
 	// ========== Network Types ==========
 
 	Router: {
