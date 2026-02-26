@@ -53,6 +53,21 @@ jobs:
         with:
           version: v0.15.4
 
+      - name: Verify vendored dependencies
+        run: |
+          echo "Checking vendored apercue.ca..."
+          ls -la cue.mod/pkg/ || echo "No pkg dir"
+          # GitHub Actions may mangle @ in paths; ensure vendor dir exists
+          if [ ! -d "cue.mod/pkg/apercue.ca@v0" ]; then
+            echo "Vendor dir missing — attempting recovery from git"
+            git checkout -- 'cue.mod/pkg/apercue.ca@v0/' 2>/dev/null || true
+          fi
+          ls cue.mod/pkg/apercue.ca@v0/ || {
+            echo "ERROR: Vendored apercue.ca@v0 not found after recovery"
+            find cue.mod/pkg/ -maxdepth 2 -type f | head -10
+            exit 1
+          }
+
       - name: Validate core vocabulary
         run: cue vet ./vocab/ ./patterns/ ./charter/ -c
 
