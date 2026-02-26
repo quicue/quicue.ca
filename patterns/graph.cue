@@ -449,7 +449,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 	// Uses Graph.dependents (struct-as-set) for O(1) lookup
 	_nodes: [
 		for r in _export.resources {
-			let _directDeps = len([for k, _ in Graph.dependents[r.name] {k}])
+			let _directDeps = len([for rn, rx in Graph.resources if rx.depends_on != _|_ if rx.depends_on[r.name] != _|_ {rn}])
 			let _transitive = len([
 				for rname2, r2 in Graph.resources
 				if r2._ancestors[r.name] != _|_ && rname2 != r.name {rname2},
