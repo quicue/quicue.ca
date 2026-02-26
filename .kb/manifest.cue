@@ -36,5 +36,6 @@ kb: ext.#KnowledgeBase & {
 		patterns:  ext.#PatternsGraph
 		insights:  ext.#InsightsGraph
 		rejected:  ext.#RejectedGraph
+		tasks:     ext.#TasksGraph
 	}
 }

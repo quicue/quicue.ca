@@ -99,6 +99,13 @@ package ext
 	directory:   "derivations"
 }
 
+#TasksGraph: #Graph & {
+	kg_type:     "core.#Task"
+	semantic:    "schema:Action"
+	description: "Trackable work items with dependencies and KB references. Each task is a schema:Action with potentialAction edges."
+	directory:   "tasks"
+}
+
 #WorkspaceGraph: #Graph & {
 	kg_type:     "ext.#Workspace"
 	semantic:    "dcat:Dataset"
