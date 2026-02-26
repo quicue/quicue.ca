@@ -54,21 +54,36 @@ jobs:
           version: v0.15.4
 
       - name: Validate core vocabulary
-        run: cue vet ./vocab/ ./patterns/ ./charter/
+        run: cue vet ./vocab/ ./patterns/ ./charter/ -c
 
       - name: Validate all examples
         run: |
           for d in examples/*/; do
             echo "=== $(basename $d) ==="
-            cue vet "./$d"
+            cue vet "./$d" -c
           done
 
       - name: Validate all provider templates
         run: |
           for d in template/*/; do
             echo "=== $(basename $d) ==="
-            cue vet "./$d/..."
+            cue vet "./$d/..." -c
           done
+
+      - name: No hardcoded absolute paths in markdown
+        run: |
+          FOUND=0
+          for f in $(find . -name '*.md' -not -path './.git/*' -not -path '*/node_modules/*'); do
+            if grep -nE '(/home/|/Users/)' "$f"; then
+              echo "  ^ in $f"
+              FOUND=$((FOUND + 1))
+            fi
+          done
+          if [ "$FOUND" -gt 0 ]; then
+            echo "ERROR: $FOUND file(s) contain hardcoded absolute paths"
+            exit 1
+          fi
+          echo "No hardcoded absolute paths found"
 
   binding:
     runs-on: ubuntu-latest
