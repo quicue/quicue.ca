@@ -55,16 +55,27 @@ jobs:
         with:
           version: v0.15.4
 
-      - name: Ensure vendored deps resolve
+      - name: Populate CUE module cache from vendored deps
         run: |
-          # CUE v0.15 vendor resolution may look for either apercue.ca@v0/ or apercue.ca/
-          # Ensure both exist so resolution works regardless of CUE's lookup strategy
-          if [ -d "cue.mod/pkg/apercue.ca@v0" ] && [ ! -d "cue.mod/pkg/apercue.ca" ]; then
-            cp -r "cue.mod/pkg/apercue.ca@v0" "cue.mod/pkg/apercue.ca"
-          elif [ -d "cue.mod/pkg/apercue.ca" ] && [ ! -d "cue.mod/pkg/apercue.ca@v0" ]; then
-            cp -r "cue.mod/pkg/apercue.ca" "cue.mod/pkg/apercue.ca@v0"
+          # CUE v0.15 resolves declared deps from ~/.cache/cue/mod/, not cue.mod/pkg/.
+          # cue.mod/pkg/ is for manually vendored packages without a deps declaration.
+          # Since apercue.ca isn't published to a CUE registry, we populate the cache
+          # from the vendored copy checked into the repo.
+          cache_dir="$HOME/.cache/cue/mod/extract/apercue.ca@v0.0.1"
+          mkdir -p "$cache_dir"
+          if [ -d "cue.mod/pkg/apercue.ca@v0" ]; then
+            cp -r cue.mod/pkg/apercue.ca@v0/* "$cache_dir/"
+            # CUE needs a module.cue in the cached module root
+            if [ ! -f "$cache_dir/cue.mod/module.cue" ]; then
+              mkdir -p "$cache_dir/cue.mod"
+              cat > "$cache_dir/cue.mod/module.cue" << 'MODEOF'
+          module: "apercue.ca@v0"
+          language: version: "v0.15.4"
+          source: kind: "self"
+          MODEOF
+            fi
           fi
-          ls cue.mod/pkg/
+          echo "Cache populated: $(find "$cache_dir" -name '*.cue' | wc -l) CUE files"
 
       - name: Validate core vocabulary
         run: cue vet ./vocab/ ./patterns/ ./charter/ -c
