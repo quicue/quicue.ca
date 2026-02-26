@@ -56,6 +56,13 @@ homelab:
 devbox:
 	cue eval ./examples/devbox/ -e output.summary
 
+# Universal Platform example
+universal-platform:
+	cd examples/universal-platform && ./build.sh
+
+universal-platform-test:
+	cd examples/universal-platform && ./test.sh
+
 # What breaks if the router dies?
 impact:
 	cue eval ./examples/datacenter/ -e 'output.impact."router-core"'

@@ -1,8 +1,14 @@
-# Pattern Catalog
+# patterns
 
-Reference for all computational patterns in `quicue.ca/patterns@v0`. Every pattern is a CUE definition that takes typed inputs and produces computed outputs.
+Algorithms: graph, bind, deploy, health, SPOF, viz, TOON, OpenAPI, validation
 
-## Schema Index
+| Field | Value |
+|-------|-------|
+| Path | `patterns/` |
+| Layer | `definition` |
+| Status | active |
+
+## Schemas
 
 - `#InfraGraph`
 - `#BindCluster`
@@ -29,8 +35,6 @@ Reference for all computational patterns in `quicue.ca/patterns@v0`. Every patte
 - `#CriticalPath`
 - `#ComplianceCheck`
 - `#LifecyclePhasesSKOS`
-
-See [KB Patterns](patterns-kb/index.md) for the validated problem/solution pairs that inform these schemas.
 
 ---
 *Generated from quicue.ca registries by `#DocsProjection`*

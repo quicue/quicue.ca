@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'wiki/**'
       - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
@@ -22,8 +23,17 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install CUE
+        run: |
+          curl -sSL https://github.com/cue-lang/cue/releases/download/v0.15.4/cue_v0.15.4_linux_amd64.tar.gz | tar xz -C /usr/local/bin cue
+
       - name: Install dependencies
         run: pip install mkdocs-material
+
+      - name: Generate docs from registries
+        run: |
+          cue export ./wiki/ -e docs --out json > /tmp/docs-bulk.json
+          python3 wiki/split_docs.py /tmp/docs-bulk.json .
 
       - name: Remove internal docs
         run: rm -rf docs/plans/
