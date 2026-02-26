@@ -1,0 +1,115 @@
+# Desktop tier — actually runs the 6 resources described in the CUE model.
+#
+# Container names match the CUE-compiled commands exactly:
+#   platform-dns, platform-proxy, platform-db, platform-app, platform-mon
+#
+# Usage:
+#   docker compose up -d       # start all services
+#   make demo                  # build JSON + start API server
+#   # Then use the UI to execute commands against real containers
+
+services:
+  # Layer 0: compute (implicit — this is the Docker host)
+
+  # Layer 1: dns
+  dns:
+    image: coredns/coredns:latest
+    container_name: platform-dns
+    restart: unless-stopped
+    ports:
+      - "5553:53/udp"
+      - "5553:53/tcp"
+    volumes:
+      - ./docker/Corefile:/etc/coredns/Corefile:ro
+    networks:
+      - platform
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Layer 1: database
+  database:
+    image: postgres:16-alpine
+    container_name: platform-db
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - platform
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U platform"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Layer 2: proxy
+  proxy:
+    image: caddy:2-alpine
+    container_name: platform-proxy
+    restart: unless-stopped
+    ports:
+      - "8880:80"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      dns:
+        condition: service_healthy
+    networks:
+      - platform
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Layer 3: app (depends on proxy + database)
+  app:
+    image: nginx:alpine
+    container_name: platform-app
+    restart: unless-stopped
+    volumes:
+      - ./docker/app-index.html:/usr/share/nginx/html/index.html:ro
+    depends_on:
+      database:
+        condition: service_healthy
+      proxy:
+        condition: service_healthy
+    networks:
+      - platform
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Layer 4: monitoring (depends on compute + app)
+  monitoring:
+    image: prom/prometheus:latest
+    container_name: platform-mon
+    restart: unless-stopped
+    ports:
+      - "9099:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - platform
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata:
+
+networks:
+  platform:
+    name: platform-net

@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Universal Platform — Scale-Invariant Infrastructure</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&family=Atkinson+Hyperlegible+Mono:wght@400;700&display=swap');
+:root {
+  --bg: #0d1117; --surface: #161b22; --elevated: #21262d; --border: #30363d;
+  --text: #e6edf3; --text-sec: #8b949e; --text-dim: #6e7681;
+  --accent: #58a6ff; --green: #3fb950; --red: #f85149; --warning: #d29922; --purple: #a371f7;
+  --font-ui: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  --font-mono: 'Atkinson Hyperlegible Mono', monospace;
+  --radius: 8px;
+  --nav-height: 48px;
+  --layer-0: #f85149; --layer-1: #d29922; --layer-2: #3fb950; --layer-3: #58a6ff;
+  --layer-4: #a371f7; --layer-5: #f0883e; --layer-6: #db61a2;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-ui); background: var(--bg); color: var(--text); line-height: 1.6; overflow: hidden; height: 100vh; }
+a { color: var(--accent); text-decoration: none; }
+
+/* Nav bar */
+nav {
+  height: var(--nav-height);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+nav .site-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-right: 1.5rem;
+  color: var(--text);
+}
+nav .site-claim {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-right: auto;
+}
+
+/* Tier tabs */
+.tier-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+.tier-tab {
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  font-family: var(--font-ui);
+  color: var(--text-sec);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.tier-tab:hover { background: var(--elevated); color: var(--text); }
+.tier-tab.active { background: var(--elevated); color: var(--accent); border-color: var(--accent); font-weight: 700; }
+
+/* Toolbar */
+.toolbar {
+  height: 44px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.toolbar .sep { width: 1px; height: 24px; background: var(--border); margin: 0 0.25rem; }
+.toolbar label {
+  font-size: 0.75rem;
+  color: var(--text-sec);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.25rem;
+}
+.layer-btn {
+  width: 32px; height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  cursor: pointer;
+  color: #fff;
+  transition: opacity 0.15s, box-shadow 0.15s;
+}
+.layer-btn.off { opacity: 0.3; }
+.layer-btn:hover { box-shadow: 0 0 0 2px rgba(255,255,255,0.15); }
+.layout-btn {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--elevated);
+  color: var(--text-sec);
+  font-size: 0.8rem;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.layout-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,0.1); }
+.layout-btn:hover { color: var(--text); }
+.reset-btn {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--elevated);
+  color: var(--text-sec);
+  font-size: 0.8rem;
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+.reset-btn:hover { color: var(--text); border-color: var(--text-sec); }
+
+/* Tier info badge */
+.tier-info {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+.tier-info .stat {
+  background: var(--elevated);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.tier-info .stat b { color: var(--text-sec); }
+
+/* Main layout */
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* SVG area */
+.graph-area { flex: 1; position: relative; overflow: hidden; }
+.graph-area svg { width: 100%; height: 100%; display: block; }
+
+/* Tooltip */
+.tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  max-width: 300px;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.12s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.tooltip.visible { opacity: 1; }
+.tooltip .tt-name { font-weight: 700; font-family: var(--font-mono); margin-bottom: 0.25rem; }
+.tooltip .tt-types { color: var(--text-sec); font-size: 0.75rem; margin-bottom: 0.15rem; }
+.tooltip .tt-ip { color: var(--green); font-family: var(--font-mono); font-size: 0.75rem; }
+.tooltip .tt-layer { font-size: 0.7rem; margin-top: 0.15rem; }
+.tooltip .tt-desc { color: var(--text-sec); font-size: 0.75rem; margin-top: 0.15rem; font-style: italic; }
+
+/* Detail panel */
+.detail-panel {
+  width: 0; min-width: 0;
+  background: var(--surface);
+  border-left: 1px solid transparent;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 0;
+  transition: width 0.25s ease, min-width 0.25s ease, padding 0.25s ease, border-color 0.25s ease;
+  flex-shrink: 0;
+  position: relative;
+}
+.detail-panel.open {
+  width: 360px; min-width: 360px;
+  padding: 1.25rem;
+  border-left-color: var(--border);
+}
+.detail-panel h2 {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+.detail-section {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.detail-section:last-child { border-bottom: none; }
+.detail-section h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-sec);
+  margin-bottom: 0.4rem;
+}
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  margin: 0.1rem 0.15rem 0.1rem 0;
+  border: 1px solid var(--border);
+  background: var(--elevated);
+  color: var(--text-sec);
+}
+.badge-layer { color: #fff; border: none; font-weight: 700; }
+.detail-meta { font-size: 0.85rem; color: var(--text-sec); }
+.detail-meta span { color: var(--text); font-family: var(--font-mono); }
+.dep-link {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  margin: 0.1rem 0.15rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+.dep-link:hover { background: rgba(88,166,255,0.1); border-color: var(--accent); }
+.impact-box {
+  background: rgba(248,81,73,0.08);
+  border: 1px solid rgba(248,81,73,0.25);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
+}
+.impact-box strong { color: var(--red); font-family: var(--font-mono); }
+
+/* Command groups */
+.cmd-group { margin-bottom: 0.75rem; }
+.cmd-group-header {
+  font-size: 0.8rem; font-weight: 700;
+  color: var(--text-sec); font-family: var(--font-mono);
+  margin-bottom: 0.3rem; text-transform: lowercase;
+}
+.cmd-row { display: flex; align-items: flex-start; gap: 0.4rem; margin-bottom: 0.3rem; }
+.cmd-action { font-size: 0.75rem; color: var(--accent); font-family: var(--font-mono); white-space: nowrap; }
+.cmd-text {
+  flex: 1; font-size: 0.7rem; color: var(--text-dim);
+  font-family: var(--font-mono); word-break: break-all; line-height: 1.4;
+}
+.cmd-copy {
+  flex-shrink: 0; width: 24px; height: 24px;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: var(--elevated); color: var(--text-sec);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; transition: border-color 0.12s, color 0.12s;
+}
+.cmd-copy:hover { border-color: var(--accent); color: var(--accent); }
+.cmd-copy.copied { border-color: var(--green); color: var(--green); }
+
+/* Panel close */
+.panel-close {
+  position: absolute; top: 0.75rem; right: 0.75rem;
+  width: 28px; height: 28px;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: var(--elevated); color: var(--text-sec);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.panel-close:hover { color: var(--text); border-color: var(--text-sec); }
+
+/* Deployment plan */
+.deploy-timeline { margin-top: 0.5rem; }
+.deploy-layer {
+  display: flex; align-items: flex-start; gap: 0.5rem;
+  margin-bottom: 0.5rem; padding: 0.4rem 0.6rem;
+  background: var(--elevated); border-radius: 4px;
+  border-left: 3px solid var(--border);
+}
+.deploy-layer-num {
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;
+  min-width: 24px; color: #fff;
+}
+.deploy-layer-resources {
+  display: flex; flex-wrap: wrap; gap: 0.25rem;
+}
+.deploy-resource {
+  font-family: var(--font-mono); font-size: 0.7rem;
+  padding: 0.1rem 0.4rem; border-radius: 3px;
+  background: rgba(255,255,255,0.05); color: var(--text-sec);
+}
+
+/* Blast radius glow animation */
+@keyframes blast-pulse {
+  0% { stroke-opacity: 0.9; stroke-width: 4; }
+  100% { stroke-opacity: 0; stroke-width: 16; }
+}
+.blast-ring {
+  fill: none;
+  stroke: var(--red);
+  animation: blast-pulse 0.8s ease-out forwards;
+}
+
+/* Loading */
+.loading {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-sec); font-size: 0.9rem;
+}
+
+/* Execution console */
+.console-panel {
+  height: 0; min-height: 0;
+  background: var(--surface);
+  border-top: 1px solid transparent;
+  overflow: hidden;
+  transition: height 0.25s ease, min-height 0.25s ease, border-color 0.25s ease;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+.console-panel.open {
+  height: 220px; min-height: 220px;
+  border-top-color: var(--border);
+}
+.console-header {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.console-header h3 {
+  font-size: 0.8rem; font-family: var(--font-mono);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-sec); margin: 0;
+}
+.console-header .console-status {
+  font-size: 0.75rem; font-family: var(--font-mono);
+  color: var(--text-dim); margin-left: auto;
+}
+.console-header button {
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: var(--elevated); color: var(--text-sec);
+  font-size: 0.75rem; font-family: var(--font-ui);
+  cursor: pointer;
+}
+.console-header button:hover { color: var(--text); border-color: var(--text-sec); }
+.console-body {
+  flex: 1; overflow-y: auto; padding: 0.5rem 1rem;
+  font-family: var(--font-mono); font-size: 0.75rem;
+  line-height: 1.5; color: var(--text-dim);
+}
+.console-entry { margin-bottom: 0.4rem; padding: 0.3rem 0.5rem; border-radius: 4px; background: var(--elevated); }
+.console-entry .ce-cmd { color: var(--accent); word-break: break-all; }
+.console-entry .ce-output { white-space: pre-wrap; margin-top: 0.2rem; }
+.console-entry.ce-ok .ce-output { color: var(--green); }
+.console-entry.ce-err .ce-output { color: var(--red); }
+.console-entry.ce-mock .ce-output { color: var(--warning); }
+.console-entry .ce-meta { color: var(--text-dim); font-size: 0.7rem; }
+
+/* Execute button */
+.cmd-exec {
+  flex-shrink: 0; width: 24px; height: 24px;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: var(--elevated); color: var(--green);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; transition: border-color 0.12s, color 0.12s, background 0.12s;
+}
+.cmd-exec:hover { border-color: var(--green); background: rgba(63,185,80,0.1); }
+.cmd-exec.running { color: var(--warning); border-color: var(--warning); cursor: wait; }
+
+/* Console toggle in toolbar */
+.console-toggle {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: var(--elevated); color: var(--text-sec);
+  font-size: 0.8rem; font-family: var(--font-ui); cursor: pointer;
+}
+.console-toggle:hover { color: var(--text); }
+.console-toggle.active { border-color: var(--green); color: var(--green); background: rgba(63,185,80,0.1); }
+
+/* Impact summary card */
+.impact-summary {
+  background: var(--elevated); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 0.75rem; margin-bottom: 0.5rem;
+}
+.impact-summary .impact-headline {
+  font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem;
+}
+.impact-summary .impact-headline .blast-count {
+  color: var(--red); font-size: 1.4rem;
+}
+.impact-summary .impact-headline .safe-count {
+  color: var(--green); font-size: 1.4rem;
+}
+.impact-stat {
+  display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0;
+  font-size: 0.85rem; color: var(--text-sec);
+}
+.impact-stat .stat-label { min-width: 6rem; }
+.impact-stat .stat-value { font-weight: 700; color: var(--text); font-family: var(--font-mono); }
+.impact-stat .stat-bar {
+  flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+}
+.impact-stat .stat-bar-fill { height: 100%; border-radius: 3px; }
+
+/* Resource list in impact */
+.resource-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem; }
+.resource-chip {
+  padding: 0.15rem 0.5rem; border-radius: 4px;
+  font-size: 0.75rem; font-family: var(--font-mono); cursor: pointer;
+  border: 1px solid var(--border); background: var(--elevated); color: var(--text-sec);
+  transition: border-color 0.12s, color 0.12s;
+}
+.resource-chip:hover { border-color: var(--accent); color: var(--accent); }
+.resource-chip.blast { border-color: var(--red); color: var(--red); background: rgba(248,81,73,0.08); }
+.resource-chip.ancestor { border-color: var(--warning); color: var(--warning); background: rgba(210,153,34,0.08); }
+
+/* Collapsible section */
+.collapsible-header {
+  display: flex; align-items: center; gap: 0.4rem; cursor: pointer;
+  user-select: none; padding: 0.1rem 0;
+}
+.collapsible-header::before {
+  content: '\25b6'; font-size: 0.65rem; color: var(--text-dim);
+  transition: transform 0.15s;
+}
+.collapsible-header.open::before { transform: rotate(90deg); }
+.collapsible-body { display: none; }
+.collapsible-body.open { display: block; }
+
+/* Shutdown/startup sequence */
+.sequence-list { list-style: none; padding: 0; }
+.sequence-list li {
+  padding: 0.2rem 0.4rem; font-size: 0.8rem; font-family: var(--font-mono);
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.sequence-list li .seq-num {
+  color: var(--text-dim); min-width: 1.5rem; text-align: right;
+}
+.sequence-list li .seq-name { cursor: pointer; }
+.sequence-list li .seq-name:hover { color: var(--accent); }
+
+/* CAB check mode */
+.cab-active .tier-tab { pointer-events: none; opacity: 0.5; }
+.cab-selected circle { stroke: var(--warning) !important; stroke-width: 3px !important; }
+.cab-bar {
+  display: none; background: var(--elevated); border-top: 1px solid var(--border);
+  padding: 0.4rem 1rem; font-size: 0.8rem; color: var(--text-sec);
+  align-items: center; gap: 0.5rem;
+}
+.cab-bar.open { display: flex; }
+.cab-bar .cab-selection { flex: 1; font-family: var(--font-mono); }
+.cab-bar button {
+  padding: 0.2rem 0.6rem; border: 1px solid var(--border); border-radius: 4px;
+  background: var(--elevated); color: var(--text-sec); font-size: 0.75rem; cursor: pointer;
+}
+.cab-bar button:hover { color: var(--text); border-color: var(--text-sec); }
+.cab-bar button.cab-run { border-color: var(--warning); color: var(--warning); }
+.cab-bar button.cab-run:hover { background: rgba(210,153,34,0.1); }
+
+/* Scrollbar */
+.detail-panel::-webkit-scrollbar { width: 6px; }
+.detail-panel::-webkit-scrollbar-track { background: transparent; }
+.detail-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="site-name">Universal Platform</span>
+  <span class="site-claim">Change Impact Analysis</span>
+  <div class="tier-tabs" id="tier-tabs"></div>
+</nav>
+
+<div class="toolbar" id="toolbar">
+  <label>Layers</label>
+  <button class="layer-btn" data-layer="0" style="background:var(--layer-0)" aria-label="Toggle layer 0">L0</button>
+  <button class="layer-btn" data-layer="1" style="background:var(--layer-1)" aria-label="Toggle layer 1">L1</button>
+  <button class="layer-btn" data-layer="2" style="background:var(--layer-2)" aria-label="Toggle layer 2">L2</button>
+  <button class="layer-btn" data-layer="3" style="background:var(--layer-3)" aria-label="Toggle layer 3">L3</button>
+  <button class="layer-btn" data-layer="4" style="background:var(--layer-4)" aria-label="Toggle layer 4">L4</button>
+  <div class="sep"></div>
+  <label>Layout</label>
+  <button class="layout-btn active" data-layout="force" aria-label="Force-directed layout">Force</button>
+  <button class="layout-btn" data-layout="layered" aria-label="Layered layout">Layered</button>
+  <div class="sep"></div>
+  <button class="reset-btn" id="zoom-reset" aria-label="Reset zoom">Reset</button>
+  <div class="sep"></div>
+  <button class="console-toggle" id="cab-toggle" title="CAB Check: select 2+ resources to check overlap" aria-label="Toggle CAB check mode">CAB Check</button>
+  <button class="console-toggle" id="console-toggle" title="Toggle execution console" aria-label="Toggle execution console">Console</button>
+  <div class="tier-info" id="tier-info"></div>
+</div>
+
+<div class="cab-bar" id="cab-bar">
+  <span>CAB Check:</span>
+  <span class="cab-selection" id="cab-selection">Select 2+ resources on the graph</span>
+  <button class="cab-run" id="cab-run" aria-label="Run CAB check">Check Overlap</button>
+  <button id="cab-cancel" aria-label="Cancel CAB check">Cancel</button>
+</div>
+<div style="display:flex;flex-direction:column;height:calc(100vh - var(--nav-height) - 44px);overflow:hidden">
+<div class="main">
+  <div class="graph-area" id="graph-area">
+    <div class="loading" id="loading">Loading tier data...</div>
+    <svg id="graph-svg" role="img" aria-label="Infrastructure dependency graph"></svg>
+  </div>
+  <div class="detail-panel" id="detail-panel">
+    <button class="panel-close" id="panel-close" title="Close" aria-label="Close detail panel">&times;</button>
+    <div id="detail-content" aria-live="polite"></div>
+  </div>
+</div>
+
+<div class="console-panel" id="console-panel">
+  <div class="console-header">
+    <h3>Execution Console</h3>
+    <span class="console-status" id="console-status">mock mode</span>
+    <button id="console-clear" aria-label="Clear console output">Clear</button>
+    <button id="console-close" aria-label="Close console">&times;</button>
+  </div>
+  <div class="console-body" id="console-body"></div>
+</div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+(async function() {
+  // ── Configuration ──
+  const TIERS = ['desktop', 'node', 'cluster', 'enterprise'];
+  const TIER_LABELS = { desktop: 'Desktop', node: 'Node', cluster: 'Cluster', enterprise: 'Enterprise' };
+  const layerColors = ['#f85149', '#d29922', '#3fb950', '#58a6ff', '#a371f7', '#f0883e', '#db61a2'];
+  function layerColor(n) { return layerColors[((n % layerColors.length) + layerColors.length) % layerColors.length]; }
+
+  // ── State ──
+  let currentTier = 'desktop';
+  let tierData = {};       // cached tier JSON
+  let nodes = [], links = [];
+  let resources = {}, topology = {}, commandsData = {};
+  let layerMap = {}, directDependents = {};
+  let closureData = {};    // depth, ancestors, dependents from precomputed
+  let impactData = {};     // per-resource impact from CUE
+  let spofData = [];       // SPOF list
+  let deploymentData = {}; // deployment plan layers
+  let selectedNode = null;
+  let currentLayout = 'force';
+  const layerVisibility = [true, true, true, true, true, true, true];
+
+  // CAB check mode
+  let cabMode = false;
+  let cabSelected = new Set();
+
+  // ── Tier tabs ──
+  const tabsEl = document.getElementById('tier-tabs');
+  for (const tier of TIERS) {
+    const btn = document.createElement('button');
+    btn.className = 'tier-tab' + (tier === currentTier ? ' active' : '');
+    btn.textContent = TIER_LABELS[tier];
+    btn.dataset.tier = tier;
+    btn.addEventListener('click', () => switchTier(tier));
+    tabsEl.appendChild(btn);
+  }
+
+  // ── Data loading ──
+  async function loadTier(tier) {
+    if (tierData[tier]) return tierData[tier];
+    // Try API first, fall back to static files
+    let data;
+    try {
+      const resp = await fetch('data/' + tier + '.json');
+      if (!resp.ok) throw new Error(resp.status);
+      data = await resp.json();
+    } catch {
+      try {
+        const resp = await fetch('/api/tier/' + tier);
+        if (!resp.ok) throw new Error(resp.status);
+        data = await resp.json();
+      } catch {
+        return null;
+      }
+    }
+    tierData[tier] = data;
+    return data;
+  }
+
+  // ── Parse VizData format ──
+  function parseTierData(data) {
+    const viz = data.vizData || data;
+    resources = {};
+    commandsData = data.commands || {};
+    closureData = data.closure || {};
+    impactData = data.impact || {};
+    spofData = data.spof || [];
+    deploymentData = data.deployment_plan || {};
+
+    // Pre-index edges
+    const edgesBySource = {};
+    for (const edge of (viz.edges || [])) {
+      (edgesBySource[edge.source] ??= []).push(edge.target);
+    }
+
+    for (const node of (viz.nodes || [])) {
+      const id = node.id;
+      const depsOn = {};
+      for (const target of (edgesBySource[id] || [])) depsOn[target] = true;
+      const typeSet = {};
+      for (const t of (node.types || [])) typeSet[t] = true;
+
+      resources[id] = {
+        name: node._name || node.name || id,
+        '@type': typeSet,
+        depends_on: depsOn,
+        _depth: node.depth ?? 0,
+        description: node.description,
+        ip: node.ip,
+        host: node.host,
+        container_id: node.container_id,
+      };
+    }
+
+    // Topology
+    topology = {};
+    for (const [key, members] of Object.entries(viz.topology || {})) {
+      if (Array.isArray(members)) {
+        const set = {};
+        for (const m of members) set[m] = true;
+        topology[key] = set;
+      } else {
+        topology[key] = members;
+      }
+    }
+
+    // Layer map
+    layerMap = {};
+    for (const [key, members] of Object.entries(topology)) {
+      const num = parseInt(key.replace('layer_', ''), 10);
+      for (const name of Object.keys(members)) layerMap[name] = num;
+    }
+
+    // Direct dependents
+    directDependents = {};
+    for (const [name, r] of Object.entries(resources)) {
+      for (const dep of Object.keys(r.depends_on || {})) {
+        (directDependents[dep] ??= []).push(name);
+      }
+    }
+  }
+
+  // ── Transitive impact (BFS) ──
+  function getImpact(name) {
+    const visited = new Set();
+    const queue = [name];
+    while (queue.length) {
+      const n = queue.shift();
+      for (const d of (directDependents[n] || [])) {
+        if (!visited.has(d)) { visited.add(d); queue.push(d); }
+      }
+    }
+    return visited;
+  }
+
+  // ── SVG setup ──
+  const svgEl = document.getElementById('graph-svg');
+  const svg = d3.select(svgEl);
+  const graphArea = document.getElementById('graph-area');
+  let width = graphArea.clientWidth;
+  let height = graphArea.clientHeight;
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id', 'arrow')
+    .attr('viewBox', '0 -5 10 10').attr('refX', 10).attr('refY', 0)
+    .attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
+    .append('path').attr('d', 'M0,-4L10,0L0,4').attr('fill', '#6e7681');
+  defs.append('marker').attr('id', 'arrow-hl')
+    .attr('viewBox', '0 -5 10 10').attr('refX', 10).attr('refY', 0)
+    .attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
+    .append('path').attr('d', 'M0,-4L10,0L0,4').attr('fill', '#58a6ff');
+  defs.append('marker').attr('id', 'arrow-blast')
+    .attr('viewBox', '0 -5 10 10').attr('refX', 10).attr('refY', 0)
+    .attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
+    .append('path').attr('d', 'M0,-4L10,0L0,4').attr('fill', '#f85149');
+
+  const g = svg.append('g');
+  const zoom = d3.zoom().scaleExtent([0.2, 5])
+    .on('zoom', (event) => g.attr('transform', event.transform));
+  svg.call(zoom);
+
+  const linkG = g.append('g').attr('class', 'links');
+  const nodeG = g.append('g').attr('class', 'nodes');
+  const blastG = g.append('g').attr('class', 'blast-rings');
+
+  let linkSelection, nodeSelection, simulation;
+
+  // ── Build / rebuild graph ──
+  // Preserves node positions across tier switches (same topology)
+  let savedPositions = {};
+
+  function buildGraph() {
+    // Save current positions
+    if (nodes.length > 0) {
+      for (const n of nodes) {
+        savedPositions[n.id] = { x: n.x, y: n.y };
+      }
+    }
+
+    const nodeNames = Object.keys(resources);
+    const depCounts = {};
+    for (const [name, r] of Object.entries(resources)) {
+      for (const dep of Object.keys(r.depends_on || {})) {
+        depCounts[dep] = (depCounts[dep] || 0) + 1;
+      }
+    }
+    const maxDeps = Math.max(...Object.values(depCounts), 1);
+
+    nodes = nodeNames.map(name => {
+      const saved = savedPositions[name];
+      const sizeMetric = (depCounts[name] || 0) / maxDeps;
+      return {
+        id: name,
+        layer: layerMap[name] ?? 0,
+        resource: resources[name],
+        radius: 10 + sizeMetric * 14,
+        x: saved ? saved.x : width / 2 + (Math.random() - 0.5) * 200,
+        y: saved ? saved.y : height / 2 + (Math.random() - 0.5) * 200,
+      };
+    });
+
+    links = [];
+    for (const [name, r] of Object.entries(resources)) {
+      for (const dep of Object.keys(r.depends_on || {})) {
+        if (resources[dep]) links.push({ source: dep, target: name });
+      }
+    }
+
+    // Clear and rebuild
+    linkG.selectAll('*').remove();
+    nodeG.selectAll('*').remove();
+    blastG.selectAll('*').remove();
+
+    linkSelection = linkG.selectAll('line')
+      .data(links).join('line')
+      .attr('stroke', '#6e7681').attr('stroke-width', 1)
+      .attr('stroke-opacity', 0.4).attr('marker-end', 'url(#arrow)');
+
+    nodeSelection = nodeG.selectAll('g')
+      .data(nodes).join('g').attr('class', 'node').style('cursor', 'pointer')
+      .call(d3.drag()
+        .on('start', dragStarted).on('drag', dragged).on('end', dragEnded));
+
+    nodeSelection.append('circle')
+      .attr('r', d => d.radius)
+      .attr('fill', d => layerColor(d.layer))
+      .attr('stroke', 'transparent').attr('stroke-width', 2.5)
+      .style('transition', 'fill 0.3s, r 0.15s, stroke 0.15s');
+
+    nodeSelection.append('text')
+      .text(d => d.id)
+      .attr('dy', d => d.radius + 13)
+      .attr('text-anchor', 'middle')
+      .attr('font-family', "'Atkinson Hyperlegible Mono', monospace")
+      .attr('font-size', '10px').attr('fill', '#8b949e')
+      .attr('pointer-events', 'none');
+
+    // Tooltip
+    nodeSelection.on('mouseenter', (event, d) => {
+      const r = d.resource;
+      const types = Object.keys(r['@type'] || {}).join(', ');
+      const tip = document.getElementById('tooltip');
+      tip.textContent = '';
+
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'tt-name';
+      nameDiv.textContent = d.id;
+      tip.appendChild(nameDiv);
+
+      if (types) {
+        const t = document.createElement('div');
+        t.className = 'tt-types';
+        t.textContent = types;
+        tip.appendChild(t);
+      }
+      if (r.ip) {
+        const t = document.createElement('div');
+        t.className = 'tt-ip';
+        t.textContent = r.ip;
+        tip.appendChild(t);
+      }
+      const layerDiv = document.createElement('div');
+      layerDiv.className = 'tt-layer';
+      layerDiv.style.color = layerColor(d.layer);
+      layerDiv.textContent = 'Layer ' + d.layer;
+      tip.appendChild(layerDiv);
+
+      if (r.description) {
+        const t = document.createElement('div');
+        t.className = 'tt-desc';
+        t.textContent = r.description;
+        tip.appendChild(t);
+      }
+      tip.classList.add('visible');
+
+      d3.select(event.currentTarget).select('circle')
+        .transition().duration(120).attr('r', d.radius * 1.2);
+    })
+    .on('mousemove', (event) => {
+      const tip = document.getElementById('tooltip');
+      tip.style.left = (event.clientX + 14) + 'px';
+      tip.style.top = (event.clientY - 10) + 'px';
+    })
+    .on('mouseleave', (event, d) => {
+      document.getElementById('tooltip').classList.remove('visible');
+      d3.select(event.currentTarget).select('circle')
+        .transition().duration(120).attr('r', d.radius);
+    });
+
+    // Click
+    nodeSelection.on('click', (event, d) => {
+      event.stopPropagation();
+      if (cabMode) {
+        // CAB mode: toggle resource selection
+        if (cabSelected.has(d.id)) cabSelected.delete(d.id);
+        else cabSelected.add(d.id);
+        updateCabUI();
+        return;
+      }
+      selectNode(d);
+    });
+
+    // Simulation
+    if (simulation) simulation.stop();
+    simulation = d3.forceSimulation(nodes)
+      .force('link', d3.forceLink(links).id(d => d.id).distance(100).strength(0.5))
+      .force('charge', d3.forceManyBody().strength(-400))
+      .force('center', d3.forceCenter(width / 2, height / 2))
+      .force('collision', d3.forceCollide().radius(d => d.radius + 10))
+      .force('x', d3.forceX(width / 2).strength(0.04))
+      .force('y', d3.forceY(height / 2).strength(0.04))
+      .on('tick', ticked);
+
+    // If we have saved positions, low alpha
+    if (Object.keys(savedPositions).length > 0) {
+      simulation.alpha(0.15);
+    }
+
+    if (currentLayout === 'layered') applyLayout();
+    applyVisibility();
+  }
+
+  function ticked() {
+    linkSelection.each(function(d) {
+      const dx = d.target.x - d.source.x;
+      const dy = d.target.y - d.source.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const tr = d.target.radius || 12;
+      d3.select(this)
+        .attr('x1', d.source.x).attr('y1', d.source.y)
+        .attr('x2', d.target.x - (dx / dist) * tr)
+        .attr('y2', d.target.y - (dy / dist) * tr);
+    });
+    nodeSelection.attr('transform', d => `translate(${d.x},${d.y})`);
+  }
+
+  // ── Drag ──
+  function dragStarted(event, d) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x; d.fy = d.y;
+  }
+  function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
+  function dragEnded(event, d) {
+    if (!event.active) simulation.alphaTarget(0);
+    if (currentLayout === 'force') { d.fx = null; d.fy = null; }
+  }
+
+  // ── Blast radius animation ──
+  function animateBlastRadius(sourceNode) {
+    blastG.selectAll('*').remove();
+    const impact = getImpact(sourceNode.id);
+    if (impact.size === 0) return;
+
+    // Cascade: source first, then dependents in BFS order with delay
+    const ordered = [];
+    const visited = new Set();
+    const queue = [sourceNode.id];
+    while (queue.length) {
+      const n = queue.shift();
+      for (const d of (directDependents[n] || [])) {
+        if (!visited.has(d)) {
+          visited.add(d);
+          ordered.push(d);
+          queue.push(d);
+        }
+      }
+    }
+
+    // Pulse on source
+    blastG.append('circle')
+      .attr('cx', sourceNode.x).attr('cy', sourceNode.y)
+      .attr('r', sourceNode.radius)
+      .attr('class', 'blast-ring');
+
+    // Cascade through dependents
+    ordered.forEach((name, i) => {
+      const node = nodes.find(n => n.id === name);
+      if (!node) return;
+      setTimeout(() => {
+        blastG.append('circle')
+          .attr('cx', node.x).attr('cy', node.y)
+          .attr('r', node.radius)
+          .attr('class', 'blast-ring');
+
+        // Briefly flash the node red
+        const circle = nodeSelection.filter(d => d.id === name).select('circle');
+        circle.transition().duration(200).attr('stroke', 'var(--red)').attr('stroke-width', 3);
+        circle.transition().delay(600).duration(400).attr('stroke', 'transparent').attr('stroke-width', 2.5);
+      }, (i + 1) * 150);
+    });
+
+    // Also flash the impacted edges
+    ordered.forEach((name, i) => {
+      setTimeout(() => {
+        linkSelection.filter(l => {
+          const sid = typeof l.source === 'object' ? l.source.id : l.source;
+          const tid = typeof l.target === 'object' ? l.target.id : l.target;
+          return tid === name;
+        })
+        .transition().duration(200)
+        .attr('stroke', '#f85149').attr('stroke-opacity', 0.8).attr('stroke-width', 2)
+        .attr('marker-end', 'url(#arrow-blast)')
+        .transition().delay(600).duration(400)
+        .attr('stroke', '#6e7681').attr('stroke-opacity', 0.4).attr('stroke-width', 1)
+        .attr('marker-end', 'url(#arrow)');
+      }, (i + 1) * 150);
+    });
+
+    // Cleanup rings after animation
+    setTimeout(() => blastG.selectAll('*').remove(), (ordered.length + 1) * 150 + 1000);
+  }
+
+  // ── Node selection ──
+  function selectNode(d) {
+    selectedNode = d.id;
+    blastG.selectAll('*').remove();
+
+    const deps = new Set(Object.keys(d.resource.depends_on || {}));
+    const depnts = new Set(directDependents[d.id] || []);
+    const connected = new Set([d.id, ...deps, ...depnts]);
+
+    nodeSelection.transition().duration(200)
+      .style('opacity', n => connected.has(n.id) ? 1 : 0.15);
+
+    linkSelection.transition().duration(200)
+      .attr('stroke-opacity', l => {
+        const sid = typeof l.source === 'object' ? l.source.id : l.source;
+        const tid = typeof l.target === 'object' ? l.target.id : l.target;
+        return (sid === d.id || tid === d.id) ? 0.9 : 0.05;
+      })
+      .attr('stroke-width', l => {
+        const sid = typeof l.source === 'object' ? l.source.id : l.source;
+        const tid = typeof l.target === 'object' ? l.target.id : l.target;
+        return (sid === d.id || tid === d.id) ? 2.5 : 1;
+      })
+      .attr('stroke', l => {
+        const sid = typeof l.source === 'object' ? l.source.id : l.source;
+        const tid = typeof l.target === 'object' ? l.target.id : l.target;
+        return (sid === d.id || tid === d.id) ? '#58a6ff' : '#6e7681';
+      })
+      .attr('marker-end', l => {
+        const sid = typeof l.source === 'object' ? l.source.id : l.source;
+        const tid = typeof l.target === 'object' ? l.target.id : l.target;
+        return (sid === d.id || tid === d.id) ? 'url(#arrow-hl)' : 'url(#arrow)';
+      });
+
+    nodeSelection.select('circle')
+      .attr('stroke', n => n.id === d.id ? '#58a6ff' : 'transparent');
+
+    showDetail(d);
+
+    // Trigger blast radius animation
+    animateBlastRadius(d);
+  }
+
+  function deselectNode() {
+    if (!selectedNode) return;
+    selectedNode = null;
+    blastG.selectAll('*').remove();
+
+    nodeSelection.transition().duration(200).style('opacity', 1);
+    nodeSelection.select('circle').attr('stroke', 'transparent');
+
+    linkSelection.transition().duration(200)
+      .attr('stroke-opacity', 0.4).attr('stroke-width', 1)
+      .attr('stroke', '#6e7681').attr('marker-end', 'url(#arrow)');
+
+    document.getElementById('detail-panel').classList.remove('open');
+  }
+
+  svg.on('click', () => deselectNode());
+
+  function navigateToNode(name) {
+    const node = nodes.find(n => n.id === name);
+    if (!node) return;
+    selectNode(node);
+    const transform = d3.zoomTransform(svgEl);
+    const tx = width / 2 - node.x * transform.k;
+    const ty = height / 2 - node.y * transform.k;
+    svg.transition().duration(500)
+      .call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(transform.k));
+  }
+
+  // ── Detail panel ──
+  const panelEl = document.getElementById('detail-panel');
+  const detailContent = document.getElementById('detail-content');
+  document.getElementById('panel-close').addEventListener('click', (e) => {
+    e.stopPropagation();
+    deselectNode();
+  });
+
+  function showDetail(d) {
+    const r = d.resource;
+    const types = Object.keys(r['@type'] || {});
+    const deps = Object.keys(r.depends_on || {});
+    const depnts = directDependents[d.id] || [];
+    const impact = impactData[d.id] || {};
+    const affectedNames = Object.keys(impact.affected || {});
+    const ancestorNames = Object.keys(impact.ancestors || {});
+    const cmds = commandsData[d.id] || {};
+    const totalResources = Object.keys(resources).length;
+    const isSpof = spofData.some(s => s.name === d.id);
+
+    detailContent.textContent = '';
+
+    // ── Title + type badges ──
+    const h2 = document.createElement('h2');
+    h2.textContent = d.id;
+    if (isSpof) {
+      const spofBadge = document.createElement('span');
+      spofBadge.className = 'badge';
+      spofBadge.style.cssText = 'background:rgba(248,81,73,0.15);color:var(--red);border:1px solid var(--red);margin-left:0.5rem;font-size:0.7rem;';
+      spofBadge.textContent = 'SPOF';
+      h2.appendChild(spofBadge);
+    }
+    detailContent.appendChild(h2);
+
+    const typeLine = document.createElement('div');
+    typeLine.style.cssText = 'margin-bottom:0.5rem;';
+    for (const t of types) {
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = t;
+      typeLine.appendChild(badge);
+    }
+    detailContent.appendChild(typeLine);
+
+    // ── IMPACT SUMMARY (primary view) ──
+    const impactCard = document.createElement('div');
+    impactCard.className = 'impact-summary';
+
+    const headline = document.createElement('div');
+    headline.className = 'impact-headline';
+    if (affectedNames.length > 0) {
+      headline.innerHTML = `If <strong>${d.id}</strong> fails: <span class="blast-count">${affectedNames.length}</span> resource${affectedNames.length === 1 ? '' : 's'} affected`;
+    } else {
+      headline.innerHTML = `<span class="safe-count">${d.id}</span> is a leaf node — no downstream impact`;
+    }
+    impactCard.appendChild(headline);
+
+    // Stats
+    const stats = [
+      { label: 'Blast radius', value: affectedNames.length, max: totalResources - 1, color: 'var(--red)' },
+      { label: 'Ancestors', value: ancestorNames.length, max: totalResources - 1, color: 'var(--warning)' },
+      { label: 'Depth', value: impact.depth ?? d.layer, max: 4, color: layerColor(d.layer) },
+    ];
+    for (const s of stats) {
+      const row = document.createElement('div');
+      row.className = 'impact-stat';
+      row.innerHTML = `<span class="stat-label">${s.label}</span><span class="stat-value">${s.value}</span><div class="stat-bar"><div class="stat-bar-fill" style="width:${Math.min(100, (s.value / Math.max(s.max, 1)) * 100)}%;background:${s.color}"></div></div>`;
+      impactCard.appendChild(row);
+    }
+    detailContent.appendChild(impactCard);
+
+    // ── Blast radius (affected resources) ──
+    if (affectedNames.length > 0) {
+      const blastSection = makeSection('Blast Radius (' + affectedNames.length + ')');
+      const chips = document.createElement('div');
+      chips.className = 'resource-chips';
+      for (const name of affectedNames) {
+        const chip = document.createElement('span');
+        chip.className = 'resource-chip blast';
+        chip.textContent = name;
+        chip.addEventListener('click', (e) => { e.stopPropagation(); navigateToNode(name); });
+        chips.appendChild(chip);
+      }
+      blastSection.appendChild(chips);
+      detailContent.appendChild(blastSection);
+    }
+
+    // ── Ancestors (what this depends on transitively) ──
+    if (ancestorNames.length > 0) {
+      const ancestorSection = makeSection('Ancestors (' + ancestorNames.length + ')');
+      const chips = document.createElement('div');
+      chips.className = 'resource-chips';
+      for (const name of ancestorNames) {
+        const chip = document.createElement('span');
+        chip.className = 'resource-chip ancestor';
+        chip.textContent = name;
+        chip.addEventListener('click', (e) => { e.stopPropagation(); navigateToNode(name); });
+        chips.appendChild(chip);
+      }
+      ancestorSection.appendChild(chips);
+      detailContent.appendChild(ancestorSection);
+    }
+
+    // ── Safe shutdown / startup sequence ──
+    if (deploymentData.layers) {
+      const layers = deploymentData.layers;
+      // Build flat ordered list from deployment layers
+      const startupOrder = [];
+      const allLayers = Array.isArray(layers) ? layers : Object.values(layers);
+      for (const layer of allLayers) {
+        const names = layer.resources || (Array.isArray(layer) ? layer : Object.keys(layer));
+        if (Array.isArray(names)) {
+          for (const name of names) startupOrder.push({ name, layer: layer.layer ?? startupOrder.length });
+        }
+      }
+      const shutdownOrder = [...startupOrder].reverse();
+
+      // Only show resources relevant to this node's blast radius + self
+      const relevant = new Set([d.id, ...affectedNames]);
+
+      const seqSection = makeSection('Change Sequence');
+
+      // Shutdown
+      const shutdownH = document.createElement('div');
+      shutdownH.style.cssText = 'font-size:0.8rem;color:var(--red);font-weight:700;margin:0.3rem 0 0.15rem;';
+      shutdownH.textContent = 'Safe shutdown order:';
+      seqSection.appendChild(shutdownH);
+      const shutdownList = document.createElement('ol');
+      shutdownList.className = 'sequence-list';
+      let seq = 1;
+      for (const item of shutdownOrder) {
+        if (!relevant.has(item.name)) continue;
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="seq-num">${seq++}.</span><span class="seq-name" style="color:${item.name === d.id ? 'var(--accent)' : 'var(--text-sec)'}">${item.name}</span>`;
+        li.querySelector('.seq-name').addEventListener('click', (e) => { e.stopPropagation(); navigateToNode(item.name); });
+        shutdownList.appendChild(li);
+      }
+      seqSection.appendChild(shutdownList);
+
+      // Startup
+      const startupH = document.createElement('div');
+      startupH.style.cssText = 'font-size:0.8rem;color:var(--green);font-weight:700;margin:0.5rem 0 0.15rem;';
+      startupH.textContent = 'Safe startup order:';
+      seqSection.appendChild(startupH);
+      const startupList = document.createElement('ol');
+      startupList.className = 'sequence-list';
+      seq = 1;
+      for (const item of startupOrder) {
+        if (!relevant.has(item.name)) continue;
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="seq-num">${seq++}.</span><span class="seq-name" style="color:${item.name === d.id ? 'var(--accent)' : 'var(--text-sec)'}">${item.name}</span>`;
+        li.querySelector('.seq-name').addEventListener('click', (e) => { e.stopPropagation(); navigateToNode(item.name); });
+        startupList.appendChild(li);
+      }
+      seqSection.appendChild(startupList);
+      detailContent.appendChild(seqSection);
+    }
+
+    // ── Details (collapsible) ──
+    const detailsSection = makeCollapsible('Details');
+    if (r.description) {
+      const p = document.createElement('p');
+      p.className = 'detail-meta';
+      p.textContent = r.description;
+      detailsSection.body.appendChild(p);
+    }
+    if (r.ip) addMetaLine(detailsSection.body, 'IP', r.ip);
+    if (r.host) addMetaLine(detailsSection.body, 'Host', r.host);
+    if (r.container_id !== undefined) addMetaLine(detailsSection.body, 'Container', r.container_id);
+
+    const layerP = document.createElement('p');
+    layerP.className = 'detail-meta';
+    layerP.style.marginTop = '0.3rem';
+    layerP.textContent = 'Layer: ';
+    const layerBadge = document.createElement('span');
+    layerBadge.className = 'badge badge-layer';
+    layerBadge.style.background = layerColor(d.layer);
+    layerBadge.textContent = d.layer;
+    layerP.appendChild(layerBadge);
+    detailsSection.body.appendChild(layerP);
+
+    // Direct deps/dependents
+    if (deps.length > 0) {
+      const depsLabel = document.createElement('p');
+      depsLabel.className = 'detail-meta';
+      depsLabel.style.cssText = 'margin-top:0.4rem;font-weight:700;font-size:0.8rem;color:var(--text-sec);';
+      depsLabel.textContent = 'Direct dependencies (' + deps.length + '):';
+      detailsSection.body.appendChild(depsLabel);
+      for (const name of deps) detailsSection.body.appendChild(makeDepLink(name));
+    }
+    if (depnts.length > 0) {
+      const depntsLabel = document.createElement('p');
+      depntsLabel.className = 'detail-meta';
+      depntsLabel.style.cssText = 'margin-top:0.4rem;font-weight:700;font-size:0.8rem;color:var(--text-sec);';
+      depntsLabel.textContent = 'Direct dependents (' + depnts.length + '):';
+      detailsSection.body.appendChild(depntsLabel);
+      for (const name of depnts) detailsSection.body.appendChild(makeDepLink(name));
+    }
+    detailContent.appendChild(detailsSection.el);
+
+    // ── Commands (collapsible) ──
+    const cmdEntries = Object.entries(cmds);
+    if (cmdEntries.length > 0) {
+      const cmdCollapsible = makeCollapsible('Commands (' + cmdEntries.length + ')');
+      const grouped = {};
+      for (const [key, cmd] of cmdEntries) {
+        const slash = key.indexOf('/');
+        const provider = slash > 0 ? key.substring(0, slash) : 'other';
+        const action = slash > 0 ? key.substring(slash + 1) : key;
+        (grouped[provider] ??= []).push({ action, cmd, key });
+      }
+
+      for (const [provider, actions] of Object.entries(grouped).sort((a, b) => a[0].localeCompare(b[0]))) {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'cmd-group';
+
+        const header = document.createElement('div');
+        header.className = 'cmd-group-header';
+        header.textContent = provider;
+        groupDiv.appendChild(header);
+
+        for (const { action, cmd, key } of actions) {
+          const row = document.createElement('div');
+          row.className = 'cmd-row';
+
+          const actionSpan = document.createElement('span');
+          actionSpan.className = 'cmd-action';
+          actionSpan.textContent = action;
+          row.appendChild(actionSpan);
+
+          const cmdSpan = document.createElement('span');
+          cmdSpan.className = 'cmd-text';
+          cmdSpan.textContent = cmd;
+          row.appendChild(cmdSpan);
+
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'cmd-copy';
+          copyBtn.title = 'Copy command';
+          copyBtn.setAttribute('aria-label', 'Copy command: ' + action);
+          copyBtn.textContent = '\u2398';
+          copyBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            try { await navigator.clipboard.writeText(cmd); } catch {
+              const ta = document.createElement('textarea');
+              ta.value = cmd;
+              ta.style.position = 'fixed';
+              ta.style.left = '-9999px';
+              document.body.appendChild(ta);
+              ta.select();
+              document.execCommand('copy');
+              ta.remove();
+            }
+            copyBtn.classList.add('copied');
+            copyBtn.textContent = '\u2713';
+            setTimeout(() => { copyBtn.classList.remove('copied'); copyBtn.textContent = '\u2398'; }, 1500);
+          });
+          row.appendChild(copyBtn);
+
+          const execBtn = document.createElement('button');
+          execBtn.className = 'cmd-exec';
+          execBtn.title = 'Execute';
+          execBtn.setAttribute('aria-label', 'Execute command: ' + action);
+          execBtn.textContent = '\u25b6';
+          execBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (execBtn.classList.contains('running')) return;
+            execBtn.classList.add('running');
+            execBtn.textContent = '\u23f3';
+            openConsole();
+            const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out (60s)')), 60000));
+            try {
+              const result = await Promise.race([executeCommand(d.id, key, cmd), timeout]);
+              appendConsoleEntry(result);
+            } catch (err) {
+              appendConsoleEntry({ resource: d.id, command: cmd, mode: 'error', output: err.message, returncode: -1, duration_ms: 0 });
+            }
+            execBtn.classList.remove('running');
+            execBtn.textContent = '\u25b6';
+          });
+          row.appendChild(execBtn);
+          groupDiv.appendChild(row);
+        }
+        cmdCollapsible.body.appendChild(groupDiv);
+      }
+      detailContent.appendChild(cmdCollapsible.el);
+    }
+
+    panelEl.classList.add('open');
+  }
+
+  function makeSection(title) {
+    const section = document.createElement('div');
+    section.className = 'detail-section';
+    if (title) {
+      const h3 = document.createElement('h3');
+      h3.textContent = title;
+      section.appendChild(h3);
+    }
+    return section;
+  }
+
+  function makeDepLink(name) {
+    const span = document.createElement('span');
+    span.className = 'dep-link';
+    span.textContent = name;
+    span.addEventListener('click', (e) => { e.stopPropagation(); navigateToNode(name); });
+    return span;
+  }
+
+  function addMetaLine(parent, label, value) {
+    const p = document.createElement('p');
+    p.className = 'detail-meta';
+    p.textContent = label + ': ';
+    const s = document.createElement('span');
+    s.textContent = value;
+    p.appendChild(s);
+    parent.appendChild(p);
+  }
+
+  function makeCollapsible(title) {
+    const el = document.createElement('div');
+    el.className = 'detail-section';
+    const header = document.createElement('h3');
+    header.className = 'collapsible-header';
+    header.textContent = title;
+    const body = document.createElement('div');
+    body.className = 'collapsible-body';
+    header.addEventListener('click', (e) => {
+      e.stopPropagation();
+      header.classList.toggle('open');
+      body.classList.toggle('open');
+    });
+    el.appendChild(header);
+    el.appendChild(body);
+    return { el, header, body };
+  }
+
+  // ── CAB Check mode ──
+  const cabBar = document.getElementById('cab-bar');
+  const cabSelectionEl = document.getElementById('cab-selection');
+  const cabToggleBtn = document.getElementById('cab-toggle');
+
+  cabToggleBtn.addEventListener('click', () => {
+    cabMode = !cabMode;
+    cabToggleBtn.classList.toggle('active', cabMode);
+    cabBar.classList.toggle('open', cabMode);
+    document.body.classList.toggle('cab-active', cabMode);
+    if (!cabMode) {
+      cabSelected.clear();
+      updateCabUI();
+      // Restore normal node appearance
+      nodeSelection.select('circle').attr('stroke', 'transparent').attr('stroke-width', 2.5);
+    }
+  });
+
+  document.getElementById('cab-cancel').addEventListener('click', () => {
+    cabMode = false;
+    cabToggleBtn.classList.remove('active');
+    cabBar.classList.remove('open');
+    document.body.classList.remove('cab-active');
+    cabSelected.clear();
+    updateCabUI();
+    nodeSelection.select('circle').attr('stroke', 'transparent').attr('stroke-width', 2.5);
+  });
+
+  document.getElementById('cab-run').addEventListener('click', async () => {
+    if (cabSelected.size < 2) return;
+    const names = [...cabSelected];
+    // Show CAB check results in detail panel
+    showCabResults(names);
+  });
+
+  function updateCabUI() {
+    if (cabSelected.size === 0) {
+      cabSelectionEl.textContent = 'Select 2+ resources on the graph';
+    } else {
+      cabSelectionEl.textContent = [...cabSelected].join(', ');
+    }
+    document.getElementById('cab-run').style.opacity = cabSelected.size >= 2 ? '1' : '0.4';
+
+    // Update node visual selection
+    if (nodeSelection) {
+      nodeSelection.select('circle')
+        .attr('stroke', n => cabSelected.has(n.id) ? 'var(--warning)' : 'transparent')
+        .attr('stroke-width', n => cabSelected.has(n.id) ? 3 : 2.5);
+    }
+  }
+
+  function showCabResults(names) {
+    detailContent.textContent = '';
+
+    const h2 = document.createElement('h2');
+    h2.textContent = 'CAB Check';
+    detailContent.appendChild(h2);
+
+    const subtitle = document.createElement('p');
+    subtitle.className = 'detail-meta';
+    subtitle.textContent = 'Simultaneous change: ' + names.join(', ');
+    detailContent.appendChild(subtitle);
+
+    // Compute overlap from closure data
+    const blastSets = {};
+    for (const name of names) {
+      const entry = impactData[name] || {};
+      blastSets[name] = new Set(Object.keys(entry.affected || {}));
+    }
+
+    // Per-resource blast
+    const perResource = makeSection('Blast Radius Per Resource');
+    for (const name of names) {
+      const entry = impactData[name] || {};
+      const p = document.createElement('div');
+      p.className = 'impact-stat';
+      p.innerHTML = `<span class="stat-label" style="cursor:pointer">${name}</span><span class="stat-value">${entry.affected_count || 0}</span><div class="stat-bar"><div class="stat-bar-fill" style="width:${((entry.affected_count || 0) / Math.max(Object.keys(resources).length - 1, 1)) * 100}%;background:var(--red)"></div></div>`;
+      p.querySelector('.stat-label').addEventListener('click', (e) => { e.stopPropagation(); navigateToNode(name); });
+      perResource.appendChild(p);
+    }
+    detailContent.appendChild(perResource);
+
+    // Overlap matrix
+    const overlapSection = makeSection('Overlap');
+    let hasOverlap = false;
+    for (let i = 0; i < names.length; i++) {
+      for (let j = i + 1; j < names.length; j++) {
+        const overlap = [...blastSets[names[i]]].filter(x => blastSets[names[j]].has(x));
+        if (overlap.length > 0) {
+          hasOverlap = true;
+          const p = document.createElement('div');
+          p.style.cssText = 'margin:0.3rem 0;';
+          p.innerHTML = `<span style="color:var(--warning);font-weight:700">${names[i]} + ${names[j]}</span>: <strong>${overlap.length}</strong> shared`;
+          const chips = document.createElement('div');
+          chips.className = 'resource-chips';
+          for (const name of overlap) {
+            const chip = document.createElement('span');
+            chip.className = 'resource-chip blast';
+            chip.textContent = name;
+            chip.addEventListener('click', (e) => { e.stopPropagation(); navigateToNode(name); });
+            chips.appendChild(chip);
+          }
+          p.appendChild(chips);
+          overlapSection.appendChild(p);
+        }
+      }
+    }
+    if (!hasOverlap) {
+      const p = document.createElement('p');
+      p.className = 'detail-meta';
+      p.style.color = 'var(--green)';
+      p.textContent = 'No overlap — these changes can proceed independently.';
+      overlapSection.appendChild(p);
+    }
+    detailContent.appendChild(overlapSection);
+
+    // Total
+    const allAffected = new Set();
+    for (const s of Object.values(blastSets)) for (const v of s) allAffected.add(v);
+    const totalSection = makeSection('Summary');
+    const summaryBox = document.createElement('div');
+    summaryBox.className = 'impact-summary';
+    summaryBox.innerHTML = `<div class="impact-headline">Total blast radius: <span class="blast-count">${allAffected.size}</span> resource${allAffected.size === 1 ? '' : 's'}</div>`;
+    totalSection.appendChild(summaryBox);
+    detailContent.appendChild(totalSection);
+
+    panelEl.classList.add('open');
+  }
+
+  // ── Tier info bar ──
+  function updateTierInfo(data) {
+    const el = document.getElementById('tier-info');
+    el.textContent = '';
+    if (!data) return;
+
+    const maxBlast = Math.max(...Object.values(impactData).map(e => e.affected_count || 0), 0);
+    const stats = [
+      ['resources', data.summary?.total_resources ?? Object.keys(resources).length],
+      ['edges', data.summary?.total_edges ?? links.length],
+      ['max blast', maxBlast],
+      ['SPOF', Array.isArray(data.spof) ? data.spof.length : '?'],
+    ];
+    for (const [label, value] of stats) {
+      const span = document.createElement('span');
+      span.className = 'stat';
+      const b = document.createElement('b');
+      b.textContent = value;
+      span.appendChild(b);
+      span.appendChild(document.createTextNode(' ' + label));
+      el.appendChild(span);
+    }
+  }
+
+  // ── Tier switching ──
+  async function switchTier(tier) {
+    if (tier === currentTier && Object.keys(resources).length > 0) return;
+    currentTier = tier;
+
+    // Update tab UI
+    document.querySelectorAll('.tier-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tier === tier);
+    });
+
+    deselectNode();
+
+    // Interrupt any running D3 transitions
+    d3.selectAll('line, g.node-group').interrupt();
+
+    // Show loading overlay
+    let loadingEl = document.getElementById('loading');
+    if (!loadingEl) {
+      loadingEl = document.createElement('div');
+      loadingEl.id = 'loading';
+      loadingEl.className = 'loading';
+      document.getElementById('graph-area').prepend(loadingEl);
+    }
+    loadingEl.textContent = 'Loading ' + (TIER_LABELS[tier] || tier) + '...';
+    loadingEl.style.display = 'flex';
+
+    const data = await loadTier(tier);
+    if (!data) {
+      loadingEl.textContent = 'Failed to load ' + tier;
+      return;
+    }
+
+    loadingEl.style.display = 'none';
+
+    parseTierData(data);
+    buildGraph();
+    updateTierInfo(data);
+  }
+
+  // ── Layer toggles ──
+  document.querySelectorAll('.layer-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const layer = parseInt(btn.dataset.layer, 10);
+      layerVisibility[layer] = !layerVisibility[layer];
+      btn.classList.toggle('off', !layerVisibility[layer]);
+      applyVisibility();
+    });
+  });
+
+  function applyVisibility() {
+    if (!nodeSelection) return;
+    nodeSelection.style('display', d => layerVisibility[d.layer] ? null : 'none');
+    linkSelection.style('display', l => {
+      const sl = typeof l.source === 'object' ? l.source.layer : layerMap[l.source];
+      const tl = typeof l.target === 'object' ? l.target.layer : layerMap[l.target];
+      return (layerVisibility[sl] && layerVisibility[tl]) ? null : 'none';
+    });
+  }
+
+  // ── Layout switching ──
+  document.querySelectorAll('.layout-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const layout = btn.dataset.layout;
+      if (layout === currentLayout) return;
+      currentLayout = layout;
+      document.querySelectorAll('.layout-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.layout === layout));
+      applyLayout();
+    });
+  });
+
+  function applyLayout() {
+    if (!simulation || !nodes.length) return;
+    if (currentLayout === 'layered') {
+      simulation.stop();
+      const padding = 80;
+      const usableW = width - padding * 2;
+      const usableH = height - padding * 2;
+      const colWidth = usableW / 5; // layers 0-4
+
+      const layerCounts = {};
+      for (const n of nodes) layerCounts[n.layer] = (layerCounts[n.layer] || 0) + 1;
+      const layerIndex = {};
+
+      for (const n of nodes) {
+        const li = n.layer;
+        layerIndex[li] = (layerIndex[li] || 0);
+        const count = layerCounts[li];
+        const ySpacing = usableH / (count + 1);
+        n.fx = padding + li * colWidth;
+        n.fy = padding + (layerIndex[li] + 1) * ySpacing;
+        layerIndex[li]++;
+      }
+
+      for (const n of nodes) { n.x = n.fx; n.y = n.fy; }
+
+      simulation.alphaTarget(0).alpha(0);
+      nodeSelection.transition().duration(500)
+        .attr('transform', d => `translate(${d.x},${d.y})`);
+      linkSelection.transition().duration(500)
+        .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+        .attr('x2', d => {
+          const dx = d.target.x - d.source.x;
+          const dy = d.target.y - d.source.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          return d.target.x - (dx / dist) * (d.target.radius || 12);
+        })
+        .attr('y2', d => {
+          const dx = d.target.x - d.source.x;
+          const dy = d.target.y - d.source.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          return d.target.y - (dy / dist) * (d.target.radius || 12);
+        });
+    } else {
+      for (const n of nodes) { n.fx = null; n.fy = null; }
+      simulation.alpha(0.6).restart();
+    }
+  }
+
+  // ── Zoom reset ──
+  document.getElementById('zoom-reset').addEventListener('click', () => {
+    svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity);
+  });
+
+  // ── Resize ──
+  const resizeObserver = new ResizeObserver(() => {
+    const newW = graphArea.clientWidth;
+    const newH = graphArea.clientHeight;
+    if (newW === width && newH === height) return;
+    width = newW; height = newH;
+    if (simulation) {
+      simulation.force('center', d3.forceCenter(width / 2, height / 2));
+      simulation.force('x', d3.forceX(width / 2).strength(0.04));
+      simulation.force('y', d3.forceY(height / 2).strength(0.04));
+      if (currentLayout === 'force') simulation.alpha(0.15).restart();
+      else applyLayout();
+    }
+  });
+  resizeObserver.observe(graphArea);
+
+  // ── Execution console ──
+  const consolePanel = document.getElementById('console-panel');
+  const consoleBody = document.getElementById('console-body');
+  const consoleStatus = document.getElementById('console-status');
+
+  function openConsole() {
+    consolePanel.classList.add('open');
+    document.getElementById('console-toggle').classList.add('active');
+  }
+  function closeConsole() {
+    consolePanel.classList.remove('open');
+    document.getElementById('console-toggle').classList.remove('active');
+  }
+
+  document.getElementById('console-toggle').addEventListener('click', () => {
+    consolePanel.classList.contains('open') ? closeConsole() : openConsole();
+  });
+  document.getElementById('console-close').addEventListener('click', closeConsole);
+  document.getElementById('console-clear').addEventListener('click', () => {
+    consoleBody.textContent = '';
+  });
+
+  async function executeCommand(resource, action, command) {
+    const resp = await fetch('/api/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tier: currentTier, resource, action, command }),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ detail: resp.statusText }));
+      throw new Error(err.detail || `HTTP ${resp.status}`);
+    }
+    return resp.json();
+  }
+
+  function appendConsoleEntry(result) {
+    const div = document.createElement('div');
+    const rc = result.returncode ?? 0;
+    const mode = result.mode || 'mock';
+    div.className = 'console-entry ' + (mode === 'mock' ? 'ce-mock' : rc === 0 ? 'ce-ok' : 'ce-err');
+
+    const cmdEl = document.createElement('div');
+    cmdEl.className = 'ce-cmd';
+    cmdEl.textContent = (result.resource ? result.resource + ' > ' : '') + (result.command || '');
+    div.appendChild(cmdEl);
+
+    if (result.output) {
+      const outEl = document.createElement('div');
+      outEl.className = 'ce-output';
+      const maxLen = 2000;
+      if (result.output.length > maxLen) {
+        outEl.textContent = result.output.substring(0, maxLen) + '\n... (truncated)';
+      } else {
+        outEl.textContent = result.output;
+      }
+      div.appendChild(outEl);
+    }
+
+    const ts = new Date().toLocaleTimeString();
+    const meta = document.createElement('div');
+    meta.className = 'ce-meta';
+    meta.textContent = `${ts} | ${mode} | rc=${rc} | ${result.duration_ms ?? 0}ms`;
+    div.appendChild(meta);
+
+    // Only auto-scroll if user is already near the bottom
+    const atBottom = consoleBody.scrollHeight - consoleBody.scrollTop - consoleBody.clientHeight < 40;
+    consoleBody.appendChild(div);
+    if (atBottom) consoleBody.scrollTop = consoleBody.scrollHeight;
+  }
+
+  // Check server mode on load
+  fetch('/api/status').then(r => r.json()).then(d => {
+    consoleStatus.textContent = d.live ? 'LIVE mode' : 'mock mode';
+    consoleStatus.style.color = d.live ? 'var(--green)' : 'var(--warning)';
+  }).catch(() => {
+    consoleStatus.textContent = 'offline (static data)';
+  });
+
+  // ── Initial load ──
+  await switchTier('desktop');
+
+})();
+</script>
+</body>
+</html>
