@@ -55,6 +55,17 @@ jobs:
         with:
           version: v0.15.4
 
+      - name: Ensure vendored deps resolve
+        run: |
+          # CUE v0.15 vendor resolution may look for either apercue.ca@v0/ or apercue.ca/
+          # Ensure both exist so resolution works regardless of CUE's lookup strategy
+          if [ -d "cue.mod/pkg/apercue.ca@v0" ] && [ ! -d "cue.mod/pkg/apercue.ca" ]; then
+            cp -r "cue.mod/pkg/apercue.ca@v0" "cue.mod/pkg/apercue.ca"
+          elif [ -d "cue.mod/pkg/apercue.ca" ] && [ ! -d "cue.mod/pkg/apercue.ca@v0" ]; then
+            cp -r "cue.mod/pkg/apercue.ca" "cue.mod/pkg/apercue.ca@v0"
+          fi
+          ls cue.mod/pkg/
+
       - name: Validate core vocabulary
         run: cue vet ./vocab/ ./patterns/ ./charter/ -c
 
