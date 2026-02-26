@@ -32,6 +32,7 @@ cue eval ./examples/datacenter/ -e output
 | `toon-export/` | Export infrastructure data in visualization-ready formats |
 | `sbom/` | CycloneDX SBOM → dependency graph — software supply chain as typed graph with SPOF analysis |
 | `ci/` | GitLab CI pipeline → dependency graph — stages, jobs, and DAG edges as typed graph |
+| `universal-platform/` | Change impact analysis — same 15-resource graph across 4 tiers with blast radius, CAB check, and risk ranking ([repo](https://github.com/quicue/universal-platform)) |
 
 ## Progression
 
@@ -43,3 +44,4 @@ cue eval ./examples/datacenter/ -e output
 6. See **`patterns-v2/`** for charter-driven project tracking
 7. Try **`sbom/`** for external spec import — CycloneDX SBOM as a typed graph
 8. Try **`ci/`** for CI/CD pipeline import — GitLab CI as a typed graph
+9. Explore **`universal-platform/`** for the capstone — change impact analysis at 4 scales with infra-graph API contract ([repo](https://github.com/quicue/universal-platform))

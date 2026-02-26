@@ -1,0 +1,15 @@
+. {
+    forward . 8.8.8.8 8.8.4.4
+    log
+    errors
+    health :8080
+}
+
+platform.local {
+    template IN A {
+        match ^(.*)\.platform\.local\.$
+        answer "{{ .Name }} 60 IN CNAME {{ .Group.1 }}"
+    }
+    forward . 127.0.0.1:53
+    log
+}

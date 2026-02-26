@@ -28,7 +28,7 @@ respec_cleanup: core.#Task & {
 core_report: core.#Task & {
 	id:       "core-report"
 	title:    "Write core use case report"
-	status:   "pending"
+	status:   "done"
 	project:  "w3c-entry"
 	priority: "high"
 	date:     "2026-02-25"
@@ -46,7 +46,7 @@ core_report: core.#Task & {
 sub_kg_construct: core.#Task & {
 	id:       "sub-kg-construct"
 	title:    "KG-Construct CG submission"
-	status:   "pending"
+	status:   "done"
 	project:  "w3c-entry"
 	priority: "high"
 	depends_on: {"core-report": true}
@@ -63,7 +63,7 @@ sub_kg_construct: core.#Task & {
 sub_context_graphs: core.#Task & {
 	id:       "sub-context-graphs"
 	title:    "Context Graphs CG submission"
-	status:   "pending"
+	status:   "done"
 	project:  "w3c-entry"
 	priority: "high"
 	depends_on: {"core-report": true}
@@ -77,7 +77,7 @@ sub_context_graphs: core.#Task & {
 sub_pm_kr: core.#Task & {
 	id:       "sub-pm-kr"
 	title:    "PM-KR CG submission"
-	status:   "pending"
+	status:   "done"
 	project:  "w3c-entry"
 	priority: "medium"
 	depends_on: {"core-report": true}
@@ -94,7 +94,7 @@ sub_pm_kr: core.#Task & {
 sub_dataspaces: core.#Task & {
 	id:       "sub-dataspaces"
 	title:    "Dataspaces CG submission"
-	status:   "pending"
+	status:   "done"
 	project:  "w3c-entry"
 	priority: "medium"
 	depends_on: {"core-report": true}

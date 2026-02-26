@@ -113,7 +113,7 @@ modules: {
 	examples: {
 		path:  "examples/"
 		layer: "value"
-		description: "11 working examples from minimal 3-layer to full 30-resource datacenter"
+		description: "17 working examples from minimal 3-layer to full 30-resource datacenter"
 		status: "active"
 		entries: [
 			"datacenter",
@@ -129,6 +129,10 @@ modules: {
 			"toon-export",
 			"patterns-v2",
 			"reconciliation",
+			"showcase",
+			"sbom",
+			"ci",
+			"universal-platform",
 		]
 	}
 }

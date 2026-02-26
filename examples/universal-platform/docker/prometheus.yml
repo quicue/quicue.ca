@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets:
+          - "localhost:9090"
+
+  - job_name: "platform-http"
+    metrics_path: /
+    scheme: http
+    static_configs:
+      - targets:
+          - "platform-app:80"
+          - "platform-proxy:80"
+    # These won't return Prometheus metrics format, but the scrape
+    # attempt itself provides up/down health signal via up{} metric.
