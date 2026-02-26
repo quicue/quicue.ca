@@ -2,16 +2,7 @@
 
 The full quicue-kg specification covers directory layout, type constraints, aggregation semantics, W3C projection mappings, and the federation protocol.
 
-**[Read the specification &rarr;](https://kg.quicue.ca/spec/index.html)**
-
-The specification is a W3C-style ReSpec document covering:
-
-- **Core types** — `#Decision`, `#Pattern`, `#Insight`, `#Rejected` with validation rules
-- **Extension types** — `#Derivation`, `#Workspace`, `#Context`, `#SourceFile`, `#CollectionProtocol`, `#PipelineRun`
-- **Aggregation** — `#KGIndex` computed views, `#KGLint` quality checks
-- **W3C projections** — PROV-O, Web Annotation, DCAT, N-Triples, Turtle, SKOS, Prolog, Datalog
-- **Federation protocol** — Cross-project discovery, merge semantics, conflict detection
-- **JSON-LD context** — Namespace mappings and RDFS class hierarchy
+The knowledge graph specification covers core types, extension types, aggregation semantics, W3C vocabulary projections, and the federation protocol for .kb/ knowledge graphs.
 
 ## JSON-LD Context
 
