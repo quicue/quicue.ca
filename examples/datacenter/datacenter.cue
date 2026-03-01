@@ -917,3 +917,47 @@ _nt: patterns.#NTriplesExport & {
 	BaseIRI: _base
 }
 sparql_export: _nt.triples
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// VoID DATASET (graph self-description)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// cue export ./examples/datacenter/ -e void_dataset --out json
+
+_void: patterns.#VoIDDataset & {
+	Graph:      infra
+	DatasetURI: _base + "dataset"
+	Title:      "Datacenter Infrastructure Dataset"
+	Homepage:   "https://infra.example.com"
+}
+void_dataset: _void.void_description
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// OWL ONTOLOGY (type vocabulary as formal ontology)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// cue export ./examples/datacenter/ -e owl_ontology --out json
+
+_owl: patterns.#OWLOntology & {
+	Graph: infra
+	Spec: {
+		URI:         "https://infra.example.com/ontology#"
+		Title:       "Datacenter Infrastructure Ontology"
+		Description: "OWL ontology extracted from datacenter resource types"
+		Version:     "1.0.0"
+	}
+	IncludeIndividuals: true
+}
+owl_ontology: _owl.owl_ontology
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DQV DATA QUALITY (graph health metrics)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// cue export ./examples/datacenter/ -e quality_report --out json
+
+_dqv: patterns.#DataQualityReport & {
+	Graph:      infra
+	DatasetURI: _base + "dataset"
+}
+quality_report: _dqv.quality_report
