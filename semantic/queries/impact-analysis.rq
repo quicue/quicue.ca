@@ -1,0 +1,12 @@
+# Impact Analysis: What breaks if a resource goes down?
+# Usage: Replace the target URN with the resource you're investigating
+PREFIX apercue: <https://apercue.ca/vocab#>
+
+SELECT ?app ?appName ?environment WHERE {
+    ?resource apercue:name ?rName .
+    FILTER(CONTAINS(LCASE(?rName), "active directory"))
+    ?resource apercue:appearsIn ?app .
+    ?app apercue:name ?appName .
+    OPTIONAL { ?app apercue:environment ?environment }
+}
+ORDER BY ?appName

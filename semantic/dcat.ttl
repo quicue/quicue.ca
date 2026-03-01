@@ -1,0 +1,45 @@
+@prefix dcat:    <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix vcard:   <http://www.w3.org/2006/vcard/ns#> .
+
+# ─────────────────────────────────────────────────
+# DCAT Catalog — dataset discovery for CKAN and data portals
+# ─────────────────────────────────────────────────
+
+<https://sparql.infra.grdn/catalog> a dcat:Catalog ;
+    dcterms:title "apercue Infrastructure Data Catalog" ;
+    dcterms:description "Catalog of infrastructure datasets maintained by Central IT, University of Ottawa." ;
+    dcterms:publisher <https://apercue.ca> ;
+    dcat:dataset <https://sparql.infra.grdn/dataset/infrastructure> .
+
+# The infrastructure dataset
+<https://sparql.infra.grdn/dataset/infrastructure> a dcat:Dataset ;
+    dcterms:title "Infrastructure Dependency Graph" ;
+    dcterms:description "Typed infrastructure resources, applications, and their dependency relationships. Covers databases, VMs, network devices, authentication servers, and more." ;
+    dcterms:publisher <https://apercue.ca> ;
+    dcterms:accrualPeriodicity <http://purl.org/cld/freq/irregular> ;
+    dcat:keyword "infrastructure", "dependencies", "applications", "university" ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/TECH> ;
+    dcat:distribution <https://sparql.infra.grdn/dataset/infrastructure/sparql> ;
+    dcat:distribution <https://sparql.infra.grdn/dataset/infrastructure/jsonld> .
+
+# SPARQL endpoint as a DataService
+<https://sparql.infra.grdn/service/sparql> a dcat:DataService ;
+    dcterms:title "Infrastructure SPARQL Endpoint" ;
+    dcat:endpointURL <https://sparql.infra.grdn/query> ;
+    dcat:servesDataset <https://sparql.infra.grdn/dataset/infrastructure> ;
+    dcterms:conformsTo <https://www.w3.org/TR/sparql11-protocol/> .
+
+# SPARQL distribution
+<https://sparql.infra.grdn/dataset/infrastructure/sparql> a dcat:Distribution ;
+    dcat:accessService <https://sparql.infra.grdn/service/sparql> ;
+    dcat:mediaType "application/sparql-results+json" ;
+    dcterms:title "SPARQL Endpoint" .
+
+# JSON-LD bulk download
+<https://sparql.infra.grdn/dataset/infrastructure/jsonld> a dcat:Distribution ;
+    dcat:downloadURL <https://sparql.infra.grdn/data/infra-graph.jsonld> ;
+    dcat:mediaType "application/ld+json" ;
+    dcterms:title "JSON-LD Export" .

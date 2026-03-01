@@ -1,0 +1,18 @@
+# Compliance Gaps: resources missing required metadata
+PREFIX apercue: <https://apercue.ca/vocab#>
+
+SELECT ?resource ?name ?type ?missing WHERE {
+    ?resource a ?type ;
+              apercue:name ?name .
+    FILTER(STRSTARTS(STR(?type), "https://apercue.ca/vocab#"))
+
+    OPTIONAL { ?resource apercue:ipAddress ?ip }
+    BIND(IF(!BOUND(?ip), "ipAddress", "") AS ?missingIp)
+
+    OPTIONAL { ?resource apercue:functionDescription ?desc }
+    BIND(IF(!BOUND(?desc), "functionDescription", "") AS ?missingDesc)
+
+    BIND(CONCAT(?missingIp, " ", ?missingDesc) AS ?missing)
+    FILTER(?missing != " ")
+}
+ORDER BY ?type ?name
