@@ -1,0 +1,9 @@
+# Type Distribution: count resources by semantic type
+PREFIX apercue: <https://apercue.ca/vocab#>
+
+SELECT ?type (COUNT(?resource) AS ?count) WHERE {
+    ?resource a ?type .
+    FILTER(STRSTARTS(STR(?type), "https://apercue.ca/vocab#"))
+}
+GROUP BY ?type
+ORDER BY DESC(?count)

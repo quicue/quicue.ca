@@ -1,0 +1,14 @@
+# Blast Radius: multiple simultaneous failures
+PREFIX apercue: <https://apercue.ca/vocab#>
+
+SELECT ?app ?appName (GROUP_CONCAT(?rName; separator=", ") AS ?failedDeps) WHERE {
+    VALUES ?failedResource {
+        <urn:uottawa:infra:svc:active-directory>
+        <urn:uottawa:infra:svc:zabbix>
+    }
+    ?failedResource apercue:name ?rName .
+    ?failedResource apercue:appearsIn ?app .
+    ?app apercue:name ?appName .
+}
+GROUP BY ?app ?appName
+ORDER BY ?appName

@@ -1,0 +1,16 @@
+# Single Points of Failure: resources used by many apps
+PREFIX apercue: <https://apercue.ca/vocab#>
+
+SELECT ?resource ?name ?type ?appCount WHERE {
+    ?resource a ?type ;
+              apercue:name ?name .
+    FILTER(STRSTARTS(STR(?type), "https://apercue.ca/vocab#"))
+    {
+        SELECT ?resource (COUNT(DISTINCT ?app) AS ?appCount) WHERE {
+            ?resource apercue:appearsIn ?app .
+        }
+        GROUP BY ?resource
+    }
+    FILTER(?appCount > 5)
+}
+ORDER BY DESC(?appCount)

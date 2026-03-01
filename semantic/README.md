@@ -1,7 +1,8 @@
 # Semantic Web Assets
 
-Standalone W3C standards assets for infrastructure data provenance.
-Load these into any SPARQL-capable triple store (Oxigraph, Fuseki, GraphDB, Stardog).
+W3C standards assets for infrastructure data: provenance, graph analysis, and
+compliance queries. Load into any SPARQL-capable triple store (Oxigraph, Fuseki,
+GraphDB, Stardog).
 
 ## Files
 
@@ -9,7 +10,7 @@ Load these into any SPARQL-capable triple store (Oxigraph, Fuseki, GraphDB, Star
 |------|----------|---------|
 | `provenance.ttl` | OWL + PROV-O | Ontology extension for data lineage |
 | `provenance.shacl.ttl` | SHACL | Validation shapes with graduated severity |
-| `queries/*.rq` | SPARQL 1.1 | Ready-to-use provenance queries |
+| `queries/*.rq` | SPARQL 1.1 | 10 ready-to-use infrastructure queries |
 
 ## Provenance Ontology
 
@@ -22,6 +23,18 @@ Extends [W3C PROV-O](https://www.w3.org/TR/prov-o/) with infrastructure-specific
 - **LatticeUnification** (prov:Activity) — CUE evaluation that merges per-source files
 
 ## SPARQL Queries
+
+### Graph Analysis
+
+| Query | Returns |
+|-------|---------|
+| `impact-analysis.rq` | What breaks if a resource goes down |
+| `blast-radius.rq` | Scope of multiple simultaneous failures |
+| `spof-detection.rq` | Single points of failure (resources used by >5 apps) |
+| `type-distribution.rq` | Resource counts by semantic type |
+| `compliance-gaps.rq` | Resources missing required metadata (IP, description) |
+
+### Provenance
 
 | Query | Returns |
 |-------|---------|

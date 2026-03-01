@@ -1,0 +1,29 @@
+@prefix void:    <http://rdfs.org/ns/void#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix apercue: <https://apercue.ca/vocab#> .
+
+# ─────────────────────────────────────────────────
+# VoID Dataset Descriptor — machine-readable metadata about this SPARQL endpoint
+# ─────────────────────────────────────────────────
+
+<https://sparql.example.com/dataset/infrastructure> a void:Dataset ;
+    dcterms:title "University of Ottawa Infrastructure Dependency Graph" ;
+    dcterms:description "Typed infrastructure resources, applications, and their dependency relationships. Exported from CUE-native configuration via JSON-LD." ;
+    dcterms:publisher <https://apercue.ca> ;
+    void:sparqlEndpoint <https://sparql.example.com/query> ;
+    void:vocabulary <https://apercue.ca/vocab#> ;
+    void:vocabulary <http://www.w3.org/2004/02/skos/core#> ;
+    void:vocabulary <http://www.w3.org/ns/prov#> ;
+    void:vocabulary <http://www.w3.org/ns/dcat#> ;
+    void:uriSpace "urn:infra:" ;
+    void:exampleResource <urn:infra:database:cdb-p40:10-33-32-48> .
+
+# Linkset to Wikidata
+<https://sparql.example.com/linkset/wikidata> a void:Linkset ;
+    void:target <http://www.wikidata.org/> ;
+    void:subjectsTarget <https://sparql.example.com/dataset/infrastructure> ;
+    void:objectsTarget <http://www.wikidata.org/> ;
+    void:linkPredicate <http://www.w3.org/2002/07/owl#equivalentClass> ;
+    dcterms:description "OWL equivalentClass mappings between apercue infrastructure types and Wikidata entities. 25 of 26 classes mapped." .
