@@ -170,6 +170,7 @@ import "quicue.ca/vocab"
 		name:             "delete_admin_token"
 		description:      "Delete an admin API token from the cluster, revoking all its permissions."
 		category:         "admin"
+		destructive:      true
 		params: {
 			api_url: {from_field: "garage_url"}
 			api_token: {from_field: "garage_token"}
@@ -181,6 +182,7 @@ import "quicue.ca/vocab"
 		name:             "delete_bucket"
 		description:      "Deletes a storage bucket. A bucket cannot be deleted if it is not empty."
 		category:         "admin"
+		destructive:      true
 		params: {
 			api_url: {from_field: "garage_url"}
 			api_token: {from_field: "garage_token"}
@@ -192,6 +194,7 @@ import "quicue.ca/vocab"
 		name:             "delete_key"
 		description:      "Delete a key from the cluster. Its access will be removed from all the buckets it was associated with."
 		category:         "admin"
+		destructive:      true
 		params: {
 			api_url: {from_field: "garage_url"}
 			api_token: {from_field: "garage_token"}

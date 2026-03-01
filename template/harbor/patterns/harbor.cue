@@ -76,7 +76,7 @@ import "quicue.ca/vocab"
 	get_project_deletable: vocab.#ActionDef & {
 		name:             "get_project_deletable"
 		description:      "Get the deletable status of the project"
-		category:         "monitor"
+		category:         "info"
 		params: {
 			api_url: {from_field: "harbor_url"}
 			api_token: {from_field: "harbor_token"}
