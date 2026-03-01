@@ -52,16 +52,19 @@ Specs: {[string]: #SpecEntry} & {
 		patterns: {
 			"#ComplianceCheck": true
 			"#GapAnalysis":     true
+			"#SHACLShapes":     true
 		}
 		files: {
 			"patterns/validation.cue": true
+			"patterns/shapes.cue":     true
 			"charter/charter.cue":     true
 		}
 		exports: {
-			"compliance.shacl_report": true
-			"gaps.shacl_report":       true
+			"compliance.shacl_report":     true
+			"gaps.shacl_report":           true
+			"shape_export.shapes_graph":   true
 		}
-		coverage: "sh:ValidationReport from compliance checks and gap analysis"
+		coverage: "sh:ValidationReport from compliance/gap analysis + sh:NodeShape generation from graph types"
 	}
 
 	"SKOS": {
@@ -72,16 +75,19 @@ Specs: {[string]: #SpecEntry} & {
 		patterns: {
 			"#LifecyclePhasesSKOS": true
 			"#TypeVocabulary":      true
+			"#SKOSTaxonomy":        true
 		}
 		files: {
 			"patterns/lifecycle.cue": true
+			"patterns/taxonomy.cue":  true
 			"views/skos.cue":         true
 		}
 		exports: {
-			"lifecycle_skos": true
-			"type_vocab":     true
+			"lifecycle_skos":          true
+			"type_vocab":              true
+			"taxonomy.taxonomy_scheme": true
 		}
-		coverage: "skos:ConceptScheme from type vocabularies and lifecycle phases"
+		coverage: "skos:ConceptScheme from type vocabularies, lifecycle phases, and hierarchical taxonomies with broader/narrower"
 	}
 
 	"EARL": {
@@ -122,10 +128,19 @@ Specs: {[string]: #SpecEntry} & {
 		url:    "https://www.w3.org/TR/prov-o/"
 		status: "Implemented"
 		prefix: "prov"
-		patterns: {"#ProvenanceTrace": true}
-		files: {"patterns/provenance.cue": true}
-		exports: {"provenance.prov_report": true}
-		coverage: "prov:Entity + prov:wasDerivedFrom from dependency edges"
+		patterns: {
+			"#ProvenanceTrace": true
+			"#ProvenancePlan":  true
+		}
+		files: {
+			"patterns/provenance.cue":      true
+			"patterns/provenance_plan.cue":  true
+		}
+		exports: {
+			"provenance.prov_report":     true
+			"_prov_plan.plan_report":     true
+		}
+		coverage: "prov:Entity + prov:wasDerivedFrom from dependency edges; prov:Plan from charter gates with prov:Activity per gate"
 	}
 
 	"schema.org": {
@@ -183,6 +198,50 @@ Specs: {[string]: #SpecEntry} & {
 		coverage: "org:Organization with type-based OrganizationalUnits"
 	}
 
+	"VoID": {
+		name:   "VoID"
+		url:    "https://www.w3.org/TR/void/"
+		status: "Implemented"
+		prefix: "void"
+		patterns: {"#VoIDDataset": true}
+		files: {"patterns/void.cue": true}
+		exports: {"void_dataset.void_description": true}
+		coverage: "void:Dataset with class/property partitions, linkset statistics, and vocabulary usage"
+	}
+
+	"Web Annotation": {
+		name:   "Web Annotation"
+		url:    "https://www.w3.org/TR/annotation-model/"
+		status: "Implemented"
+		prefix: "oa"
+		patterns: {"#AnnotationCollection": true}
+		files: {"patterns/annotation.cue": true}
+		exports: {"annotations.annotation_collection": true}
+		coverage: "oa:Annotation with TextualBody, SpecificResource targets, and W3C motivations"
+	}
+
+	"RDFS": {
+		name:   "RDFS"
+		url:    "https://www.w3.org/TR/rdf-schema/"
+		status: "Implemented"
+		prefix: "rdfs"
+		patterns: {"#OWLOntology": true}
+		files: {"patterns/ontology.cue": true}
+		exports: {"ontology.owl_ontology": true}
+		coverage: "rdfs:Class and rdfs:subClassOf from graph type hierarchy with owl:ObjectProperty for dependencies"
+	}
+
+	"DQV": {
+		name:   "DQV"
+		url:    "https://www.w3.org/TR/vocab-dqv/"
+		status: "Implemented"
+		prefix: "dqv"
+		patterns: {"#DataQualityReport": true}
+		files: {"patterns/quality.cue": true}
+		exports: {"_quality.quality_report": true}
+		coverage: "dqv:QualityMeasurement for completeness, consistency, and accessibility dimensions"
+	}
+
 	// ── Downstream (implemented in quicue.ca) ────────────────────────
 
 	"Hydra Core": {
@@ -201,9 +260,12 @@ Specs: {[string]: #SpecEntry} & {
 		url:    "https://www.w3.org/TR/vocab-dcat-3/"
 		status: "Implemented"
 		prefix: "dcat"
-		patterns: {"#DCATCatalog": true}
+		patterns: {
+			"#DCATCatalog":      true
+			"#DCATDistribution": true
+		}
 		files: {"patterns/catalog.cue": true}
 		exports: {"catalog.dcat_catalog": true}
-		coverage: "dcat:Catalog with dcat:Dataset per resource, dcat:theme from @type"
+		coverage: "dcat:Catalog with dcat:Dataset, dcat:Distribution, dcat:DataService, and dcat:theme from @type"
 	}
 }
