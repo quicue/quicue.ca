@@ -51,6 +51,7 @@ import "quicue.ca/vocab"
 		name:             "mass_delete_annotations"
 		description:      "Delete multiple annotations."
 		category:         "admin"
+		destructive:      true
 		params: {
 			api_url: {from_field: "grafana_url"}
 			api_token: {from_field: "grafana_token"}
@@ -115,6 +116,7 @@ import "quicue.ca/vocab"
 		name:             "delete_annotation_by_id"
 		description:      "Delete Annotation By ID."
 		category:         "admin"
+		destructive:      true
 		params: {
 			api_url: {from_field: "grafana_url"}
 			api_token: {from_field: "grafana_token"}
@@ -251,6 +253,7 @@ import "quicue.ca/vocab"
 		name:             "delete_public_dashboard"
 		description:      "Delete public dashboard for a dashboard"
 		category:         "admin"
+		destructive:      true
 		params: {
 			api_url: {from_field: "grafana_url"}
 			api_token: {from_field: "grafana_token"}
@@ -278,6 +281,7 @@ import "quicue.ca/vocab"
 		name:             "delete_dashboard_by_uid"
 		description:      "Delete dashboard by uid."
 		category:         "admin"
+		destructive:      true
 		params: {
 			api_url: {from_field: "grafana_url"}
 			api_token: {from_field: "grafana_token"}
@@ -417,8 +421,9 @@ import "quicue.ca/vocab"
 
 	delete_data_source_by_name: vocab.#ActionDef & {
 		name:             "delete_data_source_by_name"
-		description:      "Delete an existing data source by name. This function will be removed in the"
+		description:      "Delete an existing data source by name."
 		category:         "admin"
+		destructive:      true
 		params: {
 			api_url: {from_field: "grafana_url"}
 			api_token: {from_field: "grafana_token"}
@@ -460,6 +465,7 @@ import "quicue.ca/vocab"
 		name:             "datasource_proxy_deleteby_uidcalls"
 		description:      "Data source proxy DELETE calls."
 		category:         "admin"
+		destructive:      true
 		params: {
 			api_url: {from_field: "grafana_url"}
 			api_token: {from_field: "grafana_token"}
@@ -502,6 +508,7 @@ import "quicue.ca/vocab"
 		name:             "datasource_proxy_deletecalls"
 		description:      "Data source proxy DELETE calls."
 		category:         "admin"
+		destructive:      true
 		params: {
 			api_url: {from_field: "grafana_url"}
 			api_token: {from_field: "grafana_token"}
