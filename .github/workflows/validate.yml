@@ -58,6 +58,9 @@ jobs:
       - name: Populate CUE module cache
         run: bash .github/populate-cue-cache.sh
 
+      - name: Validate vendor sync
+        run: bash .github/validate-vendor-sync.sh
+
       - name: Validate core vocabulary
         run: cue vet ./vocab/ ./patterns/ ./charter/ -c
 
