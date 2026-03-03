@@ -1,6 +1,6 @@
 # Insights
 
-14 validated discoveries from building the quicue ecosystem.
+15 validated discoveries from building the quicue ecosystem.
 
 ## INSIGHT-001: CUE transitive closure performance is topology-sensitive, not node-count-limited
 
@@ -232,6 +232,24 @@ Token management needs a single source of truth. CF_API_KEY vs CLOUDFLARE_API_TO
 
 **Related:** INSIGHT-004
 
+---
+
+## INSIGHT-015: SHACL 1.2 and CUE unification solve the same validation problem at different layers
+
+**Method:** cross_reference | **Confidence:** high | **Discovered:** 2026-03-02
+
+### Evidence
+
+- Kurt Cagle's SHACL 1.2 methodology (shacl-methodology, shaclify, shaclConverter, contextGraph, annotation-context-ontology) implements the same patterns as quicue.ca: typed schema → validation → derived properties → W3C export
+- `sh:codeIdentifier` in SHACL serves the same role as `@type` in CUE: a binding surface between the schema and external data representations
+- SHACL's validate→store→query pipeline (pyshacl + Fuseki + SPARQL) collapses to a single `cue export` in the CUE approach
+- The one exception: RDF-Star contextual truth annotations (ACO) express per-statement provenance that CUE's closed-world assumption cannot natively represent
+
+### Implication
+
+CUE typed graphs handle the same validation, binding, and projection problems as the full SHACL 1.2 stack, with zero runtime dependencies. The SHACL approach retains an advantage only for open-world, multi-perspective data requiring statement-level annotation.
+
+**Related:** INSIGHT-007, INSIGHT-011, INSIGHT-006
 
 ---
 *Generated from quicue.ca registries by `#DocsProjection`*

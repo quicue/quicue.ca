@@ -271,6 +271,26 @@ i014: core.#Insight & {
 	related: {"INSIGHT-004": true}
 }
 
+i015: core.#Insight & {
+	id:        "INSIGHT-015"
+	statement: "SHACL 1.2 and CUE unification solve the same validation problem at different layers"
+	evidence: [
+		"Kurt Cagle's SHACL 1.2 methodology (shacl-methodology, shaclify, shaclConverter, contextGraph, annotation-context-ontology) implements the same patterns as quicue.ca: typed schema, validation, derived properties, W3C export",
+		"sh:codeIdentifier in SHACL serves the same role as @type in CUE: a binding surface between the schema and external data representations",
+		"SHACL's validate-store-query pipeline (pyshacl + Fuseki + SPARQL) collapses to a single cue export in the CUE approach",
+		"The one exception: RDF-Star contextual truth annotations (ACO) express per-statement provenance that CUE's closed-world assumption cannot natively represent",
+	]
+	method:     "cross_reference"
+	confidence: "high"
+	discovered: "2026-03-02"
+	implication: "CUE typed graphs handle the same validation, binding, and projection problems as the full SHACL 1.2 stack, with zero runtime dependencies. The SHACL approach retains an advantage only for open-world, multi-perspective data requiring statement-level annotation."
+	action_items: [
+		"Document SHACL 1.2 comparison on quicue.ca site",
+		"Consider RDF-Star-like annotation pattern for multi-perspective CUE data",
+	]
+	related: {"INSIGHT-007": true, "INSIGHT-011": true, "INSIGHT-006": true}
+}
+
 i010: core.#Insight & {
 	id:        "INSIGHT-010"
 	statement: "Three latent bugs in patterns/ went undetected because CUE's lax evaluation hides struct iteration errors and name collisions"

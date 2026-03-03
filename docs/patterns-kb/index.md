@@ -1,6 +1,6 @@
 # Knowledge Base Patterns
 
-14 validated problem/solution pairs organized by category.
+17 validated problem/solution pairs organized by category.
 
 ## By Category
 
@@ -25,6 +25,7 @@
 ### verification
 
 - [Contract-via-Unification](contract-via-unification.md)
+- [Compile-Time Shape Validation](compile-time-shape-validation.md)
 
 ### planning
 
@@ -34,6 +35,11 @@
 
 - [Safe Deploy Pipeline](safe-deploy-pipeline.md)
 - [Idempotent-by-Construction](idempotent-by-construction.md)
+- [Airgapped Bundle](airgapped-bundle.md)
+
+### security
+
+- [ASCII-Safe Identifiers](ascii-safe-identifiers.md)
 
 ### adoption
 
@@ -58,6 +64,9 @@
 | [Idempotent-by-Construction](idempotent-by-construction.md) | operations | quicue.ca |
 | [Types-Compose-Scripts-Don't](types-compose-scripts-don't.md) | architecture | quicue.ca |
 | [Static-First](static-first.md) | architecture | quicue.ca |
+| [Compile-Time Shape Validation](compile-time-shape-validation.md) | verification | quicue.ca, apercue |
+| [ASCII-Safe Identifiers](ascii-safe-identifiers.md) | security | apercue, quicue.ca, cmhc-retrofit, homelab, maison-613 |
+| [Airgapped Bundle](airgapped-bundle.md) | operations | quicue.ca |
 
 ---
 *Generated from quicue.ca registries by `#DocsProjection`*
