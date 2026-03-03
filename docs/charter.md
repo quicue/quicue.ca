@@ -24,7 +24,7 @@ _charter: charter.#Charter & {
     scope: {
         total_resources: 18
         root:            "entry-point"
-        required_types:  {Database: true, WebServer: true}
+        required_types:  {Database: true, WebFrontend: true}
     }
     gates: {
         "db-ready": {

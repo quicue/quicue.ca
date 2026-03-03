@@ -34,12 +34,14 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Finds: finds.md
   - Getting Started: getting-started.md
   - Architecture: architecture.md
   - Patterns: patterns.md
   - Charter: charter.md
   - Knowledge Graph: knowledge-graph.md
   - Linked Data: linked-data.md
+  - SHACL 1.2: shacl-comparison.md
   - Templates: templates.md
   - Federation: federation.md
   - Modules:
@@ -90,6 +92,7 @@ nav:
       - Static-First: patterns-kb/static-first.md
       - Airgapped Bundle: patterns-kb/airgapped-bundle.md
       - ASCII-Safe Identifiers: patterns-kb/ascii-safe-identifiers.md
+      - Compile-Time Shape Validation: patterns-kb/compile-time-shape-validation.md
   - Insights: insights/index.md
   - Type Registry: types/index.md
   - Example Output: example/index.md

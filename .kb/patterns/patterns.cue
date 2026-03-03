@@ -254,6 +254,23 @@ p_ascii_safe_identifiers: core.#Pattern & {
 	}
 }
 
+p_compile_time_shape_validation: core.#Pattern & {
+	name:     "Compile-Time Shape Validation"
+	category: "verification"
+	problem:  "The SHACL 1.2 approach to data validation requires three separate artifacts — a schema file (Turtle), a validator (pyshacl/Jena), and a runtime environment (triple store) — each of which can drift from the others. Schema changes require updating all three layers, and validation failures are detected at runtime rather than build time."
+	solution: "Define shapes as CUE definitions that unify with the data they constrain. The schema IS the validator — there is no separate validation step. cue vet catches shape violations at compile time, and cue export produces W3C-compatible output (including SHACL shapes themselves) without a runtime dependency."
+	context:  "Any project that needs W3C-compatible data validation but wants compile-time guarantees instead of runtime validation. Particularly relevant when the validation pipeline would otherwise require SHACL + pyshacl + a triple store."
+	used_in: {
+		"quicue.ca": true
+		"apercue":   true
+	}
+	related: {
+		"contract_via_unification":  true
+		"everything_is_projection":  true
+		"compile_time_binding":      true
+	}
+}
+
 p_airgapped_bundle: core.#Pattern & {
 	name:     "Airgapped Bundle"
 	category: "operations"

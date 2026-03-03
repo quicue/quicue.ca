@@ -73,7 +73,7 @@ Resources deploy in dependency order. Each layer completes (gate) before the nex
 | ansible-controller | 4 | LXCContainer, AutomationServer | proxmox, ansible, terraform, opentofu, foreman | 20 |
 | zabbix | 4 | LXCContainer, MonitoringServer | proxmox, zabbix, foreman | 21 |
 | restic-offsite | 4 | BackupServer | pbs, restic, ansible, terraform, opentofu | 9 |
-| nginx-web | 5 | LXCContainer, WebServer | proxmox, caddy, nginx, foreman | 33 |
+| nginx-web | 5 | LXCContainer, WebFrontend | proxmox, caddy, nginx, foreman | 33 |
 | kubevirt-vms | 5 | KubernetesWorkload, VirtualMachine | kubectl, kubevirt, argocd | 12 |
 | gitlab-scm | 5 | LXCContainer, GitServer, CIServer | proxmox, gitlab, foreman | 18 |
 | awx | 5 | LXCContainer, AutomationServer | proxmox, ansible, awx, terraform, opentofu, foreman | 37 |
