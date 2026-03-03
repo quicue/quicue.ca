@@ -26,6 +26,10 @@ Provider bindings      Impact analysis               MkDocs wiki
                        Rollback plans                OpenAPI spec
 ```
 
+## Demo
+
+![quicue.ca demo](docs/demo.gif)
+
 ## Quick start
 
 ```bash
@@ -44,6 +48,8 @@ cue eval ./examples/datacenter/ -e output.impact.\"router-core\"
 cue export ./examples/datacenter/ -e output --out json
 ```
 
+> **CUE commands:** `cue vet` validates constraints (no output = pass). `cue eval` prints human-readable output. `cue export` produces strict JSON/YAML.
+
 ## How it works
 
 Resources declare what they are (`@type`) and what they depend on (`depends_on`), both as sets:
@@ -53,13 +59,28 @@ dns: #Resource & {
     "@type":     {LXCContainer: true, DNSServer: true}
     depends_on:  {router: true}
     host:        "node-1"
-    container_id: "101"
+    container_id: 101
 }
 ```
 
 Providers declare what resource types they serve. quicue.ca matches providers to resources by type overlap, then resolves command templates at compile time — every `{host}` and `{container_id}` placeholder is filled from resource fields before you run anything. If a field is missing, CUE catches it as a type error.
 
 The result is a fully resolved execution plan: deployment order, rollback sequence, and per-resource commands, all as plain JSON.
+
+## Naming conventions
+
+Names are Quebecois French wordplay, not acronyms:
+
+| Name | Meaning |
+|------|---------|
+| **quicue** | "qui cue" (French: who CUEs) — wordplay on cuisine/cooking + CUE |
+| **ou/** | French "où" (where) — role-scoped views. **Not** "Organizational Unit" |
+| **orche/** | Orchestration |
+| **cab/** | Change Advisory Board (standard ITIL term) |
+| **TOON** | Token Oriented Object Notation — compact export format (~55% smaller) |
+| `@type` | Struct-as-set (`{Key: true}`) — O(1) type membership, not JSON-LD decoration |
+| `_|_` | CUE "bottom" — undefined/error value. `x != _|_` means "x exists" |
+| `_hidden` | Leading underscore = hidden field, not exported by `cue export` |
 
 ## Foundation
 
