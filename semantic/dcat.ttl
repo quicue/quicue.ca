@@ -10,7 +10,7 @@
 
 <https://sparql.example.com/catalog> a dcat:Catalog ;
     dcterms:title "apercue Infrastructure Data Catalog" ;
-    dcterms:description "Catalog of infrastructure datasets maintained by Central IT, University of Ottawa." ;
+    dcterms:description "Catalog of infrastructure datasets maintained by Central IT." ;
     dcterms:publisher <https://apercue.ca> ;
     dcat:dataset <https://sparql.example.com/dataset/infrastructure> .
 
@@ -20,7 +20,7 @@
     dcterms:description "Typed infrastructure resources, applications, and their dependency relationships. Covers databases, VMs, network devices, authentication servers, and more." ;
     dcterms:publisher <https://apercue.ca> ;
     dcterms:accrualPeriodicity <http://purl.org/cld/freq/irregular> ;
-    dcat:keyword "infrastructure", "dependencies", "applications", "university" ;
+    dcat:keyword "infrastructure", "dependencies", "applications" ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/TECH> ;
     dcat:distribution <https://sparql.example.com/dataset/infrastructure/sparql> ;
     dcat:distribution <https://sparql.example.com/dataset/infrastructure/jsonld> .

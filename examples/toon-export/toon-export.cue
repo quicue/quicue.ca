@@ -39,7 +39,7 @@ _resources: {
 
 	// Web tier
 	"web-server": {
-		"@type": {WebServer: true, LXCContainer: true}
+		"@type": {WebFrontend: true, LXCContainer: true}
 		ip:           "198.51.100.20"
 		host:         "pve-node-2"
 		container_id: 102

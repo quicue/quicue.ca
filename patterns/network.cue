@@ -161,7 +161,7 @@ package patterns
 // Usage:
 //   matrix: #ZoneMatrix & {
 //       Zones: classifier.classified
-//       Types: {dns: {DNSServer: true}, web: {WebServer: true}}
+//       Types: {dns: {DNSServer: true}, web: {WebFrontend: true}}
 //   }
 //   // matrix.cells.Restricted.DNSServer = {dns: true}
 //

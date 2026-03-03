@@ -3,8 +3,8 @@ PREFIX apercue: <https://apercue.ca/vocab#>
 
 SELECT ?app ?appName (GROUP_CONCAT(?rName; separator=", ") AS ?failedDeps) WHERE {
     VALUES ?failedResource {
-        <urn:uottawa:infra:svc:active-directory>
-        <urn:uottawa:infra:svc:zabbix>
+        <urn:example:infra:svc:active-directory>
+        <urn:example:infra:svc:zabbix>
     }
     ?failedResource apercue:name ?rName .
     ?failedResource apercue:appearsIn ?app .

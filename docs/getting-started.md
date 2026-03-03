@@ -157,7 +157,8 @@ diamond-shaped DAGs with wide fan-in, evaluation time grows exponentially.
 
 ```bash
 # Generate precomputed depth/ancestors/dependents
-python3 tools/toposort.py your-resources.cue  # from apercue.ca/tools/
+# Clone apercue if you haven't: git clone https://github.com/quicue/apercue.git
+python3 ../apercue/tools/toposort.py your-resources.cue
 ```
 
 This creates `precomputed.cue` with depth, ancestors, and dependents pre-calculated.
