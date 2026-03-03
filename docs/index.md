@@ -8,8 +8,8 @@ Model it in CUE. Validate by unification. Export to whatever the world expects.
 |--------|-------|
 | Modules | 12 |
 | Decisions (ADRs) | 14 |
-| KB Patterns | 14 |
-| Insights | 14 |
+| KB Patterns | 17 |
+| Insights | 15 |
 | Semantic Types | 57 |
 | Downstream Consumers | 3 |
 | Deployed Sites | 7 |

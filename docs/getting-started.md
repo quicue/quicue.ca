@@ -24,6 +24,14 @@ git clone https://github.com/quicue/quicue.ca.git
 cd quicue.ca
 ```
 
+## CUE commands
+
+| Command | What it does | Output |
+|---------|-------------|--------|
+| `cue vet` | Validate all constraints | No output = pass. Errors if constraints fail. |
+| `cue eval -e expr` | Evaluate and print human-readable CUE | Good for exploration |
+| `cue export -e expr` | Evaluate and produce strict JSON/YAML | Use for machine consumption |
+
 ## Define your resources
 
 Create a file called `my-infra.cue` in the repo root:
@@ -58,7 +66,7 @@ _resources: {
     }
     web: vocab.#Resource & {
         name:         "web"
-        "@type":      {LXCContainer: true, WebServer: true}
+        "@type":      {LXCContainer: true, WebFrontend: true}
         depends_on:   {router: true, dns: true}
         host:         "pve-node1"
         container_id: 101
@@ -119,7 +127,7 @@ cue export my-infra.cue -e output --out json
 
 The `dns` resource has type `LXCContainer` and `DNSServer`. Proxmox matches on `LXCContainer` — so `dns` gets container lifecycle commands (`pct status 100`, `pct start 100`, etc.). PowerDNS matches on `DNSServer` — so `dns` also gets zone management commands. All resolved from the resource's fields at compile time.
 
-`web` has type `LXCContainer` and `WebServer`. Proxmox matches on `LXCContainer`. PowerDNS doesn't match (no `DNSServer` type). `web` gets container commands only.
+`web` has type `LXCContainer` and `WebFrontend`. Proxmox matches on `LXCContainer`. PowerDNS doesn't match (no `DNSServer` type). `web` gets container commands only.
 
 `router` has type `Router`. Neither provider matches. It gets no resolved commands — you'd need a VyOS or similar provider for that.
 
@@ -137,6 +145,32 @@ Answer: `web` is affected (it depends on `dns`). `router` is not (nothing depend
 - **Write your own provider.** The [Template Guide](templates.md) walks through the process.
 - **Understand the architecture.** The [Architecture](architecture.md) doc explains the four-layer model.
 - **Browse the pattern catalog.** The [Pattern Catalog](patterns.md) lists every computation available.
+- **Read [Finds](finds.md)** — a plain-language essay on what fell out of building this system.
+
+## Scaling past small graphs
+
+`#InfraGraph` computes transitive closure (ancestors, descendants) recursively in CUE.
+This works well for graphs up to ~30 nodes with simple topologies. For dense
+diamond-shaped DAGs with wide fan-in, evaluation time grows exponentially.
+
+**The fix: precompute with Python, use `Precomputed` input.**
+
+```bash
+# Generate precomputed depth/ancestors/dependents
+python3 tools/toposort.py your-resources.cue  # from apercue.ca/tools/
+```
+
+This creates `precomputed.cue` with depth, ancestors, and dependents pre-calculated.
+Pass the data to `#InfraGraph` via its `Precomputed` field to skip recursive evaluation.
+All downstream patterns (`#ImpactQuery`, `#BlastRadius`, `#ExecutionPlan`) work the same way.
+
+The datacenter example (30 resources) evaluates natively. The self-charter at
+[apercue.ca](https://github.com/quicue/apercue) uses precomputed data for 40+ nodes
+and evaluates in ~33ms.
+
+## Naming conventions
+
+Names are Quebecois French wordplay, not acronyms. See the [full naming table](https://github.com/quicue/quicue.ca#naming-conventions) in the README.
 
 ## Clean up
 

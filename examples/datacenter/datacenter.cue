@@ -581,7 +581,7 @@ cluster: patterns.#BindCluster & {
 // GRAPH ANALYSIS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-infra: patterns.#InfraGraph & {Input: _resources}
+infra: patterns.#InfraGraph & {Input: _resources, Precomputed: _precomputed}
 
 // Validation
 validate: patterns.#ValidateGraph & {Input: _resources}
