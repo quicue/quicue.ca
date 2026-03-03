@@ -55,7 +55,7 @@ _resources: {
 
 	"web-app": vocab.#Resource & {
 		name: "web-app"
-		"@type": {WebServer: true, LXCContainer: true}
+		"@type": {WebFrontend: true, LXCContainer: true}
 		ip:       "198.51.100.50"
 		host:     "pve-node-2"
 		ssh_user: "deploy"

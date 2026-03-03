@@ -9,7 +9,7 @@
 # ─────────────────────────────────────────────────
 
 <https://sparql.infra.grdn/dataset/infrastructure> a void:Dataset ;
-    dcterms:title "University of Ottawa Infrastructure Dependency Graph" ;
+    dcterms:title "Example Infrastructure Dependency Graph" ;
     dcterms:description "Typed infrastructure resources, applications, and their dependency relationships. Exported from CUE-native configuration via JSON-LD." ;
     dcterms:publisher <https://apercue.ca> ;
     void:sparqlEndpoint <https://sparql.infra.grdn/query> ;
