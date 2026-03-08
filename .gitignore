@@ -25,3 +25,4 @@ operator/public/index.html
 operator/public/wiki/
 operator/public/.build-stats.json
 operator/public/.bound_commands.json
+.gitlab-ci-local/

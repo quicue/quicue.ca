@@ -50,7 +50,7 @@ import (
 		for target in ChangedResources {
 			(target): {
 				resource: target
-				depth:    Graph.resources[target]._depth
+				depth:    Graph.resources[target]._depth | *0
 
 				// Who depends on this resource (transitively)?
 				affected: [
@@ -184,12 +184,9 @@ import (
 
 	markdown: strings.Join([_header, _prioritySection, _impactDetails], "\n")
 
-	// JSON output
-	json: {
-		summary: summary
-		risk:    risk
-		impacts: impacts
-	}
+	// Structured output (JSON-serializable)
+	// Access via impactReport.summary, .risk, .impacts directly
+	...
 }
 
 // #BlastRadiusReport - Detailed blast radius for a single resource

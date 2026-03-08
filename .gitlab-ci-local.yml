@@ -1,0 +1,114 @@
+# Local-testable CI — quicue.ca
+# Usage: gitlab-ci-local --file .gitlab-ci-local.yml --list
+# For patterns/analysis (imports apercue.ca): needs --volume "$HOME/.cache/cue:/root/.cache/cue"
+
+stages:
+  - validate
+  - test
+
+variables:
+  CUE_VERSION: "0.15.4"
+
+.cue-setup:
+  image: golang:1.21-alpine
+  before_script:
+    - apk add --no-cache curl bash git sed
+    - |
+      if [ ! -f /usr/local/bin/cue ]; then
+        curl -sSL "https://github.com/cue-lang/cue/releases/download/v${CUE_VERSION}/cue_v${CUE_VERSION}_linux_amd64.tar.gz" | tar xz -C /usr/local/bin
+      fi
+    - |
+      # Remove source: kind: "self" — it blocks CUE module cache resolution in CI
+      sed -i '/^source:/d' cue.mod/module.cue
+
+# Vocab only (no external deps)
+validate:vocab:
+  extends: .cue-setup
+  stage: validate
+  script:
+    - cue vet ./vocab/
+    - echo "Vocab valid"
+
+# Vocab + patterns (requires apercue.ca in CUE module cache)
+validate:patterns:
+  extends: .cue-setup
+  stage: validate
+  script:
+    - cue vet ./vocab/ ./patterns/
+    - echo "Vocab + patterns valid"
+  allow_failure: true
+
+# Examples and providers that import apercue.ca will fail offline
+validate:examples:
+  extends: .cue-setup
+  stage: validate
+  script:
+    - |
+      failed=0
+      for d in examples/*/; do
+        example=$(basename "$d")
+        if timeout 30 cue vet "./$d" 2>/dev/null; then
+          echo "  OK $example"
+        else
+          echo "  FAIL $example"
+          failed=$((failed + 1))
+        fi
+      done
+      if [ "$failed" -gt 0 ]; then
+        echo "$failed example(s) failed (some may need apercue.ca)"
+        exit 1
+      fi
+  allow_failure: true
+
+validate:providers:
+  extends: .cue-setup
+  stage: validate
+  script:
+    - |
+      failed=0
+      for d in template/*/; do
+        provider=$(basename "$d")
+        if cue vet "./$d/..." 2>/dev/null; then
+          echo "  OK $provider"
+        else
+          echo "  FAIL $provider"
+          failed=$((failed + 1))
+        fi
+      done
+      if [ "$failed" -gt 0 ]; then
+        echo "$failed provider(s) failed (some may need apercue.ca)"
+        exit 1
+      fi
+  allow_failure: true
+
+validate:charter:
+  extends: .cue-setup
+  stage: validate
+  script:
+    - cue vet ./charter/
+  allow_failure: true
+
+# KB needs quicue-kg from GitHub — allow_failure until local changes are pushed
+validate:kb:
+  extends: .cue-setup
+  stage: validate
+  allow_failure: true
+  before_script:
+    - apk add --no-cache curl bash git sed
+    - |
+      if [ ! -f /usr/local/bin/cue ]; then
+        curl -sSL "https://github.com/cue-lang/cue/releases/download/v${CUE_VERSION}/cue_v${CUE_VERSION}_linux_amd64.tar.gz" | tar xz -C /usr/local/bin
+      fi
+    - |
+      sed -i '/^source:/d' cue.mod/module.cue
+    - |
+      mkdir -p .kb/cue.mod/pkg/quicue.ca
+      rm -rf .kb/cue.mod/pkg/quicue.ca/kg
+      git clone --depth=1 https://github.com/quicue/quicue-kg.git .kb/cue.mod/pkg/quicue.ca/kg || true
+  script:
+    - (cd .kb && cue vet .)
+    - (cd .kb/decisions && cue vet .)
+    - (cd .kb/patterns && cue vet .)
+    - (cd .kb/insights && cue vet .)
+    - (cd .kb/rejected && cue vet .)
+    - echo "KB validates clean"
