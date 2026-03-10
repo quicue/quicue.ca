@@ -359,7 +359,7 @@ import (
 				for rname, _ in _match
 				if rule.max_depth != _|_
 				if Graph.resources[rname]._depth > rule.max_depth {
-					{resource: rname, check: "max_depth", actual: Graph.resources[rname]._depth, limit: rule.max_depth}
+					{resource: rname, check: "max_depth", actual: Graph.resources[rname]._depth, required: rule.max_depth}
 				},
 			]
 
