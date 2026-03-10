@@ -1,10 +1,10 @@
-# What We Learned from SHACL 1.2
+# What We Learned from SHACL
 
-SHACL 1.2 and CUE both constrain typed data at the schema level. SHACL runs against a triple store at runtime. CUE evaluates at build time and exports static artifacts. We looked at Kurt Cagle's [SHACL 1.2 repositories](https://github.com/kurtcagle) — a complete pipeline from schema to validation to export — and mapped each piece to what we already had. This is what fell out.
+SHACL and CUE both constrain typed data at the schema level. SHACL runs against a triple store at runtime. CUE evaluates at build time and exports static artifacts. We looked at Kurt Cagle's [SHACL repositories](https://github.com/kurtcagle) to map each piece to what we already had. This is what fell out.
 
-Cagle's repos are one implementation. SHACL itself is a W3C Recommendation (2017) with broad adoption — TopBraid, Stardog, GraphDB, Amazon Neptune, government linked data platforms. We chose these repos because they cover the full SHACL pipeline — schema, validation, conversion, export — in public code. We're comparing approaches, not ecosystems.
+Cagle's repos are one implementation. SHACL itself is a W3C Recommendation (2017) with broad adoption: TopBraid, Stardog, GraphDB, Amazon Neptune, government linked data platforms. We chose these repos because they cover the full SHACL pipeline in public code. We're comparing approaches, not ecosystems.
 
-*SHACL 1.2 Working Draft as of March 2026. CUE v0.15.4.*
+*SHACL W3C Recommendation (2017), with Advanced Features (W3C Note). CUE v0.15.4.*
 
 ## Exit criteria: prose vs constraints
 

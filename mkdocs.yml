@@ -41,7 +41,7 @@ nav:
   - Charter: charter.md
   - Knowledge Graph: knowledge-graph.md
   - Linked Data: linked-data.md
-  - SHACL 1.2: shacl-comparison.md
+  - SHACL Comparison: shacl-comparison.md
   - Context Events: context-events.md
   - Form Projection: form-projection.md
   - RDF-Star: rdf-star.md

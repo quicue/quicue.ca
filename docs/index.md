@@ -2,6 +2,12 @@
 
 Model it in CUE. Validate by unification. Export to whatever the world expects.
 
+## What this is
+
+You declare resources as graph nodes with types and dependencies. CUE computes topology, validates constraints, and exports [W3C linked data](linked-data.md): JSON-LD, SHACL validation reports, DCAT catalogs, PROV-O provenance, OWL-Time schedules, ODRL policies, Activity Streams, and more. The same graph also computes operational views: blast radius, deployment plans, single points of failure.
+
+The graph patterns are domain-agnostic. quicue.ca applies them to infrastructure. [apercue.ca](https://apercue.ca) provides the underlying engine with examples in education, cooking, supply chain, and project management.
+
 ## Overview
 
 | Metric | Count |
