@@ -243,6 +243,12 @@ import (
 	must_not_be_leaf?: true // something must depend on it
 	min_dependents?:   int  // minimum number of dependents
 	max_depth?:        int  // maximum allowed depth
+
+	// Optional: override severity when all matched resources share a tag
+	conditional_severity?: {
+		when_tagged:   string
+		then_severity: "warning" | "critical" | "info"
+	}
 }
 
 // #Violation — a single compliance check failure.
@@ -359,8 +365,30 @@ import (
 
 			let _allViolations = list.Concat([_v1, _v2, _v3, _v4, _v5, _v6])
 
+			// Compute effective severity: if conditional_severity is set and
+			// ALL matched resources carry the specified tag, use the override.
+			let _effectiveSeverity = {
+				if rule.conditional_severity != _|_ {
+					let _tagged = len([
+						for rname, _ in _match
+						for t, _ in Graph.resources[rname]["@type"]
+						if t == rule.conditional_severity.when_tagged {1},
+					])
+					let _total = len([for m, _ in _match {m}])
+					if _tagged == _total && _total > 0 {
+						out: rule.conditional_severity.then_severity
+					}
+					if _tagged != _total || _total == 0 {
+						out: rule.severity
+					}
+				}
+				if rule.conditional_severity == _|_ {
+					out: rule.severity
+				}
+			}
+
 			name:     rule.name
-			severity: rule.severity
+			severity: _effectiveSeverity.out
 			matching: len([for m, _ in _match {m}])
 			violations: _allViolations
 			passed:     len(_allViolations) == 0
@@ -399,6 +427,22 @@ import (
 				"sh:resultSeverity": {"@id": _severity_iri[r.severity]}
 				"sh:resultMessage": r.name + ": " + v.check + " on " + v.resource
 				"sh:sourceShape": {"@id": "apercue:rule/" + r.name}
+
+				// SHACL 1.2 §4.7: attach rule metadata as annotation
+				"sh:resultAnnotation": {
+					"@type":                 "sh:ResultAnnotation"
+					"sh:annotationProperty": {"@id": "dcterms:source"}
+					"sh:annotationValue":    r.name
+				}
+
+				// SHACL 1.2 §2.7: structured detail for quantitative violations
+				if v.actual != _|_ {
+					"sh:detail": {
+						"@type":             "sh:ValidationResult"
+						"sh:resultMessage":  "actual: \(v.actual), required: \(v.required)"
+						"sh:resultSeverity": {"@id": _severity_iri[r.severity]}
+					}
+				}
 			},
 		]
 	}
