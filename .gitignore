@@ -26,3 +26,4 @@ operator/public/wiki/
 operator/public/.build-stats.json
 operator/public/.bound_commands.json
 .gitlab-ci-local/
+package-lock.json
