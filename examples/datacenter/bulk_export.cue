@@ -28,6 +28,7 @@ _bulk: {
 	hydra_collection: datacenter_hydra_collection
 	skos_types:       datacenter_skos_types
 	interaction:      interaction_summary
+	context_events:   context_events
 	wiki:             execution.wiki
 	rundeck:          execution.rundeck
 	script:           execution.script
