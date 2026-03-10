@@ -95,6 +95,26 @@ cue export -e event.event --out json > ldes/event.jsonld
 
 `ou/activitystreams.cue` maps operator sessions to AS2 activities for infrastructure change feeds.
 
+### Context events
+
+`patterns/context_event.cue` projects federation boundary crossings as [PROV-O](https://www.w3.org/TR/prov-o/) activities with [OWL-Time](https://www.w3.org/TR/owl-time/) instants. Each event records a merge, validation, projection, or export between domain graphs:
+
+```bash
+cue export ./examples/datacenter/ -e context_events --out json
+```
+
+See [Context Events](context-events.md) for details and the interactive timeline.
+
+### RDF-Star annotations
+
+`patterns/rdf_star.cue` annotates individual dependency edges with metadata: confidence scores, discovery methods, timestamps. Uses [RDF 1.2](https://www.w3.org/TR/rdf12-concepts/) reification via JSON-LD `@annotation`:
+
+```bash
+cue export ./examples/datacenter/ -e rdf_star --out json
+```
+
+See [RDF-Star Annotations](rdf-star.md) for the pattern design and examples.
+
 ## Knowledge projections
 
 All knowledge projections live in `quicue.ca/kg`'s `aggregate/` package. They share the same input contract — a `#KGIndex` computed from `.kb/` files — and emit structured output.
@@ -194,4 +214,6 @@ JSON-LD contexts: [`quicue:`](https://quicue.ca/vocab) | [`kg:`](https://kg.quic
 | Browse patterns as taxonomy | SKOS |
 | Query provenance chains | Prolog or Datalog |
 | Automated CI checks | Datalog |
+| Annotate edge metadata | RDF-Star annotations |
+| Log federation operations | Context events |
 | Register in a data catalog | DCAT 3 |

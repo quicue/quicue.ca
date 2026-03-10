@@ -197,7 +197,63 @@ These are limits we've hit in practice — documented in our own [insights](insi
 | **W3C output** | Separate Turtle per standard | One CUE file per standard | SHACL, DCAT, N-Triples, ODRL, Hydra, EARL ([full list](linked-data.md#infrastructure-projections)) |
 | **Runtime** | Triple store + SHACL processor | None | CDN serves pre-computed JSON |
 | **Exit criteria** | Prose methodology | `#GapAnalysis` (machine-evaluable) | Charter gates in CUE |
-| **Contextual truth** | RDF-Star (native) | Separate graphs (workaround) | No native equivalent |
+| **Contextual truth** | RDF-Star (native) | Separate graphs (workaround) | [RDF-Star annotations](rdf-star.md) |
+
+## SHACL 1.2 features in quicue.ca
+
+`#ComplianceCheck` in `patterns/validation.cue` now implements three SHACL 1.2 features:
+
+**sh:resultAnnotation** (SHACL 1.2 section 4.7). Each validation result carries metadata about the rule that produced it. The `sh:annotationProperty` and `sh:annotationValue` fields identify which compliance rule generated each finding:
+
+```json
+"sh:resultAnnotation": {
+    "@type": "sh:ResultAnnotation",
+    "sh:annotationProperty": { "@id": "dcterms:source" },
+    "sh:annotationValue": "databases-need-monitoring"
+}
+```
+
+**Conditional severity**. Rules can declare a `conditional_severity` override. If all matched resources share a specified tag, severity is downgraded. For example, a rule that is `critical` in production can become `warning` when every matched resource is tagged `development`:
+
+```cue
+conditional_severity: {
+    when_tagged:   "development"
+    then_severity: "warning"
+}
+```
+
+**sh:detail** (SHACL 1.2 section 2.7). Quantitative violations (like `min_dependents`) produce nested `sh:detail` results with actual vs required values:
+
+```json
+"sh:detail": {
+    "@type": "sh:ValidationResult",
+    "sh:resultMessage": "actual: 1, required: 3",
+    "sh:resultSeverity": { "@id": "sh:Violation" }
+}
+```
+
+A full validation result with all three features:
+
+```json
+{
+  "@type": "sh:ValidationResult",
+  "sh:focusNode": { "@id": "postgresql" },
+  "sh:sourceConstraintComponent": { "@id": "apercue:min_dependents" },
+  "sh:resultSeverity": { "@id": "sh:Violation" },
+  "sh:resultMessage": "critical-services-need-redundancy: min_dependents on postgresql",
+  "sh:sourceShape": { "@id": "apercue:rule/critical-services-need-redundancy" },
+  "sh:resultAnnotation": {
+    "@type": "sh:ResultAnnotation",
+    "sh:annotationProperty": { "@id": "dcterms:source" },
+    "sh:annotationValue": "critical-services-need-redundancy"
+  },
+  "sh:detail": {
+    "@type": "sh:ValidationResult",
+    "sh:resultMessage": "actual: 1, required: 3",
+    "sh:resultSeverity": { "@id": "sh:Violation" }
+  }
+}
+```
 
 ## References
 
