@@ -29,7 +29,7 @@ import "apercue.ca/vocab"
 	Graph: #AnalyzableGraph
 
 	// Policy metadata
-	PolicyID: string | *"apercue:graph-policy"
+	PolicyID: string | *"urn:policy:graph-policy"
 	Profile?: string
 
 	// Rules — user declares these
@@ -47,6 +47,7 @@ import "apercue.ca/vocab"
 		"odrl:permission": [
 			for rule in permissions {
 				_entry: {
+					"@type":        "odrl:Permission"
 					"odrl:action": {"@id": "odrl:" + rule.action}
 					if rule.assignee != _|_ {
 						"odrl:assignee": {"@id": rule.assignee}
@@ -78,6 +79,7 @@ import "apercue.ca/vocab"
 		"odrl:prohibition": [
 			for rule in prohibitions {
 				_entry: {
+					"@type":        "odrl:Prohibition"
 					"odrl:action": {"@id": "odrl:" + rule.action}
 					if rule.assignee != _|_ {
 						"odrl:assignee": {"@id": rule.assignee}

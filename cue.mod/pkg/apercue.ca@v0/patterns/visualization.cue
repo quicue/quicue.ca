@@ -47,7 +47,7 @@ import (
 		color: "#4CAF50"
 		icon:  "DB"
 	}
-	WebFrontend: #NodeStyle & {
+	WebServer: #NodeStyle & {
 		shape: "box"
 		color: "#FF9800"
 		icon:  "WEB"

@@ -22,7 +22,7 @@ import "apercue.ca/vocab"
 	// Optional: who/what constructed the graph
 	Agent?: string
 
-	_agent_id: string | *"apercue:graph-engine"
+	_agent_id: string | *"urn:agent:graph-engine"
 	if Agent != _|_ {
 		_agent_id: Agent
 	}
@@ -43,13 +43,22 @@ import "apercue.ca/vocab"
 					]
 				}
 				"prov:wasAttributedTo": {"@id": _agent_id}
-				"prov:wasGeneratedBy": {"@id": "apercue:graph-construction"}
+				"prov:wasGeneratedBy": {"@id": "urn:activity:graph-construction"}
+				"prov:qualifiedGeneration": {"@id": "urn:generation:" + name}
+			},
+
+			// Qualified generation events (prov:Generation per entity)
+			for name, _ in Graph.resources {
+				"@type":          "prov:Generation"
+				"@id":            "urn:generation:" + name
+				"prov:entity":   {"@id": "urn:resource:" + name}
+				"prov:activity": {"@id": "urn:activity:graph-construction"}
 			},
 
 			// The graph construction activity
 			{
 				"@type":         "prov:Activity"
-				"@id":           "apercue:graph-construction"
+				"@id":           "urn:activity:graph-construction"
 				"dcterms:title": "Graph construction"
 				"prov:wasAssociatedWith": {"@id": _agent_id}
 				"prov:generated": [
@@ -59,9 +68,9 @@ import "apercue.ca/vocab"
 				]
 			},
 
-			// The agent
+			// The agent (prov:SoftwareAgent when automated)
 			{
-				"@type": "prov:Agent"
+				"@type": ["prov:Agent", "prov:SoftwareAgent"]
 				"@id":   _agent_id
 			},
 		]
