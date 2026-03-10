@@ -1036,3 +1036,14 @@ _event_log: apercue_patterns.#ContextEventLog & {
 	Agent:  "urn:agent:datacenter-controller"
 }
 context_events: _event_log.event_report
+
+// ==========================================================================
+// FORM PROJECTION (UI form definitions from type registry)
+// ==========================================================================
+//
+// cue export ./examples/datacenter/ -e form_projection --out json
+
+_forms: apercue_patterns.#FormProjection & {
+	Types: vocab.#TypeRegistry
+}
+form_projection: _forms.form_definitions
