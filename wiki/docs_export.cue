@@ -748,7 +748,7 @@ _decisions: {
 		title:     "Public showcase data sourced exclusively from example datacenter"
 		status:    "accepted"
 		date:      "2026-02-18"
-		context:   "Public surfaces were originally built from production infrastructure data containing real 172.20.x.x IPs."
+		context:   "Public surfaces were originally built from production infrastructure data containing real private IPs."
 		decision:  "All public-facing data is generated from examples/datacenter/ which uses RFC 5737 TEST-NET IPs (198.51.100.x). CI validates no real IPs leak."
 		rationale: "A single source of safe data eliminates the risk of production IP leakage."
 		consequences: [
@@ -936,7 +936,7 @@ _patterns: {
 			"quicue.ca":       true
 			"cmhc-retrofit":   true
 			"maison-613":      true
-			homelab:              true
+			homelab:           true
 		}
 		related: {
 			struct_as_set:  true
@@ -1133,7 +1133,7 @@ _insights: {
 		id:        "INSIGHT-004"
 		statement: "Production data leaks through generated artifacts, not just source code"
 		evidence: [
-			"cat.quicue.ca had 98 real 172.20.x.x IPs in generated JSON",
+			"cat.quicue.ca had 98 real private IPs in generated JSON",
 			"Deploying safe data missed pre-existing files with different naming conventions",
 		]
 		method:      "observation"

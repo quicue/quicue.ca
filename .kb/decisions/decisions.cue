@@ -91,7 +91,7 @@ d006: core.#Decision & {
 	title:     "Public showcase data sourced exclusively from example datacenter"
 	status:    "accepted"
 	date:      "2026-02-18"
-	context:   "Public surfaces (imp.quicue.ca, api.quicue.ca, cat.quicue.ca) were originally built from production infrastructure data containing real 172.20.x.x IPs. Making these public required regenerating all data from a safe source."
+	context:   "Public surfaces (imp.quicue.ca, api.quicue.ca, cat.quicue.ca) were originally built from production infrastructure data containing real private IPs. Making these public required regenerating all data from a safe source."
 	decision:  "All public-facing data is generated from examples/datacenter/ which uses RFC 5737 TEST-NET IPs (198.51.100.x). CI validates no real IPs leak into generated artifacts via grep-based checks. Deploy scripts use env vars (DEPLOY_HOST, DEPLOY_CT) instead of hardcoded hostnames."
 	rationale: "A single source of safe data eliminates the risk of production IP leakage. The example datacenter exercises all 28 providers and produces 654 bound commands — the same fidelity as production without the exposure. CI enforcement prevents regression."
 	consequences: [
@@ -229,7 +229,7 @@ d011: core.#Decision & {
 	decision:  "Remove lacuene from all downstream claims. Only projects that import quicue.ca/patterns or quicue.ca/vocab are listed as downstream consumers."
 	rationale: "Listing a project that doesn't use the framework as a consumer is inaccurate. The downstream registry should reflect actual import relationships, not conceptual similarity."
 	consequences: [
-		"lacuene removed from README, docs/index.md, and all ~/.config/ docs",
+		"lacuene removed from README, docs/index.md, and all local docs",
 		"Downstream criteria: must import quicue.ca/patterns or quicue.ca/vocab",
 		"'Biomedical research' removed from domain list",
 	]

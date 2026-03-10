@@ -112,15 +112,15 @@ semantic-export:
 # Validate known downstream consumers still unify with current patterns
 check-downstream:
 	@echo "=== homelab ==="
-	@cd ~/homelab && cue vet .
+	@cd $${HOMELAB_DIR:-../homelab} && cue vet .
 	@echo "=== homelab .kb/ ==="
-	@cd ~/homelab/.kb && cue vet .
+	@cd $${HOMELAB_DIR:-../homelab}/.kb && cue vet .
 	@echo "=== cmhc-retrofit (nhcf) ==="
-	@cd ~/cmhc-retrofit/nhcf && cue vet .
+	@cd $${CMHC_DIR:-../cmhc-retrofit}/nhcf && cue vet .
 	@echo "=== cmhc-retrofit (greener-homes) ==="
-	@cd ~/cmhc-retrofit/greener-homes && cue vet .
+	@cd $${CMHC_DIR:-../cmhc-retrofit}/greener-homes && cue vet .
 	@echo "=== cmhc-retrofit .kb/ ==="
-	@cd ~/cmhc-retrofit/.kb && cue vet .
+	@cd $${CMHC_DIR:-../cmhc-retrofit}/.kb && cue vet .
 	@echo "=== maison-613 (transaction) ==="
 	@cd ~/maison-613/transaction && cue vet .
 	@echo "=== maison-613 (compliance) ==="

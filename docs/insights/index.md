@@ -57,7 +57,7 @@ Knowledge bases use typed subdirectories: each graph is an independent CUE packa
 
 ### Evidence
 
-- cat.quicue.ca had 98 real 172.20.x.x IPs in generated JSON
+- cat.quicue.ca had 98 real private IPs in generated JSON
 - Deploying safe data missed pre-existing files with different naming conventions
 
 ### Implication

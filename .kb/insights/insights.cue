@@ -59,7 +59,7 @@ i004: core.#Insight & {
 	id:        "INSIGHT-004"
 	statement: "Production data leaks through generated artifacts, not just source code"
 	evidence: [
-		"cat.quicue.ca .bound_commands.json and openapi.json contained 98 real 172.20.x.x IPs each — generated from production, not example data",
+		"cat.quicue.ca .bound_commands.json and openapi.json contained 98 real private IPs each — generated from production, not example data",
 		"imp.quicue.ca had real IPs in exec.js (placeholder text), imperator.json (349KB data file), and 40+ wiki HTML files (MkDocs build)",
 		"Deploying safe JSON data files missed pre-existing files with different naming conventions (.bound_commands.json vs bound-commands.json)",
 		"GitHub repo history contained real IP maps from old homelab.cue files — required force-push to clean",
