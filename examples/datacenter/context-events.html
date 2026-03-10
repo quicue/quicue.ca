@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Context Event Timeline</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1e1e1e;
+    color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 24px 32px;
+  }
+  h1 { font-size: 1.6rem; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .subtitle { font-size: 0.9rem; color: #888; margin-bottom: 24px; }
+  .subtitle code {
+    background: #2d2d2d; padding: 2px 6px; border-radius: 3px;
+    font-size: 0.85rem; color: #aaa;
+  }
+
+  #timeline-container {
+    background: #212121;
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+  }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: #aaa;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  #details-panel {
+    display: none;
+    background: #2d2d2d;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 16px;
+    border-left: 3px solid #448aff;
+  }
+  #details-panel h3 {
+    font-size: 1.1rem;
+    color: #448aff;
+    margin-bottom: 12px;
+  }
+  #details-panel .field {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  #details-panel .field-label {
+    color: #888;
+    display: inline-block;
+    min-width: 100px;
+  }
+  #details-panel .field-value { color: #e0e0e0; }
+  #details-panel .resources-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  #details-panel .resource-tag {
+    background: #383838;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: #ccc;
+  }
+  #details-panel .close-btn {
+    float: right;
+    background: none;
+    border: 1px solid #555;
+    color: #aaa;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  #details-panel .close-btn:hover { border-color: #888; color: #e0e0e0; }
+
+  .tooltip {
+    position: absolute;
+    background: #2d2d2d;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: #e0e0e0;
+    pointer-events: none;
+    max-width: 300px;
+    line-height: 1.5;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    z-index: 100;
+  }
+  .tooltip .tt-title { font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .tooltip .tt-field { color: #aaa; }
+
+  .swim-label {
+    font-size: 0.8rem;
+    fill: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .swim-stripe { fill: #2d2d2d; }
+  .swim-stripe-alt { fill: #262626; }
+
+  .axis text { fill: #888; font-size: 0.75rem; }
+  .axis line, .axis path { stroke: #444; }
+</style>
+</head>
+<body>
+<h1>Context Event Timeline</h1>
+<p class="subtitle"><code>PROV-O</code> + <code>OWL-Time</code> federation audit trail</p>
+
+<div id="timeline-container">
+  <svg id="timeline"></svg>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><span class="legend-dot" style="background:#4caf50"></span> success</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#ff9800"></span> partial</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#f44336"></span> conflict</div>
+  <div class="legend-item" style="margin-left: 20px; color: #666;">Circle size = number of resources used</div>
+</div>
+
+<div id="details-panel">
+  <button class="close-btn" onclick="document.getElementById('details-panel').style.display='none'">close</button>
+  <h3 id="detail-title"></h3>
+  <div id="detail-body"></div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+// Inline fallback data for file:// protocol (fetch won't work without a server).
+// This gets overwritten by the fetched JSON if available.
+const FALLBACK_DATA = {"@graph":[{"@type":["prov:Activity","apercue:ContextEvent"],"@id":"urn:event:monitoring-datacenter-merge-0","dcterms:description":"Monitoring graph merged into datacenter model","dcterms:title":"merge: monitoring \u2192 datacenter","dcterms:type":"merge","prov:startedAtTime":"2026-03-01T09:00:00Z","apercue:outcome":"success","prov:used":[{"@id":"urn:domain:monitoring"},{"@id":"urn:resource:zabbix"},{"@id":"urn:resource:caddy-proxy"}]},{"@type":["prov:Activity","apercue:ContextEvent"],"@id":"urn:event:datacenter-compliance-validate-1","dcterms:description":"Security-tier resources validated against compliance rules","dcterms:title":"validate: datacenter \u2192 compliance","dcterms:type":"validate","prov:startedAtTime":"2026-03-01T10:30:00Z","apercue:outcome":"success","prov:used":[{"@id":"urn:domain:datacenter"},{"@id":"urn:resource:vault"},{"@id":"urn:resource:keycloak"},{"@id":"urn:resource:postgresql"}]},{"@type":["prov:Activity","apercue:ContextEvent"],"@id":"urn:event:datacenter-catalog-project-2","dcterms:description":"Infrastructure layer projected to DCAT catalog","dcterms:title":"project: datacenter \u2192 catalog","dcterms:type":"project","prov:startedAtTime":"2026-03-02T14:00:00Z","apercue:outcome":"success","prov:used":[{"@id":"urn:domain:datacenter"},{"@id":"urn:resource:router-core"},{"@id":"urn:resource:pve-node1"},{"@id":"urn:resource:pve-node2"},{"@id":"urn:resource:pve-node3"}]},{"@type":["prov:Activity","apercue:ContextEvent"],"@id":"urn:event:backup-datacenter-merge-3","dcterms:description":"Backup graph merge: restic-offsite schedule conflict detected","dcterms:title":"merge: backup \u2192 datacenter","dcterms:type":"merge","prov:startedAtTime":"2026-03-03T08:15:00Z","apercue:outcome":"partial","prov:used":[{"@id":"urn:domain:backup"},{"@id":"urn:resource:restic-offsite"},{"@id":"urn:resource:backup-pbs"}]},{"@type":["prov:Activity","apercue:ContextEvent"],"@id":"urn:event:datacenter-api-export-4","dcterms:description":"Application-tier resources exported to static API","dcterms:title":"export: datacenter \u2192 api","dcterms:type":"export","prov:startedAtTime":"2026-03-03T11:00:00Z","apercue:outcome":"success","prov:used":[{"@id":"urn:domain:datacenter"},{"@id":"urn:resource:caddy-proxy"},{"@id":"urn:resource:nginx-web"},{"@id":"urn:resource:gitlab-scm"}]},{"@type":["prov:Activity","apercue:ContextEvent"],"@id":"urn:event:datacenter-charter-validate-5","dcterms:description":"Container platform charter gate: k8s-prod missing HA pair","dcterms:title":"validate: datacenter \u2192 charter","dcterms:type":"validate","prov:startedAtTime":"2026-03-04T16:45:00Z","apercue:outcome":"conflict","prov:used":[{"@id":"urn:domain:datacenter"},{"@id":"urn:resource:k8s-prod"},{"@id":"urn:resource:docker-host"},{"@id":"urn:resource:incus-cluster"}]}]};
+
+const OUTCOME_COLORS = { success: "#4caf50", partial: "#ff9800", conflict: "#f44336" };
+const LANE_ORDER = ["merge", "validate", "project", "export"];
+
+function extractResourceNames(used) {
+  return (used || [])
+    .map(u => u["@id"])
+    .filter(id => id.startsWith("urn:resource:"))
+    .map(id => id.replace("urn:resource:", ""));
+}
+
+function parseEvents(data) {
+  return data["@graph"]
+    .filter(n => {
+      const types = Array.isArray(n["@type"]) ? n["@type"] : [n["@type"]];
+      return types.includes("apercue:ContextEvent");
+    })
+    .map(n => ({
+      id: n["@id"],
+      title: n["dcterms:title"],
+      description: n["dcterms:description"],
+      type: n["dcterms:type"],
+      timestamp: new Date(n["prov:startedAtTime"]),
+      outcome: n["apercue:outcome"],
+      resources: extractResourceNames(n["prov:used"]),
+      allUsed: (n["prov:used"] || []).map(u => u["@id"])
+    }));
+}
+
+function render(events) {
+  const margin = { top: 30, right: 40, bottom: 40, left: 90 };
+  const width = 800;
+  const laneHeight = 60;
+  const height = margin.top + margin.bottom + LANE_ORDER.length * laneHeight;
+
+  const svg = d3.select("#timeline")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", `0 0 ${width} ${height}`);
+
+  svg.selectAll("*").remove();
+
+  const timeExtent = d3.extent(events, d => d.timestamp);
+  // Add 2-hour padding on each side
+  const pad = 2 * 60 * 60 * 1000;
+  const x = d3.scaleTime()
+    .domain([new Date(timeExtent[0] - pad), new Date(timeExtent[1].getTime() + pad)])
+    .range([margin.left, width - margin.right]);
+
+  const y = d3.scaleBand()
+    .domain(LANE_ORDER)
+    .range([margin.top, height - margin.bottom])
+    .padding(0.1);
+
+  // Swim lane stripes
+  LANE_ORDER.forEach((lane, i) => {
+    svg.append("rect")
+      .attr("x", margin.left)
+      .attr("y", y(lane))
+      .attr("width", width - margin.left - margin.right)
+      .attr("height", y.bandwidth())
+      .attr("class", i % 2 === 0 ? "swim-stripe" : "swim-stripe-alt")
+      .attr("rx", 3);
+  });
+
+  // Swim lane labels
+  LANE_ORDER.forEach(lane => {
+    svg.append("text")
+      .attr("class", "swim-label")
+      .attr("x", margin.left - 8)
+      .attr("y", y(lane) + y.bandwidth() / 2)
+      .attr("text-anchor", "end")
+      .attr("dominant-baseline", "middle")
+      .text(lane);
+  });
+
+  // X axis
+  const xAxis = d3.axisBottom(x)
+    .ticks(6)
+    .tickFormat(d3.timeFormat("%b %d %H:%M"));
+
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(xAxis);
+
+  // Tooltip
+  const tooltip = d3.select("body").append("div").attr("class", "tooltip").style("display", "none");
+
+  // Radius scale: 2-5 resources map to radius 8-20
+  const rScale = d3.scaleLinear()
+    .domain([d3.min(events, d => d.resources.length), d3.max(events, d => d.resources.length)])
+    .range([8, 20]);
+
+  // Event circles
+  svg.selectAll("circle.event")
+    .data(events)
+    .join("circle")
+    .attr("class", "event")
+    .attr("cx", d => x(d.timestamp))
+    .attr("cy", d => y(d.type) + y.bandwidth() / 2)
+    .attr("r", d => rScale(d.resources.length))
+    .attr("fill", d => OUTCOME_COLORS[d.outcome] || "#888")
+    .attr("opacity", 0.85)
+    .attr("stroke", "#1e1e1e")
+    .attr("stroke-width", 2)
+    .style("cursor", "pointer")
+    .on("mouseenter", function(event, d) {
+      d3.select(this).attr("opacity", 1).attr("stroke", "#fff");
+      tooltip.style("display", "block")
+        .html(`<div class="tt-title">${d.title}</div>
+               <div><span class="tt-field">Outcome:</span> ${d.outcome}</div>
+               <div><span class="tt-field">Time:</span> ${d3.timeFormat("%Y-%m-%d %H:%M")(d.timestamp)}</div>
+               <div><span class="tt-field">Resources:</span> ${d.resources.join(", ")}</div>`);
+    })
+    .on("mousemove", function(event) {
+      tooltip
+        .style("left", (event.pageX + 14) + "px")
+        .style("top", (event.pageY - 10) + "px");
+    })
+    .on("mouseleave", function() {
+      d3.select(this).attr("opacity", 0.85).attr("stroke", "#1e1e1e");
+      tooltip.style("display", "none");
+    })
+    .on("click", function(event, d) {
+      const panel = document.getElementById("details-panel");
+      document.getElementById("detail-title").textContent = d.title;
+      const outcomeColor = OUTCOME_COLORS[d.outcome] || "#888";
+      document.getElementById("detail-body").innerHTML = `
+        <div class="field"><span class="field-label">ID</span> <span class="field-value" style="font-family:monospace;font-size:0.82rem">${d.id}</span></div>
+        <div class="field"><span class="field-label">Timestamp</span> <span class="field-value">${d.timestamp.toISOString()}</span></div>
+        <div class="field"><span class="field-label">Type</span> <span class="field-value">${d.type}</span></div>
+        <div class="field"><span class="field-label">Outcome</span> <span class="field-value" style="color:${outcomeColor};font-weight:600">${d.outcome}</span></div>
+        <div class="field"><span class="field-label">Description</span> <span class="field-value">${d.description}</span></div>
+        <div class="field"><span class="field-label">Resources</span>
+          <div class="resources-list">${d.resources.map(r => `<span class="resource-tag">${r}</span>`).join("")}</div>
+        </div>`;
+      panel.style.display = "block";
+    });
+}
+
+// Try fetch first, fall back to inline data for file:// usage
+fetch("context-events.json")
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(data => render(parseEvents(data)))
+  .catch(() => render(parseEvents(FALLBACK_DATA)));
+</script>
+</body>
+</html>

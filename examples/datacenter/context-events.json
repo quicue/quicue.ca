@@ -1,0 +1,330 @@
+{
+    "@context": {
+        "@base": "urn:resource:",
+        "dcterms": "http://purl.org/dc/terms/",
+        "prov": "http://www.w3.org/ns/prov#",
+        "dcat": "http://www.w3.org/ns/dcat#",
+        "sh": "http://www.w3.org/ns/shacl#",
+        "skos": "http://www.w3.org/2004/02/skos/core#",
+        "schema": "https://schema.org/",
+        "time": "http://www.w3.org/2006/time#",
+        "earl": "http://www.w3.org/ns/earl#",
+        "odrl": "http://www.w3.org/ns/odrl/2/",
+        "org": "http://www.w3.org/ns/org#",
+        "cred": "https://www.w3.org/2018/credentials#",
+        "as": "https://www.w3.org/ns/activitystreams#",
+        "void": "http://rdfs.org/ns/void#",
+        "dqv": "http://www.w3.org/ns/dqv#",
+        "oa": "http://www.w3.org/ns/oa#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "apercue": "https://apercue.ca/vocab#",
+        "charter": "https://apercue.ca/charter#",
+        "name": "dcterms:title",
+        "description": "dcterms:description",
+        "depends_on": {
+            "@id": "dcterms:requires",
+            "@type": "@id"
+        },
+        "status": {
+            "@id": "schema:actionStatus",
+            "@type": "@id"
+        },
+        "tags": {
+            "@id": "dcterms:subject",
+            "@container": "@set"
+        }
+    },
+    "@graph": [
+        {
+            "@type": [
+                "prov:Activity",
+                "apercue:ContextEvent"
+            ],
+            "@id": "urn:event:monitoring-datacenter-merge-0",
+            "dcterms:description": "Monitoring graph merged into datacenter model",
+            "dcterms:title": "merge: monitoring → datacenter",
+            "dcterms:type": "merge",
+            "prov:startedAtTime": "2026-03-01T09:00:00Z",
+            "prov:wasAssociatedWith": {
+                "@id": "urn:agent:datacenter-controller"
+            },
+            "apercue:outcome": "success",
+            "prov:used": [
+                {
+                    "@id": "urn:domain:monitoring"
+                },
+                {
+                    "@id": "urn:resource:zabbix"
+                },
+                {
+                    "@id": "urn:resource:caddy-proxy"
+                }
+            ],
+            "prov:generated": {
+                "@id": "urn:domain:datacenter"
+            },
+            "time:hasTime": {
+                "@type": "time:Instant",
+                "@id": "urn:instant:monitoring-datacenter-0",
+                "time:inXSDDateTimeStamp": "2026-03-01T09:00:00Z"
+            }
+        },
+        {
+            "@type": [
+                "prov:Activity",
+                "apercue:ContextEvent"
+            ],
+            "@id": "urn:event:datacenter-compliance-validate-1",
+            "dcterms:description": "Security-tier resources validated against compliance rules",
+            "dcterms:title": "validate: datacenter → compliance",
+            "dcterms:type": "validate",
+            "prov:startedAtTime": "2026-03-01T10:30:00Z",
+            "prov:wasAssociatedWith": {
+                "@id": "urn:agent:datacenter-controller"
+            },
+            "apercue:outcome": "success",
+            "prov:used": [
+                {
+                    "@id": "urn:domain:datacenter"
+                },
+                {
+                    "@id": "urn:resource:vault"
+                },
+                {
+                    "@id": "urn:resource:keycloak"
+                },
+                {
+                    "@id": "urn:resource:postgresql"
+                }
+            ],
+            "prov:generated": {
+                "@id": "urn:domain:compliance"
+            },
+            "time:hasTime": {
+                "@type": "time:Instant",
+                "@id": "urn:instant:datacenter-compliance-1",
+                "time:inXSDDateTimeStamp": "2026-03-01T10:30:00Z"
+            }
+        },
+        {
+            "@type": [
+                "prov:Activity",
+                "apercue:ContextEvent"
+            ],
+            "@id": "urn:event:datacenter-catalog-project-2",
+            "dcterms:description": "Infrastructure layer projected to DCAT catalog",
+            "dcterms:title": "project: datacenter → catalog",
+            "dcterms:type": "project",
+            "prov:startedAtTime": "2026-03-02T14:00:00Z",
+            "prov:wasAssociatedWith": {
+                "@id": "urn:agent:datacenter-controller"
+            },
+            "apercue:outcome": "success",
+            "prov:used": [
+                {
+                    "@id": "urn:domain:datacenter"
+                },
+                {
+                    "@id": "urn:resource:router-core"
+                },
+                {
+                    "@id": "urn:resource:pve-node1"
+                },
+                {
+                    "@id": "urn:resource:pve-node2"
+                },
+                {
+                    "@id": "urn:resource:pve-node3"
+                }
+            ],
+            "prov:generated": {
+                "@id": "urn:domain:catalog"
+            },
+            "time:hasTime": {
+                "@type": "time:Instant",
+                "@id": "urn:instant:datacenter-catalog-2",
+                "time:inXSDDateTimeStamp": "2026-03-02T14:00:00Z"
+            }
+        },
+        {
+            "@type": [
+                "prov:Activity",
+                "apercue:ContextEvent"
+            ],
+            "@id": "urn:event:backup-datacenter-merge-3",
+            "dcterms:description": "Backup graph merge: restic-offsite schedule conflict detected",
+            "dcterms:title": "merge: backup → datacenter",
+            "dcterms:type": "merge",
+            "prov:startedAtTime": "2026-03-03T08:15:00Z",
+            "prov:wasAssociatedWith": {
+                "@id": "urn:agent:datacenter-controller"
+            },
+            "apercue:outcome": "partial",
+            "prov:used": [
+                {
+                    "@id": "urn:domain:backup"
+                },
+                {
+                    "@id": "urn:resource:restic-offsite"
+                },
+                {
+                    "@id": "urn:resource:backup-pbs"
+                }
+            ],
+            "prov:generated": {
+                "@id": "urn:domain:datacenter"
+            },
+            "time:hasTime": {
+                "@type": "time:Instant",
+                "@id": "urn:instant:backup-datacenter-3",
+                "time:inXSDDateTimeStamp": "2026-03-03T08:15:00Z"
+            }
+        },
+        {
+            "@type": [
+                "prov:Activity",
+                "apercue:ContextEvent"
+            ],
+            "@id": "urn:event:datacenter-api-export-4",
+            "dcterms:description": "Application-tier resources exported to static API",
+            "dcterms:title": "export: datacenter → api",
+            "dcterms:type": "export",
+            "prov:startedAtTime": "2026-03-03T11:00:00Z",
+            "prov:wasAssociatedWith": {
+                "@id": "urn:agent:datacenter-controller"
+            },
+            "apercue:outcome": "success",
+            "prov:used": [
+                {
+                    "@id": "urn:domain:datacenter"
+                },
+                {
+                    "@id": "urn:resource:caddy-proxy"
+                },
+                {
+                    "@id": "urn:resource:nginx-web"
+                },
+                {
+                    "@id": "urn:resource:gitlab-scm"
+                }
+            ],
+            "prov:generated": {
+                "@id": "urn:domain:api"
+            },
+            "time:hasTime": {
+                "@type": "time:Instant",
+                "@id": "urn:instant:datacenter-api-4",
+                "time:inXSDDateTimeStamp": "2026-03-03T11:00:00Z"
+            }
+        },
+        {
+            "@type": [
+                "prov:Activity",
+                "apercue:ContextEvent"
+            ],
+            "@id": "urn:event:datacenter-charter-validate-5",
+            "dcterms:description": "Container platform charter gate: k8s-prod missing HA pair",
+            "dcterms:title": "validate: datacenter → charter",
+            "dcterms:type": "validate",
+            "prov:startedAtTime": "2026-03-04T16:45:00Z",
+            "prov:wasAssociatedWith": {
+                "@id": "urn:agent:datacenter-controller"
+            },
+            "apercue:outcome": "conflict",
+            "prov:used": [
+                {
+                    "@id": "urn:domain:datacenter"
+                },
+                {
+                    "@id": "urn:resource:k8s-prod"
+                },
+                {
+                    "@id": "urn:resource:docker-host"
+                },
+                {
+                    "@id": "urn:resource:incus-cluster"
+                }
+            ],
+            "prov:generated": {
+                "@id": "urn:domain:charter"
+            },
+            "time:hasTime": {
+                "@type": "time:Instant",
+                "@id": "urn:instant:datacenter-charter-5",
+                "time:inXSDDateTimeStamp": "2026-03-04T16:45:00Z"
+            }
+        },
+        {
+            "@type": "prov:Entity",
+            "@id": "urn:domain:monitoring",
+            "dcterms:title": "monitoring"
+        },
+        {
+            "@type": "prov:Entity",
+            "@id": "urn:domain:datacenter",
+            "dcterms:title": "datacenter"
+        },
+        {
+            "@type": "prov:Entity",
+            "@id": "urn:domain:compliance",
+            "dcterms:title": "compliance"
+        },
+        {
+            "@type": "prov:Entity",
+            "@id": "urn:domain:catalog",
+            "dcterms:title": "catalog"
+        },
+        {
+            "@type": "prov:Entity",
+            "@id": "urn:domain:backup",
+            "dcterms:title": "backup"
+        },
+        {
+            "@type": "prov:Entity",
+            "@id": "urn:domain:api",
+            "dcterms:title": "api"
+        },
+        {
+            "@type": "prov:Entity",
+            "@id": "urn:domain:charter",
+            "dcterms:title": "charter"
+        },
+        {
+            "@type": [
+                "prov:Collection",
+                "apercue:ContextEventLog"
+            ],
+            "@id": "urn:collection:context-event-log",
+            "dcterms:title": "Context Event Log",
+            "prov:hadMember": [
+                {
+                    "@id": "urn:event:monitoring-datacenter-merge-0"
+                },
+                {
+                    "@id": "urn:event:datacenter-compliance-validate-1"
+                },
+                {
+                    "@id": "urn:event:datacenter-catalog-project-2"
+                },
+                {
+                    "@id": "urn:event:backup-datacenter-merge-3"
+                },
+                {
+                    "@id": "urn:event:datacenter-api-export-4"
+                },
+                {
+                    "@id": "urn:event:datacenter-charter-validate-5"
+                }
+            ]
+        },
+        {
+            "@type": [
+                "prov:Agent",
+                "prov:SoftwareAgent"
+            ],
+            "@id": "urn:agent:datacenter-controller"
+        }
+    ]
+}
