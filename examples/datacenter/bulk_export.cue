@@ -33,6 +33,7 @@ _bulk: {
 	rundeck:          execution.rundeck
 	script:           execution.script
 	form_projection:  form_projection
+	rdf_star:         rdf_star
 	index_html:       _index_page
 	stats:            _index_stats
 }

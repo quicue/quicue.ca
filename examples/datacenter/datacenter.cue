@@ -1047,3 +1047,40 @@ _forms: apercue_patterns.#FormProjection & {
 	Types: vocab.#TypeRegistry
 }
 form_projection: _forms.form_definitions
+
+// ==========================================================================
+// RDF-STAR ANNOTATION (metadata on dependency edges)
+// ==========================================================================
+//
+// cue export ./examples/datacenter/ -e rdf_star --out json
+
+_rdf_star: patterns.#RDFStarAnnotation & {
+	Graph:   infra
+	BaseIRI: _base
+	Edges: {
+		"caddy-proxy->vault": {
+			confidence: 0.99
+			source:     "tls-cert-chain"
+			timestamp:  "2026-03-01T09:00:00Z"
+			method:     "certificate-verification"
+		}
+		"gitlab-scm->postgresql": {
+			confidence: 0.95
+			source:     "connection-pool-check"
+			timestamp:  "2026-03-01T10:00:00Z"
+		}
+		"k8s-prod->vault": {
+			confidence: 0.8
+			source:     "container-runtime-probe"
+			timestamp:  "2026-03-02T14:00:00Z"
+			notes:      "Secret injection via CSI driver"
+		}
+		"zabbix->postgresql": {
+			confidence: 1.0
+			source:     "config-file-parse"
+			timestamp:  "2026-03-01T09:00:00Z"
+			method:     "zabbix_server.conf DBHost"
+		}
+	}
+}
+rdf_star: _rdf_star.annotated_graph
