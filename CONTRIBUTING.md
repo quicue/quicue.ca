@@ -11,7 +11,7 @@
 ```
 vocab/            Core type definitions (#Resource, #Action, #ActionDef, #TypeRegistry)
 patterns/         Graph algorithms and binding (#InfraGraph, #BindCluster, #ExecutionPlan)
-template/*/       29 provider templates (proxmox, docker, caddy, ...)
+template/*/       33 provider templates (proxmox, docker, caddy, ...)
 examples/*/       Working examples (datacenter, homelab, graph-patterns, ...)
 ou/               Role-scoped views (ops, dev, readonly) + Hydra JSON-LD
 boot/             Bootstrap sequencing

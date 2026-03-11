@@ -123,13 +123,13 @@ Four-layer model:
 - **`#ODRLPolicy`** — W3C ODRL 2.2 machine-readable access policies
 - **`#SHACLShapes`** — W3C SHACL node shapes from type registry
 
-## Providers (29)
+## Providers (33)
 
 | Category | Providers |
 |----------|-----------|
 | Compute | proxmox, govc, powercli, kubevirt |
 | Container/Orchestration | docker, incus, k3d, kubectl, argocd |
-| CI/CD | dagger, gitlab |
+| CI/CD | dagger, gitlab, woodpecker |
 | Networking | vyos, caddy, nginx |
 | DNS | cloudflare, powerdns, technitium |
 | Identity/Secrets | vault, keycloak |
@@ -137,9 +137,11 @@ Four-layer model:
 | DCIM/IPAM | netbox |
 | Provisioning | foreman |
 | Automation | ansible, awx |
-| Monitoring | zabbix |
+| Monitoring | zabbix, grafana |
 | IaC | terraform, opentofu |
 | Backup | restic, pbs |
+| Storage | garage |
+| Registry | harbor |
 
 Each provider follows:
 ```

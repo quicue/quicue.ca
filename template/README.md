@@ -1,6 +1,6 @@
 # Provider Templates
 
-29 provider templates implementing the `#ActionDef` vocabulary for real infrastructure tools.
+33 provider templates implementing the `#ActionDef` vocabulary for real infrastructure tools.
 
 ## Templates by Category
 
