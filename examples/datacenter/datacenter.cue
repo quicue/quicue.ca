@@ -20,9 +20,6 @@ import (
 	"list"
 	"quicue.ca/vocab@v0"
 	"quicue.ca/patterns@v0"
-	apercue_vocab "apercue.ca/vocab@v0"
-	apercue_patterns "apercue.ca/patterns@v0"
-
 	// Provider registries (29 providers)
 	ansible_patterns "quicue.ca/template/ansible/patterns"
 	argocd_patterns "quicue.ca/template/argocd/patterns"
@@ -964,123 +961,7 @@ _dqv: patterns.#DataQualityReport & {
 }
 quality_report: _dqv.quality_report
 
-// ==========================================================================
-// CONTEXT EVENT LOG (federation audit trail)
-// ==========================================================================
-//
-// cue export ./examples/datacenter/ -e context_events --out json
-
-_events: [...apercue_vocab.#ContextEvent] & [
-	{
-		timestamp:     "2026-03-01T09:00:00Z"
-		type:          "merge"
-		source_domain: "monitoring"
-		target_domain: "datacenter"
-		resources:     ["zabbix", "caddy-proxy"]
-		outcome:       "success"
-		description:   "Monitoring graph merged into datacenter model"
-	},
-	{
-		timestamp:     "2026-03-01T10:30:00Z"
-		type:          "validate"
-		source_domain: "datacenter"
-		target_domain: "compliance"
-		resources:     ["vault", "keycloak", "postgresql"]
-		outcome:       "success"
-		description:   "Security-tier resources validated against compliance rules"
-	},
-	{
-		timestamp:     "2026-03-02T14:00:00Z"
-		type:          "project"
-		source_domain: "datacenter"
-		target_domain: "catalog"
-		resources: [
-			"router-core", "pve-node1", "pve-node2", "pve-node3",
-		]
-		outcome:     "success"
-		description: "Infrastructure layer projected to DCAT catalog"
-	},
-	{
-		timestamp:     "2026-03-03T08:15:00Z"
-		type:          "merge"
-		source_domain: "backup"
-		target_domain: "datacenter"
-		resources:     ["restic-offsite", "backup-pbs"]
-		outcome:       "partial"
-		description:   "Backup graph merge: restic-offsite schedule conflict detected"
-	},
-	{
-		timestamp:     "2026-03-03T11:00:00Z"
-		type:          "export"
-		source_domain: "datacenter"
-		target_domain: "api"
-		resources:     ["caddy-proxy", "nginx-web", "gitlab-scm"]
-		outcome:       "success"
-		description:   "Application-tier resources exported to static API"
-	},
-	{
-		timestamp:     "2026-03-04T16:45:00Z"
-		type:          "validate"
-		source_domain: "datacenter"
-		target_domain: "charter"
-		resources: [
-			"k8s-prod", "docker-host", "incus-cluster",
-		]
-		outcome:     "conflict"
-		description: "Container platform charter gate: k8s-prod missing HA pair"
-	},
-]
-
-_event_log: apercue_patterns.#ContextEventLog & {
-	Events: _events
-	Agent:  "urn:agent:datacenter-controller"
-}
-context_events: _event_log.event_report
-
-// ==========================================================================
-// FORM PROJECTION (UI form definitions from type registry)
-// ==========================================================================
-//
-// cue export ./examples/datacenter/ -e form_projection --out json
-
-_forms: apercue_patterns.#FormProjection & {
-	Types: vocab.#TypeRegistry
-}
-form_projection: _forms.form_definitions
-
-// ==========================================================================
-// RDF-STAR ANNOTATION (metadata on dependency edges)
-// ==========================================================================
-//
-// cue export ./examples/datacenter/ -e rdf_star --out json
-
-_rdf_star: patterns.#RDFStarAnnotation & {
-	Graph:   infra
-	BaseIRI: _base
-	Edges: {
-		"caddy-proxy->vault": {
-			confidence: 0.99
-			source:     "tls-cert-chain"
-			timestamp:  "2026-03-01T09:00:00Z"
-			method:     "certificate-verification"
-		}
-		"gitlab-scm->postgresql": {
-			confidence: 0.95
-			source:     "connection-pool-check"
-			timestamp:  "2026-03-01T10:00:00Z"
-		}
-		"k8s-prod->vault": {
-			confidence: 0.8
-			source:     "container-runtime-probe"
-			timestamp:  "2026-03-02T14:00:00Z"
-			notes:      "Secret injection via CSI driver"
-		}
-		"zabbix->postgresql": {
-			confidence: 1.0
-			source:     "config-file-parse"
-			timestamp:  "2026-03-01T09:00:00Z"
-			method:     "zabbix_server.conf DBHost"
-		}
-	}
-}
-rdf_star: _rdf_star.annotated_graph
+// Context events, form projection, and RDF-Star annotation are demonstrated
+// in examples/small-graph/ where evaluation completes in under 1 second.
+// The 30-node datacenter graph causes CUE evaluation timeout when these
+// patterns are included (CUE evaluates all public fields in a package).
