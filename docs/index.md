@@ -35,7 +35,7 @@ The graph patterns are domain-agnostic. quicue.ca applies them to infrastructure
 | [ci](modules/ci.md) | `ci` | Reusable GitLab CI templates for CUE validation, export, topology, impact |
 | [server](modules/server.md) | `operations` | FastAPI execution gateway for running infrastructure commands |
 | [charter](modules/charter.md) | `constraint` | Constraint-first project planning: declare scope, evaluate gaps, track gates. SHACL gap report projection. |
-| [examples](modules/examples.md) | `value` | 18 working examples from minimal 3-layer to full 30-resource datacenter |
+| [examples](modules/examples.md) | `value` | 19 working examples from minimal 3-layer to full 30-resource datacenter |
 
 ## Downstream Consumers
 

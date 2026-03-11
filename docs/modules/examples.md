@@ -1,6 +1,6 @@
 # examples
 
-17 working examples from minimal 3-layer to full 30-resource datacenter
+19 working examples from minimal 3-layer to full 30-resource datacenter
 
 | Field | Value |
 |-------|-------|
@@ -27,6 +27,8 @@
 - `sbom`
 - `ci`
 - `universal-platform`
+- `projections-demo`
+- `vcf-migration`
 
 ---
 *Generated from quicue.ca registries by `#DocsProjection`*
