@@ -86,7 +86,7 @@ Names are Quebecois French wordplay, not acronyms:
 
 quicue.ca builds on **[apercue.ca](https://github.com/quicue/apercue)** --- the domain-agnostic foundation layer providing generic graph patterns (`#Graph`, `#CriticalPath`, `#ComplianceCheck`), charter-based planning (`#Charter`, `#GapAnalysis`), and W3C projections (JSON-LD, SHACL, SKOS, EARL, OWL-Time). apercue.ca proves the typed-graph-to-W3C-linked-data pattern works without any infrastructure dependency. quicue.ca adds infrastructure-specific types, providers, and execution plans on top.
 
-See the [apercue.ca ecosystem explorer](https://apercue.ca/explorer.html) for the full dependency graph.
+See the [apercue.ca projections dashboard](https://apercue.ca/projections.html) for the full dependency graph.
 
 ## Architecture
 
@@ -155,7 +155,7 @@ template/<name>/
 ## Examples
 
 ### `examples/datacenter/` — Full pipeline
-30 resources across all 33 providers. Exercises every pattern: graph analysis, provider binding, impact queries, blast radius, SPOF detection, deployment planning, execution plans, JSON-LD export, OpenAPI generation.
+30 resources across 29 of 33 providers. Exercises every pattern: graph analysis, provider binding, impact queries, blast radius, SPOF detection, deployment planning, execution plans, JSON-LD export, OpenAPI generation.
 
 ### `examples/homelab/` — Reference homelab
 14 resources on a 3-node cluster. Edit `_site` config, swap `providers.cue` for your stack (Proxmox, Docker, K8s, Incus), run `cue export`.

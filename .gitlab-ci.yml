@@ -8,6 +8,7 @@ stages:
 variables:
   CUE_VERSION: "0.15.4"
   JUST_VERSION: "1.46.0"
+  CUE_REGISTRY: "none"
 
 .cue-just-setup:
   image: golang:1.21-alpine

@@ -16,6 +16,8 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      CUE_REGISTRY: none
     steps:
       - uses: actions/checkout@v4
 
@@ -26,6 +28,9 @@ jobs:
       - name: Install CUE
         run: |
           curl -sSL https://github.com/cue-lang/cue/releases/download/v0.15.4/cue_v0.15.4_linux_amd64.tar.gz | tar xz -C /usr/local/bin cue
+
+      - name: Populate CUE module cache
+        run: bash .github/populate-cue-cache.sh
 
       - name: Install dependencies
         run: pip install mkdocs-material

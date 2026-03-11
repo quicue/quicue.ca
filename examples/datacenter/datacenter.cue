@@ -854,7 +854,7 @@ _openapi: patterns.#OpenAPISpec & {
 	Cluster: cluster
 	Info: {
 		title:       "Datacenter Operations API"
-		description: "Auto-generated from quicue.ca #BindCluster — 35 resources, 29 providers"
+		description: "Auto-generated from quicue.ca #BindCluster — 30 resources, 29 providers"
 		version:     "1.0.0"
 	}
 }
