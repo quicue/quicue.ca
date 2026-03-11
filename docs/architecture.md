@@ -32,7 +32,7 @@ graph TD
 
 ### template
 
-- **[templates](modules/templates.md)** — 29 platform-specific providers, each a self-contained CUE module
+- **[templates](modules/templates.md)** — 33 platform-specific providers, each a self-contained CUE module
 
 ### orchestration
 

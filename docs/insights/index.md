@@ -122,7 +122,7 @@ SPARQL is unnecessary for the primary use case. CUE comprehensions precompute al
 
 ### Evidence
 
-- 727 static JSON files replace FastAPI with zero server runtime
+- 654 static JSON files replace FastAPI with zero server runtime
 
 ### Implication
 

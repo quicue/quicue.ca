@@ -26,7 +26,7 @@ The graph patterns are domain-agnostic. quicue.ca applies them to infrastructure
 |--------|-------|-------------|
 | [vocab](modules/vocab.md) | `definition` | Core schemas: #Resource, #Action, #TypeRegistry, #ActionDef |
 | [patterns](modules/patterns.md) | `definition` | Algorithms: graph, bind, deploy, health, SPOF, viz, TOON, OpenAPI, validation |
-| [templates](modules/templates.md) | `template` | 29 platform-specific providers, each a self-contained CUE module |
+| [templates](modules/templates.md) | `template` | 33 platform-specific providers, each a self-contained CUE module |
 | [orche](modules/orche.md) | `orchestration` | Orchestration schemas: execution steps, federation, drift detection, Docker site bootstrap |
 | [boot](modules/boot.md) | `orchestration` | Bootstrap schemas: #BootstrapResource, #BootstrapPlan, credential collectors |
 | [wiki](modules/wiki.md) | `projection` | #WikiProjection — MkDocs site generation from resource graphs |
@@ -35,7 +35,7 @@ The graph patterns are domain-agnostic. quicue.ca applies them to infrastructure
 | [ci](modules/ci.md) | `ci` | Reusable GitLab CI templates for CUE validation, export, topology, impact |
 | [server](modules/server.md) | `operations` | FastAPI execution gateway for running infrastructure commands |
 | [charter](modules/charter.md) | `constraint` | Constraint-first project planning: declare scope, evaluate gaps, track gates. SHACL gap report projection. |
-| [examples](modules/examples.md) | `value` | 17 working examples from minimal 3-layer to full 30-resource datacenter |
+| [examples](modules/examples.md) | `value` | 18 working examples from minimal 3-layer to full 30-resource datacenter |
 
 ## Downstream Consumers
 
@@ -51,7 +51,7 @@ The graph patterns are domain-agnostic. quicue.ca applies them to infrastructure
 |------|-------------|
 | [docs](https://docs.quicue.ca) | MkDocs Material documentation site |
 | [demo](https://demo.quicue.ca) | Operator dashboard — D3 graph, planner, resource browser |
-| [api](https://api.quicue.ca) | Static API showcase — 727 pre-computed JSON endpoints |
+| [api](https://api.quicue.ca) | Static API showcase — 654 pre-computed JSON endpoints |
 | [cat](https://cat.quicue.ca) | DCAT 3 data catalogue |
 | [kg](https://kg.quicue.ca) | Knowledge graph framework spec |
 | [cmhc-retrofit](https://cmhc-retrofit.quicue.ca) | Construction program management showcase |

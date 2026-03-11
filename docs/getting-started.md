@@ -141,7 +141,7 @@ Answer: `web` is affected (it depends on `dns`). `router` is not (nothing depend
 
 ## Next steps
 
-- **Add more resources and providers.** See the [datacenter example](example/index.md) for a 30-resource setup with 29 providers.
+- **Add more resources and providers.** See the [datacenter example](example/index.md) for a 30-resource setup with 33 providers.
 - **Write your own provider.** The [Template Guide](templates.md) walks through the process.
 - **Understand the architecture.** The [Architecture](architecture.md) doc explains the four-layer model.
 - **Browse the pattern catalog.** The [Pattern Catalog](patterns.md) lists every computation available.

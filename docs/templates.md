@@ -1,6 +1,6 @@
 # Templates
 
-12 modules include 29 provider templates across 13 categories. Each template teaches the system how to manage a specific platform.
+12 modules include 33 provider templates across 13 categories. Each template teaches the system how to manage a specific platform.
 
 ## Categories
 

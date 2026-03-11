@@ -43,7 +43,7 @@ A provider declares `types: {LXCContainer: true}`. A resource declares `"@type":
 
 That DNS server matches Proxmox (serves LXCContainer) *and* PowerDNS (serves DNSServer) simultaneously. No registration, no interface declaration.
 
-Provider swapping is a type-set change. Replace `LXCContainer` with `DockerContainer` and Docker binds instead of Proxmox — the set intersection changed, so the dispatch changed. This is why 29 providers work without 29 special cases.
+Provider swapping is a type-set change. Replace `LXCContainer` with `DockerContainer` and Docker binds instead of Proxmox — the set intersection changed, so the dispatch changed. This is why 33 providers work without 33 special cases.
 
 ## Transitive closure from unification
 
@@ -84,7 +84,7 @@ Blast radius wraps it and adds rollback ordering. Criticality ranking counts dow
 
 There is no query planner, no index, no runtime. `cue export` produces every answer at eval time.
 
-Consequence: **if every answer is known at build time, the API is a file server.** The project serves 727 pre-computed JSON files from a CDN. No server, no database. CUE comprehensions enumerate all possible queries, so the static API is just those answers as files.
+Consequence: **if every answer is known at build time, the API is a file server.** The project serves 654 pre-computed JSON files from a CDN. No server, no database. CUE comprehensions enumerate all possible queries, so the static API is just those answers as files.
 
 ## Constraints are values
 
@@ -149,7 +149,7 @@ Same `#InfraGraph`, same `#ImpactQuery`, same `#Charter` — four domains:
 
 | Domain | Graph | Shape |
 |--------|-------|-------|
-| IT infrastructure | 30 resources, 29 providers, 654 commands | Service topology |
+| IT infrastructure | 30 resources, 33 providers, 654 commands | Service topology |
 | Construction PM | 18 CMHC deep retrofit work packages | Project delivery |
 | Energy efficiency | 17-service Greener Homes platform | Platform topology |
 | Real estate | Transaction pipeline, compliance tracker | Workflow graph |

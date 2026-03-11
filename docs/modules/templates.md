@@ -1,6 +1,6 @@
 # templates
 
-29 platform-specific providers, each a self-contained CUE module
+33 platform-specific providers, each a self-contained CUE module
 
 | Field | Value |
 |-------|-------|

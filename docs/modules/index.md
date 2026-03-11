@@ -6,7 +6,7 @@
 |--------|-------|--------|-------------|
 | [vocab](vocab.md) | `definition` | active | Core schemas: #Resource, #Action, #TypeRegistry, #ActionDef |
 | [patterns](patterns.md) | `definition` | active | Algorithms: graph, bind, deploy, health, SPOF, viz, TOON, OpenAPI, validation |
-| [templates](templates.md) | `template` | active | 29 platform-specific providers, each a self-contained CUE module |
+| [templates](templates.md) | `template` | active | 33 platform-specific providers, each a self-contained CUE module |
 | [orche](orche.md) | `orchestration` | active | Orchestration schemas: execution steps, federation, drift detection, Docker site bootstrap |
 | [boot](boot.md) | `orchestration` | active | Bootstrap schemas: #BootstrapResource, #BootstrapPlan, credential collectors |
 | [wiki](wiki.md) | `projection` | active | #WikiProjection — MkDocs site generation from resource graphs |

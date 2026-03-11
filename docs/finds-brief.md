@@ -17,7 +17,7 @@ let _matched = [
 ]
 ```
 
-A resource with `{LXCContainer: true, DNSServer: true}` matches both Proxmox and PowerDNS simultaneously. Swap `LXCContainer` for `DockerContainer` and Docker binds instead. 29 providers, zero special cases.
+A resource with `{LXCContainer: true, DNSServer: true}` matches both Proxmox and PowerDNS simultaneously. Swap `LXCContainer` for `DockerContainer` and Docker binds instead. 33 providers, zero special cases.
 
 ### 2. Transitive closure is six lines
 
@@ -44,7 +44,7 @@ affected: {
 }
 ```
 
-Impact analysis, blast radius, SPOF detection, criticality ranking — each is one comprehension over `_ancestors`. `cue export` produces every answer. The API is 727 static JSON files on a CDN.
+Impact analysis, blast radius, SPOF detection, criticality ranking — each is one comprehension over `_ancestors`. `cue export` produces every answer. The API is 654 static JSON files on a CDN.
 
 ### 4. Constraints are values, not assertions
 
