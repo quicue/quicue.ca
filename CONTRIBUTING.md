@@ -64,7 +64,7 @@ Or individually:
 ```bash
 make validate   # Core schemas only
 make examples   # All examples
-make providers  # All 29 provider templates
+make providers  # All 33 provider templates
 ```
 
 ### Adding a pattern

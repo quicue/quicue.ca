@@ -79,7 +79,7 @@ From a flat list of resources with `@type` and `depends_on`, the pattern library
 | 5 | CI/CD/automation | nginx-web, kubevirt-vms, gitlab-scm, awx, opentofu-iac | nginx, kubevirt, gitlab, awx, opentofu |
 | 6 | GitOps/IaC | argocd, gitlab-runner, dagger-ci, terraform-state | argocd, dagger, terraform |
 
-Each resource exercises at least one of the [29 provider templates](../../template/).
+Each resource exercises 29 of the [33 provider templates](../../template/).
 
 ## More queries
 

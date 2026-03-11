@@ -8,7 +8,7 @@ Two deployment modes for the same data: a **static build** that pre-computes eve
 
 ## Overview
 
-654 resolved commands across 29 providers, all computed from one `cue export`. Data comes from `examples/datacenter/` using RFC 5737 TEST-NET IPs (198.51.100.x) and RFC 2606 hostnames (*.dc.example.com). No production data.
+654 resolved commands across 29 of 33 providers, all computed from one `cue export`. Data comes from `examples/datacenter/` using RFC 5737 TEST-NET IPs (198.51.100.x) and RFC 2606 hostnames (*.dc.example.com). No production data.
 
 ### Static API (default)
 
