@@ -1,5 +1,5 @@
 site_name: quicue.ca
-site_description: Model it in CUE. Validate by unification. Export to whatever the world expects.
+site_description: Describe infrastructure as a dependency graph in CUE, check it, and export the views and formats other tools expect.
 site_url: https://docs.quicue.ca/
 repo_url: https://github.com/quicue/quicue.ca
 repo_name: quicue/quicue.ca

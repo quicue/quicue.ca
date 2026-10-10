@@ -297,7 +297,7 @@ import "strings"
 	_mkIndex: """
 		# quicue.ca
 
-		Model it in CUE. Validate by unification. Export to whatever the world expects.
+		Describe infrastructure as a dependency graph in CUE, check it, and export the views and formats other tools expect.
 
 		\(Prose.index.what_this_is)
 
