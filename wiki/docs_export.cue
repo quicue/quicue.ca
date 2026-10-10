@@ -29,7 +29,7 @@ _prose: #ProseSlots & {
 		what_this_is: """
 			## What this is
 
-			You declare resources — nodes in a graph — with types and dependencies. CUE computes the rest: dependency layers, transitive closure, blast radius, deployment plans, linked data exports. The gap between your constraints and your data IS the remaining work. When `cue vet` passes, you're done.
+			quicue.ca is a set of [CUE](https://cuelang.org) schemas for describing infrastructure as a dependency graph. Each resource (a server, a container, a service) is a node with a type and a list of what it depends on. From that, CUE works out which layer each resource sits in, everything it depends on directly or indirectly, what fails if it goes down, and the order to deploy in. The same graph can also be exported as W3C linked data.
 
 			```cue
 			dns: #Resource & {
@@ -40,12 +40,12 @@ _prose: #ProseSlots & {
 			}
 			```
 
-			No runtime. No state file. No plugins. CUE validates everything simultaneously, and the output is plain JSON.
+			Everything is computed when you run `cue vet` or `cue export`. There is no agent, state file or plugin system, and the output is plain JSON. If you also write down what the finished system must contain, any requirement not yet met shows up as a validation error, which gives you a running to-do list.
 			"""
 		not_just_infra: """
 			## Not just infrastructure
 
-			The graph patterns are domain-agnostic. `#BlastRadius`, `#ImpactQuery`, `#SinglePointsOfFailure`, and `#DeploymentPlan` don't know what domain they're in. "What breaks if X goes down?" works whether X is a DNS server, a construction phase, or a research gene.
+			The analysis patterns (`#BlastRadius`, `#ImpactQuery`, `#SinglePointsOfFailure`, `#DeploymentPlan`) only see nodes and dependencies, not what the nodes represent. The question "what breaks if X goes down?" works the same way when X is a DNS server, a phase of a construction project, or a step in a business process.
 
 			| Domain | What the graph models | Live |
 			|--------|----------------------|------|
@@ -59,33 +59,32 @@ _prose: #ProseSlots & {
 
 			| Pattern | What it answers |
 			|---------|-----------------|
-			| `#InfraGraph` | Dependency layers, transitive closure, topology |
-			| `#BindCluster` | Which providers match which resources, resolved commands |
-			| `#ImpactQuery` | "What breaks if X goes down?" |
-			| `#BlastRadius` | Change impact with rollback order |
-			| `#SinglePointsOfFailure` | Resources with no redundancy |
-			| `#HealthStatus` | Simulated failure propagation |
-			| `#DeploymentPlan` | Ordered layers with gates |
-			| `#ExecutionPlan` | All of the above, unified |
-			| `#Charter` | What "done" looks like — scope, gates, completion |
-			| `#GapAnalysis` | What's missing, what's next, which gates are satisfied |
+			| `#InfraGraph` | Which layer each resource is in, and everything it depends on |
+			| `#BindCluster` | Which platform provider handles each resource, with the commands filled in |
+			| `#ImpactQuery` | What breaks if a given resource goes down |
+			| `#BlastRadius` | What a change affects, and the order to roll it back |
+			| `#SinglePointsOfFailure` | Resources with no redundant alternative |
+			| `#HealthStatus` | How a simulated failure spreads through the graph |
+			| `#DeploymentPlan` | Deployment order, layer by layer, with checkpoints |
+			| `#ExecutionPlan` | All of the above in one result |
+			| `#Charter` | What the finished system must contain, and the milestones on the way |
+			| `#GapAnalysis` | What is still missing, what to do next, and which milestones are met |
 
 			See the [Pattern Catalog](patterns.md) for the full list and [Charter](charter.md) for project planning.
 			"""
 		contract: """
-			## Contract-via-unification
+			## Tests written as data
 
-			Verification IS unification. You write CUE constraints that must merge with the computed graph. If they can't unify, `cue vet` rejects everything:
+			Instead of a separate test framework, expected results are written as ordinary CUE values next to the graph. CUE has to merge them with what it computed. If they disagree, for example if the graph says something other than `docker` is the root, `cue vet` fails:
 
 			```cue
-			// This must merge with the computed graph output.
-			// If docker isn't the root, or validation fails, cue vet rejects.
+			// Expected results. These must agree with the computed graph or cue vet fails.
 			validate: valid: true
 			infra: roots: {"docker": true}
 			deployment: layers: [{layer: 0, resources: ["docker"]}, ...]
 			```
 
-			No assertion framework. No test runner. The contract IS CUE values. Unification IS the enforcement.
+			The checks live in the same language as the data, so there is no assertion library or test runner to maintain.
 			"""
 	}
 	architecture: {
