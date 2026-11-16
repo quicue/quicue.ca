@@ -38,7 +38,7 @@ git clone https://github.com/quicue/quicue.ca.git
 cd quicue.ca
 cue vet ./vocab/ ./patterns/
 
-# Run the datacenter example (30 resources, 33 providers, 654 resolved commands)
+# Run the datacenter example (30 resources, 28 providers, 654 resolved commands)
 cue eval ./examples/datacenter/ -e output.summary
 
 # See what breaks if the router goes down
@@ -155,7 +155,7 @@ template/<name>/
 ## Examples
 
 ### `examples/datacenter/` — Full pipeline
-30 resources across 29 of 33 providers. Exercises every pattern: graph analysis, provider binding, impact queries, blast radius, SPOF detection, deployment planning, execution plans, JSON-LD export, OpenAPI generation.
+30 resources across 28 of 33 providers. Exercises every pattern: graph analysis, provider binding, impact queries, blast radius, SPOF detection, deployment planning, execution plans, JSON-LD export, OpenAPI generation.
 
 ### `examples/homelab/` — Reference homelab
 14 resources on a 3-node cluster. Edit `_site` config, swap `providers.cue` for your stack (Proxmox, Docker, K8s, Incus), run `cue export`.
@@ -175,7 +175,7 @@ template/<name>/
 
 ## Try it live
 
-The datacenter example (30 resources, 33 providers, 654 resolved commands) is deployed as a fully static showcase — every API response is pre-computed from one `cue export`. No servers, no containers, no runtime dependencies.
+The datacenter example (30 resources, 28 providers, 654 resolved commands) is deployed as a fully static showcase — every API response is pre-computed from one `cue export`. No servers, no containers, no runtime dependencies.
 
 | Surface | URL | What you see |
 |---------|-----|-------------|
@@ -201,7 +201,7 @@ The same graph patterns power projects across different domains:
 
 | Domain | Project | What it models |
 |--------|---------|---------------|
-| IT infrastructure | [datacenter](examples/datacenter/) — [dashboard](https://demo.quicue.ca/) — [API](https://api.quicue.ca/docs/) | 30 resources, 33 providers, 654 resolved commands |
+| IT infrastructure | [datacenter](examples/datacenter/) — [dashboard](https://demo.quicue.ca/) — [API](https://api.quicue.ca/docs/) | 30 resources, 28 providers, 654 resolved commands |
 | Construction | [CMHC Retrofit](https://cmhc-retrofit.quicue.ca/) | Deep retrofit work packages for 270-unit community housing program |
 | Energy efficiency | [Greener Homes](https://cmhc-retrofit.quicue.ca/#greener-homes) | 17-service processing platform for Ontario Greener Homes |
 | Real estate | [maison-613](https://maison613.quicue.ca/) | Transaction, referral, compliance, and onboarding workflows |

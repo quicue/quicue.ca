@@ -149,7 +149,7 @@ Same `#InfraGraph`, same `#ImpactQuery`, same `#Charter` — four domains:
 
 | Domain | Graph | Shape |
 |--------|-------|-------|
-| IT infrastructure | 30 resources, 33 providers, 654 commands | Service topology |
+| IT infrastructure | 30 resources, 28 providers, 654 commands | Service topology |
 | Construction PM | 18 CMHC deep retrofit work packages | Project delivery |
 | Energy efficiency | 17-service Greener Homes platform | Platform topology |
 | Real estate | Transaction pipeline, compliance tracker | Workflow graph |
