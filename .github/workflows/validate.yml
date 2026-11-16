@@ -78,6 +78,9 @@ jobs:
             cue vet "./$d/..." -c
           done
 
+      - name: Provider counts in docs match template/ and the datacenter example
+        run: bash ci/check-provider-counts.sh
+
       - name: No hardcoded absolute paths in markdown
         run: |
           FOUND=0

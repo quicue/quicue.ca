@@ -1,6 +1,6 @@
 # Datacenter Example
 
-30 resources, 29 providers, 7 deployment layers, 654 resolved commands — all from [one CUE file](datacenter.cue).
+30 resources, 28 providers, 7 deployment layers, 654 resolved commands — all from [one CUE file](datacenter.cue).
 
 ## Run
 
@@ -65,7 +65,7 @@ From a flat list of resources with `@type` and `depends_on`, the pattern library
 
 **Health simulation** (vault goes down): 15 healthy, 14 degraded, 1 down. Degradation propagates through keycloak, caddy-proxy, k8s-prod, gitlab-scm, and everything downstream.
 
-**Command binding:** 654 executable actions resolved at compile time across 29 providers. Every `{param}` placeholder in every command template is resolved against resource fields — no unresolved templates pass `cue vet`.
+**Command binding:** 654 executable actions resolved at compile time across 28 providers. Every `{param}` placeholder in every command template is resolved against resource fields — no unresolved templates pass `cue vet`.
 
 ## Architecture layers
 
@@ -79,7 +79,7 @@ From a flat list of resources with `@type` and `depends_on`, the pattern library
 | 5 | CI/CD/automation | nginx-web, kubevirt-vms, gitlab-scm, awx, opentofu-iac | nginx, kubevirt, gitlab, awx, opentofu |
 | 6 | GitOps/IaC | argocd, gitlab-runner, dagger-ci, terraform-state | argocd, dagger, terraform |
 
-Each resource exercises 29 of the [33 provider templates](../../template/).
+The example exercises 28 of the [33 provider templates](../../template/).
 
 ## More queries
 

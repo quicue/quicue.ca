@@ -1,9 +1,9 @@
-// Representative datacenter - exercises all 28 quicue.ca providers
+// Representative datacenter - exercises 28 of the 33 quicue.ca providers
 //
 // Models a mid-size organisation datacenter with realistic dependencies
 // across physical, virtual, container, and application layers.
 //
-// Each resource maps to one or more of the 28 quicue.ca providers.
+// Each resource maps to one or more of the providers declared below.
 // #BindCluster automatically matches providers to resources by @type overlap
 // and resolves command templates into executable commands at CUE compile time.
 //
@@ -20,7 +20,7 @@ import (
 	"list"
 	"quicue.ca/vocab@v0"
 	"quicue.ca/patterns@v0"
-	// Provider registries (29 providers)
+	// Provider registries (28 providers)
 	ansible_patterns "quicue.ca/template/ansible/patterns"
 	argocd_patterns "quicue.ca/template/argocd/patterns"
 	awx_patterns "quicue.ca/template/awx/patterns"
@@ -665,7 +665,7 @@ _providerMap: {
 	"restic-offsite": ["restic"]
 }
 
-// Verify all 29 providers are represented
+// Verify all 28 providers are represented
 _allProviders: {
 	for _, providers in _providerMap
 	for _, p in providers {
@@ -854,7 +854,7 @@ _openapi: patterns.#OpenAPISpec & {
 	Cluster: cluster
 	Info: {
 		title:       "Datacenter Operations API"
-		description: "Auto-generated from quicue.ca #BindCluster — 30 resources, 29 providers"
+		description: "Auto-generated from quicue.ca #BindCluster — 30 resources, 28 providers"
 		version:     "1.0.0"
 	}
 }
