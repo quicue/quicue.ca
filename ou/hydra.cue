@@ -26,6 +26,20 @@ import (
 	"rdfs":         "http://www.w3.org/2000/01/rdf-schema#"
 	"rdf":          "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 	"ActionResult": "quicue:ActionResult"
+
+	// Hydra terms whose values are IRIs. Without "@type": "@id" a JSON-LD
+	// processor reads "quicue:ip" or "https://api.quicue.ca/api/v1/" as a
+	// string literal, so hydra:property, hydra:entrypoint and the rest
+	// pointed nowhere. These match the official Hydra context
+	// (http://www.w3.org/ns/hydra/context.jsonld), inlined so the document
+	// stays self-contained.
+	"hydra:property":   {"@type": "@id"}
+	"hydra:entrypoint": {"@type": "@id"}
+	"hydra:returns":    {"@type": "@id"}
+	"hydra:expects":    {"@type": "@id"}
+	"hydra:object":     {"@type": "@id"}
+	"hydra:subject":    {"@type": "@id"}
+	"hydra:manages":    {"@type": "@id"}
 }
 
 // #HydraOperation — a single executable operation on a resource.
