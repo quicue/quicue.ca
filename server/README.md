@@ -29,7 +29,8 @@ The server is configured via environment variables with `QUICUE_` prefix (pydant
 
 - **spec_path**: Path to OpenAPI spec JSON (default: /app/catalogue/openapi.json)
 - **spec_reload_interval**: Reload interval in seconds (default: 30)
-- **api_token**: Bearer token for authentication (default: "")
+- **role_tokens**: JSON object, one bearer token per role: `{"ops": "...", "dev": "...", "readonly": "..."}` (default: none). See Roles below.
+- **api_token**: Older single bearer token; if set, it counts as the `ops` role (default: "")
 - **trusted_subnet**: IPv4 network for local auth (default: 198.51.100.0/24)
 - **trusted_proxy_ip**: If set, trust X-Forwarded-For from this IP
 - **guacamole_url**, **guacamole_username**, **guacamole_password**: Guacamole integration
@@ -45,8 +46,20 @@ The server is configured via environment variables with `QUICUE_` prefix (pydant
 ## Modes
 
 - **Mock** (dry-run): Return resolved command without executing. Default for unauthenticated callers — this is what the public API serves.
-- **Live**: Execute commands and return output. Requires valid API token AND trusted subnet.
+- **Live**: Execute commands and return output. Requires a valid role token AND the trusted subnet.
 - **Blocked**: Reject execution (audit/approval pending).
+
+## Roles
+
+Each token belongs to one role. Roles match `ou/roles.cue`, which also scopes each role's Hydra document. In live mode the server enforces them:
+
+| Role | Live action categories | Destructive actions | Deploy lock |
+|---|---|---|---|
+| `ops` | info, connect, monitor, admin | yes, with `X-Confirm-Destructive: yes` | acquire and release |
+| `dev` | info, connect | no | no |
+| `readonly` | info | no | no |
+
+A request outside its role gets 403 with `mode: blocked`, and the attempt is written to the deploy log. Tokens are compared in constant time. Mock mode (no token, or outside the trusted subnet) is unchanged.
 
 ## API Endpoints
 

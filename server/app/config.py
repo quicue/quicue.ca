@@ -15,6 +15,10 @@ class Settings(BaseSettings):
 
     # Auth — default subnet is RFC 5737 TEST-NET (no real host matches).
     # Set QUICUE_TRUSTED_SUBNET to your actual network for live execution.
+    # One bearer token per role (ou/roles.cue): QUICUE_ROLE_TOKENS is JSON,
+    # e.g. {"ops": "...", "dev": "...", "readonly": "..."}.
+    # QUICUE_API_TOKEN is the older single token; it counts as the ops role.
+    role_tokens: dict[str, str] = {}
     api_token: str = ""
     trusted_subnet: IPv4Network = IPv4Network("198.51.100.0/24")
     trusted_proxy_ip: str = ""  # if set, trust X-Forwarded-For from this IP
@@ -40,6 +44,14 @@ class Settings(BaseSettings):
     ssh_key_path: Path = Path("/app/secrets/id_ed25519")
     default_timeout: int = 30
     admin_timeout: int = 120
+
+    @property
+    def tokens_by_role(self) -> dict[str, str]:
+        """Role name to token, with the legacy api_token as ops."""
+        tokens = {r: t for r, t in self.role_tokens.items() if t}
+        if self.api_token and "ops" not in tokens:
+            tokens["ops"] = self.api_token
+        return tokens
 
     @property
     def guacamole_enabled(self) -> bool:

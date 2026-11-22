@@ -11,19 +11,25 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from app.config import settings
+from app.middleware.access import resolve_role
 from app.deploy import lock, log
 from app.executor.runner import run_command
 from app.spec_loader import build_route_key
 
 
-def _require_auth(request: Request) -> None:
-    """Reject unauthenticated requests on write endpoints."""
-    if not settings.api_token:
-        return  # no token configured, allow all
-    auth = request.headers.get("authorization", "")
-    if auth.startswith("Bearer ") and auth[7:] == settings.api_token:
+def _require_auth(request: Request, role: str | None = None) -> None:
+    """Reject requests without a valid token on write endpoints.
+
+    With `role`, the token must belong to that role. When no tokens are
+    configured at all the endpoints stay open, as before (local use only).
+    """
+    if not settings.tokens_by_role:
         return
-    raise HTTPException(401, "Authentication required")
+    have = resolve_role(request)
+    if have is None:
+        raise HTTPException(401, "Authentication required")
+    if role is not None and have != role:
+        raise HTTPException(403, f"Role '{have}' cannot do this; needs '{role}'")
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +83,7 @@ async def get_lock_status() -> JSONResponse:
 @router.post("/lock")
 async def acquire_lock(body: LockRequest, request: Request) -> JSONResponse:
     """Acquire the deployment lock."""
-    _require_auth(request)
+    _require_auth(request, role="ops")
     success, state = lock.acquire(body.operator, body.ttl_seconds)
     if not success:
         return JSONResponse(
@@ -94,7 +100,7 @@ async def acquire_lock(body: LockRequest, request: Request) -> JSONResponse:
 @router.delete("/lock")
 async def release_lock(body: LockReleaseRequest, request: Request) -> JSONResponse:
     """Release the deployment lock."""
-    _require_auth(request)
+    _require_auth(request, role="ops")
     success, state = lock.release(body.operator)
     if not success:
         return JSONResponse(

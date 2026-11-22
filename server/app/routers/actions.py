@@ -12,6 +12,7 @@ from app.deploy import lock
 from app.deploy import log as deploy_log
 from app.executor.runner import run_command
 from app.models import ActionResponse, ConnectResponse
+from app.roles import can_run
 from app.spec_loader import RouteEntry, build_route_key
 
 log = logging.getLogger(__name__)
@@ -114,6 +115,33 @@ async def dispatch_action(
         raise HTTPException(404, f"Unknown action: {key}")
 
     execution_mode: str = request.state.execution_mode
+
+    # Role gate: in live mode the token's role must cover the action's
+    # category, and only ops may run destructive actions (ou/roles.cue).
+    if execution_mode == "live":
+        allowed, reason = can_run(
+            getattr(request.state, "role", None), entry.category, entry.destructive
+        )
+        if not allowed:
+            deploy_log.record_execution(
+                resource=resource, provider=provider, action=action,
+                command=entry.command, mode="blocked",
+                operator=request.headers.get("x-operator", None),
+                category=entry.category, destructive=entry.destructive,
+            )
+            return JSONResponse(
+                ActionResponse(
+                    mode="blocked",
+                    path=entry.path,
+                    command=entry.command,
+                    provider=entry.provider,
+                    category=entry.category,
+                    destructive=entry.destructive,
+                    idempotent=entry.idempotent,
+                    output=f"Forbidden: {reason}",
+                ).model_dump(),
+                status_code=403,
+            )
 
     # Connect category: special dispatch
     if entry.category == "connect":
