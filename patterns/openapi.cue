@@ -16,7 +16,9 @@
 package patterns
 
 #OpenAPISpec: {
-	Cluster: #BindCluster
+	// A #BindCluster value. Left as `_` so the computed cluster is shared,
+	// not re-evaluated (see the note above #ImpactQuery in graph.cue).
+	Cluster: _
 
 	Info: {
 		title:       string | *"Infrastructure Operations API"

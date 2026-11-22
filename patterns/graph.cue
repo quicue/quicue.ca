@@ -100,37 +100,60 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 	valid: len(_missingDeps) == 0
 
 	// Output: ref-based resources with computed graph properties.
-	// Two modes:
-	//   Full precomputed (depth+ancestors+dependents): pure O(1) lookups, no recursion.
-	//   Depth-only precomputed or none: recursive depth/path, direct-parent ancestors.
+	// Each of depth, ancestors and dependents comes from Precomputed when it
+	// is supplied, and is computed in CUE otherwise. The computed fallback
+	// is correct but recursive, so graphs past a few dozen nodes should
+	// supply all three from tools/toposort.py.
+	//
+	// The fallbacks sit behind struct `if` guards rather than the
+	// `[a, b][0]` idiom: every element of a list literal is evaluated, so
+	// the idiom would run the recursion even when Precomputed is present.
+	_hasPreDepth:      Precomputed != _|_
+	_hasPreAncestors:  Precomputed != _|_ && Precomputed.ancestors != _|_
+	_hasPreDependents: Precomputed != _|_ && Precomputed.dependents != _|_
+
 	resources: {
 		for rname, r in Input {
 			let _deps = *r.depends_on | {}
 			let _hasDeps = len(_deps) > 0
+			let _firstDep = [for d, _ in _deps {d}]
 
 			(rname): r & {
-				_depth: [
-					if Precomputed != _|_ && Precomputed.depth[rname] != _|_ {
-						Precomputed.depth[rname]
-					},
-					0,
-				][0]
+				// Depth: longest path to a root.
+				_depth: int
+				if _hasPreDepth && Precomputed.depth[rname] != _|_ {
+					_depth: Precomputed.depth[rname]
+				}
+				if !(_hasPreDepth && Precomputed.depth[rname] != _|_) {
+					if _hasDeps {
+						_depth: list.Max([for d, _ in _deps {resources[d]._depth}]) + 1
+					}
+					if !_hasDeps {
+						_depth: 0
+					}
+				}
 
-				// Ancestors: precomputed transitive closure or direct parents.
+				// Ancestors: transitive closure of depends_on.
 				_ancestors: {
 					[_]: true
-					if Precomputed != _|_ && Precomputed.ancestors != _|_ {
+					if _hasPreAncestors {
 						Precomputed.ancestors[rname]
 					}
-					if (Precomputed == _|_ || Precomputed.ancestors == _|_) && _hasDeps {
+					if !_hasPreAncestors && _hasDeps {
 						for d, _ in _deps {
 							(d): true
+							resources[d]._ancestors
 						}
 					}
 				}
 
-				// Path to root via first parent (O(depth) recursion, safe to ~100 nodes)
-				_path: [rname]
+				// Path to root via first parent (O(depth) recursion).
+				if _hasDeps {
+					_path: list.Concat([[rname], resources[_firstDep[0]]._path])
+				}
+				if !_hasDeps {
+					_path: [rname]
+				}
 			}
 		}
 	}
@@ -153,13 +176,32 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 	}
 	leaves: {for rname, _ in resources if _hasDependents[rname] == _|_ {(rname): true}}
 
-	// Dependents: precomputed only (CUE O(n²) scan removed).
+	// Dependents: every resource that transitively depends on each resource
+	// (inverse of _ancestors), matching what tools/toposort.py emits.
+	// Precomputed when supplied; otherwise an O(n²) scan, which is fine for
+	// the small graphs that skip precompute.
 	dependents: {
-		if Precomputed != _|_ && Precomputed.dependents != _|_ {
+		if _hasPreDependents {
 			Precomputed.dependents
+		}
+		if !_hasPreDependents {
+			for t, _ in resources {
+				(t): {for n, r in resources if r._ancestors[t] != _|_ {(n): true}}
+			}
 		}
 	}
 }
+
+// Analysis patterns take `Graph: _`, not `Graph: #InfraGraph`.
+//
+// Pass a graph built with #InfraGraph. Any constraint on Graph, even an
+// open struct like {...}, stops CUE from sharing the already computed
+// graph and makes it re-evaluate every #InfraGraph comprehension once per
+// pattern instance. On the 30-resource datacenter example (about 20
+// pattern instances) that pushed peak memory past 6 GB; #DeploymentPlan
+// alone went from 541 MB to 1,272 MB with `Graph: {...}`. A value that is
+// not a graph still fails, on the first Graph.resources or Graph.roots
+// lookup.
 
 // #ImpactQuery - Find all resources affected if target goes down
 //
@@ -168,7 +210,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // impact.affected = {"git-server": true, "web-app": true, ...}
 //
 #ImpactQuery: {
-	Graph:  #InfraGraph
+	Graph:  _
 	Target: string
 
 	affected: {
@@ -186,7 +228,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // chain.path = ["frontend", "web-app", "db", "pve-node"]
 //
 #DependencyChain: {
-	Graph:  #InfraGraph
+	Graph:  _
 	Target: string
 
 	path:      Graph.resources[Target]._path
@@ -201,7 +243,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // byType.groups.DNSServer = ["dns-primary", "dns-secondary"]
 //
 #GroupByType: {
-	Graph: #InfraGraph
+	Graph: _
 
 	// Build groups using struct accumulation (avoids empty entries from nested for)
 	groups: {
@@ -226,7 +268,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // crit.ranked = [{name: "pve-node", dependents: 8}, ...]
 //
 #CriticalityRank: {
-	Graph: #InfraGraph
+	Graph: _
 
 	ranked: [
 		for rname, _ in Graph.resources {
@@ -249,7 +291,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // risk.ranked = [{name: "dns", score: 150, direct: 5, transitive: 29}, ...]
 //
 #RiskScore: {
-	Graph: #InfraGraph
+	Graph: _
 
 	// For each resource, compute risk score using O(1) dependents lookup
 	// direct = number of immediate dependents (from Graph.dependents)
@@ -276,7 +318,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // deps.dependents = {proxy: true, git: true} (only direct, not transitive)
 //
 #ImmediateDependents: {
-	Graph:  #InfraGraph
+	Graph:  _
 	Target: string
 
 	dependents: {
@@ -295,7 +337,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // metrics.total_resources, metrics.max_depth, etc.
 //
 #GraphMetrics: {
-	Graph: #InfraGraph
+	Graph: _
 
 	total_resources: len(Graph.resources)
 	root_count:      len(Graph.roots)
@@ -325,7 +367,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // export.jsonld includes @context for JSON-LD processors
 //
 #ExportGraph: {
-	Graph: #InfraGraph
+	Graph: _
 
 	// Optional: base IRI for resource @id generation
 	BaseIRI: string | *"https://quicue.ca/resources/"
@@ -429,7 +471,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // Export: cue export -e viz.data --out json
 //
 #VizData: {
-	Graph: #InfraGraph
+	Graph: _
 	Resources: [string]: {...}
 
 	// Compute helper patterns
@@ -553,7 +595,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // health.propagated.web = "degraded" (depends on dns)
 //
 #HealthStatus: {
-	Graph: #InfraGraph
+	Graph: _
 	Status: [string]: "healthy" | "degraded" | "down"
 
 	// Resources explicitly marked as down
@@ -596,7 +638,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // blast.safe_peers = {monitoring: true}  // same layer, not affected
 //
 #BlastRadius: {
-	Graph:  #InfraGraph
+	Graph:  _
 	Target: string
 
 	// All resources that depend on target (transitively)
@@ -648,7 +690,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   }
 //
 #ZoneAwareBlastRadius: {
-	Graph:  #InfraGraph
+	Graph:  _
 	Target: string
 	Zones: [string]: string // resource name → zone name (from #ZoneClassifier)
 
@@ -700,7 +742,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   }
 //
 #CompoundRiskAnalysis: {
-	Graph: #InfraGraph
+	Graph: _
 	Targets: [...string]
 
 	// Compute blast radius per target
@@ -759,7 +801,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // ]
 //
 #DeploymentPlan: {
-	Graph: #InfraGraph
+	Graph: _
 
 	_metrics: #GraphMetrics & {"Graph": Graph}
 	_maxDepth: _metrics.max_depth
@@ -798,7 +840,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // rollback.sequence = ["web", "api", "proxy"]  // layer 2+ in reverse
 //
 #RollbackPlan: {
-	Graph:    #InfraGraph
+	Graph:    _
 	FailedAt: int // Layer number where failure occurred
 
 	_metrics: #GraphMetrics & {"Graph": Graph}
@@ -841,7 +883,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // spof.risks = [{name: "dns", dependents: 5, type: "DNSServer"}, ...]
 //
 #SinglePointsOfFailure: {
-	Graph: #InfraGraph
+	Graph: _
 
 	_crit: #CriticalityRank & {"Graph": Graph}
 	_byType: #GroupByType & {"Graph": Graph}
@@ -892,7 +934,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   }
 //
 #SPOFWithRedundancy: {
-	Graph: #InfraGraph
+	Graph: _
 	// Overlap threshold as percentage (0-100).
 	// 50 = resource is redundant if peer shares >=50% of its dependents.
 	OverlapThreshold: *50 | int

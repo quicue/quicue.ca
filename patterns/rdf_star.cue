@@ -45,7 +45,7 @@ import "quicue.ca/vocab"
 //
 // Per-edge annotations take precedence over rule-based ones.
 #RDFStarAnnotation: {
-	Graph:   #InfraGraph
+	Graph: _
 	BaseIRI: string | *"urn:resource:"
 
 	// Per-edge overrides: "source->target" => annotation

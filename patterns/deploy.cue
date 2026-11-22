@@ -20,12 +20,21 @@ package patterns
 	resources: _
 	providers: {[string]: #ProviderDecl}
 
+	// Optional topology from tools/toposort.py, passed through to the graph.
+	// Supply it for anything past a few dozen resources.
+	precomputed?: _
+
 	// Composed definitions — same resources flow through all three
 	cluster: #BindCluster & {
 		"resources": resources
 		"providers": providers
 	}
-	graph: #InfraGraph & {Input: resources}
+	graph: #InfraGraph & {
+		Input: resources
+		if precomputed != _|_ {
+			Precomputed: precomputed
+		}
+	}
 	plan: #DeploymentPlan & {Graph: graph}
 
 	// Optional category constraint — consumer narrows if desired
