@@ -516,7 +516,7 @@ _prose: #ProseSlots & {
 
 			## W3C Hydra Export
 
-			`ou/` also exports a [W3C Hydra](http://www.hydra-cg.com/spec/latest/core/) JSON-LD API description. Each resource type becomes a `hydra:Class` with `supportedOperation` entries — enabling semantic API navigation for frontends that understand linked data.
+			`ou/` also exports a [W3C Hydra](http://www.hydra-cg.com/spec/latest/core/) JSON-LD API description. Each resource type becomes a `hydra:Class`, and each action is a `hydra:Link` property whose POST operation runs at the link target, so a generic Hydra client can go from the entry point to a resource to an action.
 			"""
 		server: """
 			## Purpose

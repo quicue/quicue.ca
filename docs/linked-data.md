@@ -57,7 +57,14 @@ cue export -e shapes.graph --out json > shapes.jsonld
 
 ### Hydra API
 
-`ou/hydra.cue` generates self-describing API documentation. Each resource type becomes a `hydra:Class` with `supportedOperation` and `supportedProperty`.
+`ou/hydra.cue` generates self-describing API documentation. Each resource type becomes a `hydra:Class` with its `supportedProperty` entries. Each action is a `hydra:Link` property, `quicue:action/{provider}/{action}`, whose POST operation runs at the link target. Each resource is published as its own JSON-LD document whose action links point at `/api/v1/resources/{resource}/{provider}/{action}`, so a generic Hydra client can go from the entry point to a resource to an action without knowing quicue's URL layout:
+
+```bash
+cue export ./examples/datacenter/ -e datacenter_hydra --out json            # ApiDocumentation
+cue export ./examples/datacenter/ -e datacenter_hydra_resources --out json  # one document per resource
+```
+
+The FastAPI server (`server/`) serves both and accepts the POSTs. The static copy on api.quicue.ca is a labelled mock: operations there are GET and return the pre-computed response without running anything.
 
 ### DCAT 3 catalog
 
