@@ -13,7 +13,38 @@ SAMPLE_HYDRA = {
     "@type": "hydra:ApiDocumentation",
     "hydra:title": "test",
     "hydra:entrypoint": "/api/v1/",
+    "hydra:supportedClass": [
+        {
+            "@id": "https://api.quicue.ca/api/v1/resources/router-core",
+            "@type": "hydra:Class",
+            "hydra:supportedOperation": [
+                {
+                    "@type": "hydra:Operation",
+                    "hydra:method": "POST",
+                    "quicue:provider": "vyos",
+                    "quicue:action": "show_interfaces",
+                    # an older document that still carries the command
+                    "quicue:command": "ssh vyos@198.51.100.1 'show interfaces'",
+                }
+            ],
+        }
+    ],
 }
+
+SAMPLE_PATHS = {
+    "/resources/router-core/vyos/show_interfaces": {
+        "post": {
+            "summary": "show_interfaces",
+            "description": "Show interfaces",
+            "operationId": "router-core--vyos--show_interfaces",
+            "tags": ["info"],
+            "x-command": "ssh vyos@198.51.100.1 'show interfaces'",
+            "x-idempotent": True,
+        }
+    }
+}
+
+TOKEN = "test-token"
 
 SAMPLE_GRAPH = {
     "@context": {"quicue": "https://quicue.ca/vocab#"},
@@ -37,12 +68,12 @@ def _make_client(tmp_path: Path, hydra=True, graph=True) -> TestClient:
         "openapi": "3.0.3",
         "info": {"title": "Test", "version": "0.0.1"},
         "tags": [],
-        "paths": {},
+        "paths": SAMPLE_PATHS,
     }))
 
     with patch.dict("os.environ", {
         "QUICUE_SPEC_PATH": str(spec_path),
-        "QUICUE_API_TOKEN": "",
+        "QUICUE_API_TOKEN": TOKEN,
         "QUICUE_TRUSTED_SUBNET": "127.0.0.0/8",
         "QUICUE_HYDRA_PATH": str(hydra_path),
         "QUICUE_GRAPH_JSONLD_PATH": str(graph_path),
@@ -111,3 +142,30 @@ def test_root_includes_hydra_links(tmp_path):
     data = resp.json()
     assert "hydra" in data
     assert "graph" in data
+
+
+def _ops(data):
+    return [op for c in data["hydra:supportedClass"] for op in c["hydra:supportedOperation"]]
+
+
+def test_hydra_mock_mode_has_no_commands(tmp_path):
+    client = _make_client(tmp_path)
+    data = client.get("/api/v1/hydra").json()
+    assert all("quicue:command" not in op for op in _ops(data))
+
+
+def test_hydra_token_outside_subnet_has_no_commands(tmp_path):
+    client = _make_client(tmp_path)
+    resp = client.get("/api/v1/hydra", headers={"Authorization": f"Bearer {TOKEN}"})
+    assert all("quicue:command" not in op for op in _ops(resp.json()))
+
+
+def test_hydra_live_mode_adds_commands(tmp_path):
+    # _make_client reloads app.middleware.access, so patch the client IP
+    # afterwards; the context manager runs the lifespan that loads the routes
+    client = _make_client(tmp_path)
+    with client, patch("app.middleware.access._get_client_ip", return_value="127.0.0.1"):
+        resp = client.get("/api/v1/hydra", headers={"Authorization": f"Bearer {TOKEN}"})
+    (op,) = _ops(resp.json())
+    assert op["quicue:command"] == "ssh vyos@198.51.100.1 'show interfaces'"
+    assert op["hydra:method"] == "POST"

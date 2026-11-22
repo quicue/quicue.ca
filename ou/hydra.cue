@@ -45,7 +45,10 @@ import (
 	"quicue:category":    string
 	"quicue:idempotent":  bool | *false
 	"quicue:destructive": bool | *false
-	"quicue:command"?:    string
+	// No quicue:command here. This document is published on public and
+	// static hosts, and the commands carry ssh targets and credentials.
+	// The FastAPI server adds each operation's command from its route
+	// table in live mode only (server/app/routers/hydra.py).
 }
 
 // #HydraSupportedProperty — a property descriptor for a resource field.
@@ -117,9 +120,6 @@ _apiBase: "https://api.quicue.ca/api/v1/resources/"
 								}
 								if act.destructive != _|_ {
 									"quicue:destructive": act.destructive
-								}
-								if act.command != _|_ {
-									"quicue:command": act.command
 								}
 							}
 						},

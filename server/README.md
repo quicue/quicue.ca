@@ -54,7 +54,7 @@ The server is configured via environment variables with `QUICUE_` prefix (pydant
 - `GET /api/v1/readyz` — Readiness check
 - `GET /api/v1/spec-info` — Loaded spec summary (providers, categories, route count)
 - `POST /api/v1/resources/{resource}/{provider}/{action}` — Execute action on resource
-- `GET /api/v1/hydra` — W3C Hydra API documentation (JSON-LD)
+- `GET /api/v1/hydra` — W3C Hydra API documentation (JSON-LD). Each operation's `quicue:command` is included only in live mode; the published and static copies have none.
 - `GET /api/v1/graph.jsonld` — Infrastructure graph as JSON-LD
 - `GET /api/v1/deploy/history` — Deployment history
 - `GET /api/v1/deploy/lock` — Deployment lock status
