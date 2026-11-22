@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     # e.g. {"ops": "...", "dev": "...", "readonly": "..."}.
     # QUICUE_API_TOKEN is the older single token; it counts as the ops role.
     role_tokens: dict[str, str] = {}
+    # With no tokens at all, deploy endpoints refuse requests unless this is
+    # set. Never set it on a reachable host.
+    insecure_local: bool = False
     api_token: str = ""
     trusted_subnet: IPv4Network = IPv4Network("198.51.100.0/24")
     trusted_proxy_ip: str = ""  # if set, trust X-Forwarded-For from this IP
