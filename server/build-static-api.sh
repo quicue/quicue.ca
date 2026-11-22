@@ -89,7 +89,32 @@ json.dump({
 PYEOF
 
 # ─── Step 5: Semantic endpoints ──────────────────────────────────────────────
-jq '.hydra' "$BULK" > "$OUT/api/v1/hydra.json"
+# Hydra for the static host. The CUE document and the FastAPI server say
+# POST, which is how actions run. Cloudflare Pages static files only answer
+# GET, so this copy rewrites every operation to GET and labels the document
+# and each operation as a static mock that returns the command text without
+# running it (the files from step 6). quicue:command is not in the CUE
+# document; it is removed here too in case an older bulk export has it.
+python3 - "$BULK" > "$OUT/api/v1/hydra.json" << 'PYEOF'
+import json, sys
+
+doc = json.load(open(sys.argv[1]))["hydra"]
+note = (
+    "Static mock: api.quicue.ca is a GET-only static host, so operations here "
+    "are GET and return pre-computed mock responses without running anything. "
+    "The real API declares and accepts POST /resources/{resource}/{provider}/{action}."
+)
+doc["quicue:staticMock"] = True
+doc["hydra:description"] = f'{doc.get("hydra:description", "")} {note}'.strip()
+for cls in doc.get("hydra:supportedClass", []):
+    for op in cls.get("hydra:supportedOperation", []):
+        op.pop("quicue:command", None)
+        if op.get("hydra:method") == "POST":
+            op["hydra:method"] = "GET"
+            op["quicue:staticMock"] = True
+            op["rdfs:comment"] = f'{op.get("rdfs:comment", "")} (static mock response)'.strip()
+json.dump(doc, sys.stdout, indent=2)
+PYEOF
 jq '.hydra_entrypoint' "$BULK" > "$OUT/api/v1/index.json"
 jq '.hydra_collection' "$BULK" > "$OUT/api/v1/resources/index.json"
 jq '.graph_jsonld' "$BULK" > "$OUT/api/v1/graph.jsonld.json"
