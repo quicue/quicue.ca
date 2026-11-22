@@ -8,6 +8,9 @@
 set -euo pipefail
 
 OUT="${1:-/tmp/static-api}"
+# Host the static copy is served from. IRIs and Link headers use it, so a
+# preview on another host links to itself rather than to api.quicue.ca.
+STATIC_API_BASE="${STATIC_API_BASE:-https://api.quicue.ca}"
 DCDIR="./examples/datacenter"
 REPOROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPOROOT"
@@ -106,13 +109,23 @@ note = (
 )
 doc["quicue:staticMock"] = True
 doc["hydra:description"] = f'{doc.get("hydra:description", "")} {note}'.strip()
-for cls in doc.get("hydra:supportedClass", []):
-    for op in cls.get("hydra:supportedOperation", []):
-        op.pop("quicue:command", None)
-        if op.get("hydra:method") == "POST":
-            op["hydra:method"] = "GET"
-            op["quicue:staticMock"] = True
-            op["rdfs:comment"] = f'{op.get("rdfs:comment", "")} (static mock response)'.strip()
+def operations(node):
+    # operations sit inside each action's hydra:Link property
+    if isinstance(node, dict):
+        if node.get("@type") == "hydra:Operation":
+            yield node
+        for v in node.values():
+            yield from operations(v)
+    elif isinstance(node, list):
+        for v in node:
+            yield from operations(v)
+
+for op in operations(doc):
+    op.pop("quicue:command", None)
+    if op.get("hydra:method") == "POST":
+        op["hydra:method"] = "GET"
+        op["quicue:staticMock"] = True
+        op["rdfs:comment"] = f'{op.get("rdfs:comment", "")} (static mock response)'.strip()
 json.dump(doc, sys.stdout, indent=2)
 PYEOF
 jq '.hydra_entrypoint' "$BULK" > "$OUT/api/v1/index.json"
@@ -264,6 +277,11 @@ for name, res in graph.get("resources", graph.get("Input", {})).items():
     for k, v in res.items():
         if k not in ("@type", "depends_on", "@id", "name") and not k.startswith("_"):
             detail[k] = v
+    # JSON-LD representation from CUE (ou/hydra.cue): @context, the
+    # dereferenceable @id, depends_on as links, and one
+    # quicue:action/{provider}/{action} link per action, which a Hydra
+    # client follows to the mock response for that action.
+    detail.update(bulk.get("hydra_resources", {}).get(name, {}))
 
     with open(os.path.join(res_dir, "index.json"), "w") as f:
         json.dump(detail, f, indent=2)
@@ -287,10 +305,10 @@ cat > "$OUT/_headers" << 'EOF'
   Content-Type: application/json
 
 /
-  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <https://api.quicue.ca/api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
 
 /index.json
-  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <https://api.quicue.ca/api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
 
 /api/v1/hydra.json
   Content-Type: application/ld+json
@@ -312,34 +330,34 @@ cat > "$OUT/_headers" << 'EOF'
 
 /api/v1/index.json
   Content-Type: application/ld+json
-  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <https://api.quicue.ca/api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
 
 /api/v1/
   Content-Type: application/ld+json
-  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <https://api.quicue.ca/api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
 
 /api/v1
   Content-Type: application/ld+json
-  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <https://api.quicue.ca/api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
 
 /api/v1/resources/index.json
   Content-Type: application/ld+json
-  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <https://api.quicue.ca/api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
   Link: <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"
 
 /api/v1/resources
   Content-Type: application/ld+json
-  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <https://api.quicue.ca/api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
   Link: <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"
 
 /api/v1/resources/*/index.json
   Content-Type: application/json
-  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <https://api.quicue.ca/api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
   Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
 
 /api/v1/resources/*
   Content-Type: application/json
-  Link: </api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
+  Link: <https://api.quicue.ca/api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"
   Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
 EOF
 
@@ -378,6 +396,13 @@ EOF
 
 # ─── Done ────────────────────────────────────────────────────────────────────
 rm -f "$BULK" "$OPENAPI"
+
+# ─── Step 12: Rebase IRIs if served from another host ───────────────────────
+if [ "$STATIC_API_BASE" != "https://api.quicue.ca" ]; then
+    grep -rlF "https://api.quicue.ca" "$OUT" | while read -r f; do
+        sed -i "s#https://api.quicue.ca#${STATIC_API_BASE%/}#g" "$f"
+    done
+fi
 
 FILE_COUNT=$(find "$OUT" -type f | wc -l)
 SIZE=$(du -sh "$OUT" | cut -f1)

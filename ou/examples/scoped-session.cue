@@ -122,12 +122,17 @@ readonly_session: ou.#InteractionCtx & {
 // Hydra export — explicit generation from scoped context
 // ============================================================================
 
-ops_hydra: (ou.#ApiDocumentation & {ctx: {
+_ops_hydra_api: ou.#ApiDocumentation & {ctx: {
 	view:            ops_session.view
 	role_name:       ops_session.summary.role_name
 	total_resources: ops_session.summary.total_resources
 	total_actions:   ops_session.summary.total_actions
-}}).doc
+}}
+
+ops_hydra: _ops_hydra_api.doc
+
+// One JSON-LD representation per resource, with its action links.
+ops_hydra_resources: _ops_hydra_api.representations
 
 // ============================================================================
 // Outputs

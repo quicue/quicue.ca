@@ -35,6 +35,7 @@ The server is configured via environment variables with `QUICUE_` prefix (pydant
 - **guacamole_url**, **guacamole_username**, **guacamole_password**: Guacamole integration
 - **cors_origins**: CORS-allowed origins (default: ["*"] — public showcase)
 - **hydra_path**: Path to Hydra JSON-LD (default: /app/data/hydra.jsonld)
+- **hydra_resources_path**: Per-resource JSON-LD with action links (default: /app/data/hydra-resources.json)
 - **graph_jsonld_path**: Path to graph JSON-LD (default: /app/data/graph.jsonld)
 - **deploy_log_path**: Deployment log (JSONL) (default: /app/data/deploy.jsonl)
 - **deploy_lock_path**: Deployment lock file (default: /app/data/deploy.lock.json)
@@ -54,7 +55,12 @@ The server is configured via environment variables with `QUICUE_` prefix (pydant
 - `GET /api/v1/readyz` — Readiness check
 - `GET /api/v1/spec-info` — Loaded spec summary (providers, categories, route count)
 - `POST /api/v1/resources/{resource}/{provider}/{action}` — Execute action on resource
-- `GET /api/v1/hydra` — W3C Hydra API documentation (JSON-LD). Each operation's `quicue:command` is included only in live mode; the published and static copies have none.
+- `GET /api/v1/` — Hydra EntryPoint
+- `GET /api/v1/resources` — Hydra Collection of resources
+- `GET /api/v1/resources/{name}` — one resource as JSON-LD, with `depends_on` links and one `quicue:action/{provider}/{action}` link per action
+- `GET /api/v1/hydra` — W3C Hydra API documentation (JSON-LD): one class per resource type; each action is a link property whose POST operation runs at the link target. `quicue:command` is included only in live mode; the published and static copies have none.
+
+All Hydra responses rewrite `https://api.quicue.ca/api/v1/` in IRIs to the host serving the request and send `Link: <.../api/v1/hydra>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"`, so a generic Hydra client can start at `/api/v1/` on a local server and POST actions to that server.
 - `GET /api/v1/graph.jsonld` — Infrastructure graph as JSON-LD
 - `GET /api/v1/deploy/history` — Deployment history
 - `GET /api/v1/deploy/lock` — Deployment lock status
@@ -76,6 +82,7 @@ The server is configured via environment variables with `QUICUE_` prefix (pydant
 # Export CUE data to feed the server
 cue export ./examples/datacenter/ -e openapi_spec --out json > catalogue/public/openapi.json
 cue export ./examples/datacenter/ -e datacenter_hydra --out json > data/hydra.jsonld
+cue export ./examples/datacenter/ -e datacenter_hydra_resources --out json > data/hydra-resources.json
 cue export ./examples/datacenter/ -e jsonld --out json > data/graph.jsonld
 
 # Start server with Docker Compose
