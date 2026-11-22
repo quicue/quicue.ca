@@ -20,11 +20,16 @@ from app.spec_loader import build_route_key
 def _require_auth(request: Request, role: str | None = None) -> None:
     """Reject requests without a valid token on write endpoints.
 
-    With `role`, the token must belong to that role. When no tokens are
-    configured at all the endpoints stay open, as before (local use only).
+    With `role`, the token must belong to that role. With no tokens
+    configured the endpoints are closed (503), unless QUICUE_INSECURE_LOCAL
+    is set for local experiments, in which case they are open.
     """
     if not settings.tokens_by_role:
-        return
+        if settings.insecure_local:
+            return
+        raise HTTPException(
+            503, "No tokens configured; set QUICUE_ROLE_TOKENS (or QUICUE_INSECURE_LOCAL=1 locally)"
+        )
     have = resolve_role(request)
     if have is None:
         raise HTTPException(401, "Authentication required")

@@ -114,3 +114,42 @@ def test_roles_match_ou_roles_cue() -> None:
     )
     cue_roles = {k: frozenset(v) for k, v in json.loads(out.stdout).items()}
     assert cue_roles == ROLE_CATEGORIES
+
+
+def _client_without_tokens(tmp_path, insecure: str):
+    import importlib
+    import json as _json
+
+    spec = tmp_path / "openapi.json"
+    spec.write_text(_json.dumps({"openapi": "3.0.3", "info": {"title": "t", "version": "0"}, "paths": {}}))
+    env = {
+        "QUICUE_SPEC_PATH": str(spec),
+        "QUICUE_API_TOKEN": "",
+        "QUICUE_ROLE_TOKENS": "{}",
+        "QUICUE_INSECURE_LOCAL": insecure,
+        "QUICUE_DEPLOY_LOG_PATH": str(tmp_path / "deploy.jsonl"),
+        "QUICUE_DEPLOY_LOCK_PATH": str(tmp_path / "deploy.lock.json"),
+    }
+    with patch.dict("os.environ", env):
+        import app.config
+        importlib.reload(app.config)
+        for mod in ("app.middleware.access", "app.deploy.lock", "app.deploy.log",
+                    "app.routers.actions", "app.routers.deploy", "app.routers.hydra", "app.main"):
+            importlib.reload(importlib.import_module(mod))
+        import app.deploy.lock as lk
+        lk._state = lk.LockState()
+        lk._loaded = False
+        from app.main import create_app
+        return TestClient(create_app())
+
+
+def test_deploy_closed_without_tokens(tmp_path) -> None:
+    client = _client_without_tokens(tmp_path, "0")
+    resp = client.post("/api/v1/deploy/lock", json={"operator": "x", "ttl_seconds": 60})
+    assert resp.status_code == 503
+
+
+def test_deploy_open_only_with_insecure_local(tmp_path) -> None:
+    client = _client_without_tokens(tmp_path, "1")
+    resp = client.post("/api/v1/deploy/lock", json={"operator": "x", "ttl_seconds": 60})
+    assert resp.status_code == 200

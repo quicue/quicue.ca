@@ -31,6 +31,7 @@ The server is configured via environment variables with `QUICUE_` prefix (pydant
 - **spec_reload_interval**: Reload interval in seconds (default: 30)
 - **role_tokens**: JSON object, one bearer token per role: `{"ops": "...", "dev": "...", "readonly": "..."}` (default: none). See Roles below.
 - **api_token**: Older single bearer token; if set, it counts as the `ops` role (default: "")
+- **insecure_local**: With no tokens configured, deploy endpoints return 503 unless this is true (default: false). Local experiments only.
 - **trusted_subnet**: IPv4 network for local auth (default: 198.51.100.0/24)
 - **trusted_proxy_ip**: If set, trust X-Forwarded-For from this IP
 - **guacamole_url**, **guacamole_username**, **guacamole_password**: Guacamole integration
