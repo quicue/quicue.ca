@@ -93,6 +93,38 @@ jobs:
           fi
           echo "No hardcoded absolute paths found"
 
+  # Same checks on the newest CUE release. Module resolution goes through a
+  # local registry because v0.17 no longer reads the hand-populated cache.
+  cue-vet-next:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install CUE
+        uses: cue-lang/setup-cue@v1.0.1
+        with:
+          version: v0.17.1
+
+      - name: Serve vendored apercue from a local registry
+        run: bash .github/local-registry.sh
+
+      - name: Validate core vocabulary
+        run: cue vet ./vocab/ ./patterns/ ./charter/ -c
+
+      - name: Validate all examples
+        run: |
+          for d in examples/*/; do
+            echo "=== $(basename $d) ==="
+            cue vet "./$d" -c
+          done
+
+      - name: Validate all provider templates
+        run: |
+          for d in template/*/; do
+            echo "=== $(basename $d) ==="
+            cue vet "./$d/..." -c
+          done
+
   binding:
     runs-on: ubuntu-latest
     needs: cue-vet

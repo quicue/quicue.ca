@@ -99,7 +99,7 @@ package ansible
 					gridPos: {
 						h: 3
 						w: 6
-						x: (i * 6) mod 24
+						x: mod(i*6, 24)
 						y: 1 + div((i*6), 24)*3
 					}
 				}
