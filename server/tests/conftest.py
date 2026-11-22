@@ -112,6 +112,7 @@ def app_client(spec_file: Path, tmp_path: Path) -> TestClient:
         {
             "QUICUE_SPEC_PATH": str(spec_file),
             "QUICUE_API_TOKEN": "test-token",
+            "QUICUE_ROLE_TOKENS": '{"dev": "dev-token", "readonly": "ro-token"}',
             "QUICUE_TRUSTED_SUBNET": "127.0.0.0/8",
             "QUICUE_DEPLOY_LOG_PATH": str(deploy_log),
             "QUICUE_DEPLOY_LOCK_PATH": str(deploy_lock),

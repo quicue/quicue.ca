@@ -19,28 +19,28 @@ def _make_request(
 
 @patch("app.middleware.access.settings")
 def test_check_token_valid(mock_settings: MagicMock) -> None:
-    mock_settings.api_token = "secret"
+    mock_settings.tokens_by_role = {"ops": "secret"}
     req = _make_request(headers={"authorization": "Bearer secret"})
     assert _check_token(req) is True
 
 
 @patch("app.middleware.access.settings")
 def test_check_token_invalid(mock_settings: MagicMock) -> None:
-    mock_settings.api_token = "secret"
+    mock_settings.tokens_by_role = {"ops": "secret"}
     req = _make_request(headers={"authorization": "Bearer wrong"})
     assert _check_token(req) is False
 
 
 @patch("app.middleware.access.settings")
 def test_check_token_missing(mock_settings: MagicMock) -> None:
-    mock_settings.api_token = "secret"
+    mock_settings.tokens_by_role = {"ops": "secret"}
     req = _make_request(headers={})
     assert _check_token(req) is False
 
 
 @patch("app.middleware.access.settings")
 def test_check_token_empty_config(mock_settings: MagicMock) -> None:
-    mock_settings.api_token = ""
+    mock_settings.tokens_by_role = {}
     req = _make_request(headers={"authorization": "Bearer anything"})
     assert _check_token(req) is False
 
