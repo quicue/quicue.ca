@@ -29,12 +29,17 @@ import (
 }
 
 // #HydraOperation — a single executable operation on a resource.
+//
+// Every action executes as POST /resources/{resource}/{provider}/{action}
+// (server/app/routers/actions.py, patterns/openapi.cue), so the method is
+// POST whatever the action does. Read-only versus destructive is carried
+// by quicue:idempotent and quicue:destructive, not by the HTTP method.
 #HydraOperation: {
-	"@type":              "hydra:Operation"
-	"hydra:method":       "GET"
-	"hydra:title":        string
-	"rdfs:comment":       string
-	"hydra:returns":      "quicue:ActionResult"
+	"@type":        "hydra:Operation"
+	"hydra:method": "POST"
+	"hydra:title":  string
+	"rdfs:comment": string
+	"hydra:returns": {"@id": "quicue:ActionResult"}
 	"quicue:provider":    string
 	"quicue:action":      string
 	"quicue:category":    string
