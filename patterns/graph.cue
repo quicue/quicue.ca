@@ -100,37 +100,60 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 	valid: len(_missingDeps) == 0
 
 	// Output: ref-based resources with computed graph properties.
-	// Two modes:
-	//   Full precomputed (depth+ancestors+dependents): pure O(1) lookups, no recursion.
-	//   Depth-only precomputed or none: recursive depth/path, direct-parent ancestors.
+	// Each of depth, ancestors and dependents comes from Precomputed when it
+	// is supplied, and is computed in CUE otherwise. The computed fallback
+	// is correct but recursive, so graphs past a few dozen nodes should
+	// supply all three from tools/toposort.py.
+	//
+	// The fallbacks sit behind struct `if` guards rather than the
+	// `[a, b][0]` idiom: every element of a list literal is evaluated, so
+	// the idiom would run the recursion even when Precomputed is present.
+	_hasPreDepth:      Precomputed != _|_
+	_hasPreAncestors:  Precomputed != _|_ && Precomputed.ancestors != _|_
+	_hasPreDependents: Precomputed != _|_ && Precomputed.dependents != _|_
+
 	resources: {
 		for rname, r in Input {
 			let _deps = *r.depends_on | {}
 			let _hasDeps = len(_deps) > 0
+			let _firstDep = [for d, _ in _deps {d}]
 
 			(rname): r & {
-				_depth: [
-					if Precomputed != _|_ && Precomputed.depth[rname] != _|_ {
-						Precomputed.depth[rname]
-					},
-					0,
-				][0]
+				// Depth: longest path to a root.
+				_depth: int
+				if _hasPreDepth && Precomputed.depth[rname] != _|_ {
+					_depth: Precomputed.depth[rname]
+				}
+				if !(_hasPreDepth && Precomputed.depth[rname] != _|_) {
+					if _hasDeps {
+						_depth: list.Max([for d, _ in _deps {resources[d]._depth}]) + 1
+					}
+					if !_hasDeps {
+						_depth: 0
+					}
+				}
 
-				// Ancestors: precomputed transitive closure or direct parents.
+				// Ancestors: transitive closure of depends_on.
 				_ancestors: {
 					[_]: true
-					if Precomputed != _|_ && Precomputed.ancestors != _|_ {
+					if _hasPreAncestors {
 						Precomputed.ancestors[rname]
 					}
-					if (Precomputed == _|_ || Precomputed.ancestors == _|_) && _hasDeps {
+					if !_hasPreAncestors && _hasDeps {
 						for d, _ in _deps {
 							(d): true
+							resources[d]._ancestors
 						}
 					}
 				}
 
-				// Path to root via first parent (O(depth) recursion, safe to ~100 nodes)
-				_path: [rname]
+				// Path to root via first parent (O(depth) recursion).
+				if _hasDeps {
+					_path: list.Concat([[rname], resources[_firstDep[0]]._path])
+				}
+				if !_hasDeps {
+					_path: [rname]
+				}
 			}
 		}
 	}
@@ -153,10 +176,18 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 	}
 	leaves: {for rname, _ in resources if _hasDependents[rname] == _|_ {(rname): true}}
 
-	// Dependents: precomputed only (CUE O(n²) scan removed).
+	// Dependents: every resource that transitively depends on each resource
+	// (inverse of _ancestors), matching what tools/toposort.py emits.
+	// Precomputed when supplied; otherwise an O(n²) scan, which is fine for
+	// the small graphs that skip precompute.
 	dependents: {
-		if Precomputed != _|_ && Precomputed.dependents != _|_ {
+		if _hasPreDependents {
 			Precomputed.dependents
+		}
+		if !_hasPreDependents {
+			for t, _ in resources {
+				(t): {for n, r in resources if r._ancestors[t] != _|_ {(n): true}}
+			}
 		}
 	}
 }
