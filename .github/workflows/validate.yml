@@ -321,7 +321,9 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        continue-on-error: true
+
+      - name: Verify demo.quicue.ca serves this build
+        run: bash .github/verify-live.sh https://demo.quicue.ca/ operator/public/index.html
 
   deploy-api:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -350,4 +352,6 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        continue-on-error: true
+
+      - name: Verify api.quicue.ca serves this build
+        run: bash .github/verify-live.sh https://api.quicue.ca/api/v1/hydra.json /tmp/static-api/api/v1/hydra.json
