@@ -77,8 +77,11 @@ _scopeContains: {
 // to avoid CUE's nested comprehension evaluation issue where concrete values
 // vanish when a definition contains comprehensions over other comprehensions.
 #InteractionCtx: {
-	bound: {[string]: _}
-	plan: {layers: [...], ...}
+	// bound: a #BindCluster's .bound; plan: a #DeploymentPlan (uses .layers).
+	// Left as `_` on purpose: any constraint here makes CUE re-evaluate the
+	// whole plan and binding once per session (see patterns/graph.cue).
+	bound: _
+	plan: _
 	role: #OperatorRole | *#Roles.ops
 	scope: #SessionScope | *{}
 	position: #FlowPosition | *{current_layer: 0, gates: {}}

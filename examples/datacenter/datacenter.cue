@@ -624,6 +624,7 @@ rollback_l3: patterns.#RollbackPlan & {Graph: infra, FailedAt: 3}
 execution: patterns.#ExecutionPlan & {
 	"resources": _resources
 	"providers": _providers
+	precomputed: _precomputed
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

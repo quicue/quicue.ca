@@ -192,6 +192,17 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 	}
 }
 
+// Analysis patterns take `Graph: _`, not `Graph: #InfraGraph`.
+//
+// Pass a graph built with #InfraGraph. Any constraint on Graph, even an
+// open struct like {...}, stops CUE from sharing the already computed
+// graph and makes it re-evaluate every #InfraGraph comprehension once per
+// pattern instance. On the 30-resource datacenter example (about 20
+// pattern instances) that pushed peak memory past 6 GB; #DeploymentPlan
+// alone went from 541 MB to 1,272 MB with `Graph: {...}`. A value that is
+// not a graph still fails, on the first Graph.resources or Graph.roots
+// lookup.
+
 // #ImpactQuery - Find all resources affected if target goes down
 //
 // Usage:
@@ -199,7 +210,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // impact.affected = {"git-server": true, "web-app": true, ...}
 //
 #ImpactQuery: {
-	Graph:  #InfraGraph
+	Graph:  _
 	Target: string
 
 	affected: {
@@ -217,7 +228,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // chain.path = ["frontend", "web-app", "db", "pve-node"]
 //
 #DependencyChain: {
-	Graph:  #InfraGraph
+	Graph:  _
 	Target: string
 
 	path:      Graph.resources[Target]._path
@@ -232,7 +243,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // byType.groups.DNSServer = ["dns-primary", "dns-secondary"]
 //
 #GroupByType: {
-	Graph: #InfraGraph
+	Graph: _
 
 	// Build groups using struct accumulation (avoids empty entries from nested for)
 	groups: {
@@ -257,7 +268,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // crit.ranked = [{name: "pve-node", dependents: 8}, ...]
 //
 #CriticalityRank: {
-	Graph: #InfraGraph
+	Graph: _
 
 	ranked: [
 		for rname, _ in Graph.resources {
@@ -280,7 +291,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // risk.ranked = [{name: "dns", score: 150, direct: 5, transitive: 29}, ...]
 //
 #RiskScore: {
-	Graph: #InfraGraph
+	Graph: _
 
 	// For each resource, compute risk score using O(1) dependents lookup
 	// direct = number of immediate dependents (from Graph.dependents)
@@ -307,7 +318,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // deps.dependents = {proxy: true, git: true} (only direct, not transitive)
 //
 #ImmediateDependents: {
-	Graph:  #InfraGraph
+	Graph:  _
 	Target: string
 
 	dependents: {
@@ -326,7 +337,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // metrics.total_resources, metrics.max_depth, etc.
 //
 #GraphMetrics: {
-	Graph: #InfraGraph
+	Graph: _
 
 	total_resources: len(Graph.resources)
 	root_count:      len(Graph.roots)
@@ -356,7 +367,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // export.jsonld includes @context for JSON-LD processors
 //
 #ExportGraph: {
-	Graph: #InfraGraph
+	Graph: _
 
 	// Optional: base IRI for resource @id generation
 	BaseIRI: string | *"https://quicue.ca/resources/"
@@ -460,7 +471,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // Export: cue export -e viz.data --out json
 //
 #VizData: {
-	Graph: #InfraGraph
+	Graph: _
 	Resources: [string]: {...}
 
 	// Compute helper patterns
@@ -584,7 +595,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // health.propagated.web = "degraded" (depends on dns)
 //
 #HealthStatus: {
-	Graph: #InfraGraph
+	Graph: _
 	Status: [string]: "healthy" | "degraded" | "down"
 
 	// Resources explicitly marked as down
@@ -627,7 +638,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // blast.safe_peers = {monitoring: true}  // same layer, not affected
 //
 #BlastRadius: {
-	Graph:  #InfraGraph
+	Graph:  _
 	Target: string
 
 	// All resources that depend on target (transitively)
@@ -679,7 +690,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   }
 //
 #ZoneAwareBlastRadius: {
-	Graph:  #InfraGraph
+	Graph:  _
 	Target: string
 	Zones: [string]: string // resource name → zone name (from #ZoneClassifier)
 
@@ -731,7 +742,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   }
 //
 #CompoundRiskAnalysis: {
-	Graph: #InfraGraph
+	Graph: _
 	Targets: [...string]
 
 	// Compute blast radius per target
@@ -790,7 +801,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // ]
 //
 #DeploymentPlan: {
-	Graph: #InfraGraph
+	Graph: _
 
 	_metrics: #GraphMetrics & {"Graph": Graph}
 	_maxDepth: _metrics.max_depth
@@ -829,7 +840,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // rollback.sequence = ["web", "api", "proxy"]  // layer 2+ in reverse
 //
 #RollbackPlan: {
-	Graph:    #InfraGraph
+	Graph:    _
 	FailedAt: int // Layer number where failure occurred
 
 	_metrics: #GraphMetrics & {"Graph": Graph}
@@ -872,7 +883,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   // spof.risks = [{name: "dns", dependents: 5, type: "DNSServer"}, ...]
 //
 #SinglePointsOfFailure: {
-	Graph: #InfraGraph
+	Graph: _
 
 	_crit: #CriticalityRank & {"Graph": Graph}
 	_byType: #GroupByType & {"Graph": Graph}
@@ -923,7 +934,7 @@ _#SafeLabel: =~"^[a-zA-Z][a-zA-Z0-9_-]*$"
 //   }
 //
 #SPOFWithRedundancy: {
-	Graph: #InfraGraph
+	Graph: _
 	// Overlap threshold as percentage (0-100).
 	// 50 = resource is redundant if peer shares >=50% of its dependents.
 	OverlapThreshold: *50 | int

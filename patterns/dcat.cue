@@ -57,7 +57,7 @@ _#W3CSpecMap: {
 // #DCAT3Catalog — generates a DCAT 3 catalog from an #InfraGraph.
 #DCAT3Catalog: {
 	// Input: computed graph (provides .resources, .topology, etc.)
-	Graph: #InfraGraph
+	Graph: _
 
 	// Catalog metadata
 	CatalogID:   string | *"https://quicue.ca/catalog"

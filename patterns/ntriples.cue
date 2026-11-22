@@ -17,7 +17,7 @@ import (
 
 // #NTriplesExport — generates N-Triples from #InfraGraph.
 #NTriplesExport: {
-	Graph:   #InfraGraph
+	Graph:   _
 	BaseIRI: string | *"https://quicue.ca/resources/"
 
 	_res: Graph.Input
