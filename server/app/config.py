@@ -30,6 +30,9 @@ class Settings(BaseSettings):
 
     # Semantic data (JSON-LD / Hydra)
     hydra_path: Path = Path("/app/data/hydra.jsonld")
+    # One JSON-LD representation per resource (datacenter_hydra_resources),
+    # served at /api/v1/resources/{name} with its action links.
+    hydra_resources_path: Path = Path("/app/data/hydra-resources.json")
     graph_jsonld_path: Path = Path("/app/data/graph.jsonld")
 
     # Deployment state

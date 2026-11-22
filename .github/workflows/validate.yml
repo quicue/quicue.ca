@@ -225,8 +225,19 @@ jobs:
       - name: Run unit tests
         run: pytest server/tests/ -v
 
-      - name: Generate full spec for integration test
-        run: cue export ./examples/datacenter/ -e openapi_spec --out json > /tmp/quicue-openapi.json
+      - name: Generate full spec and Hydra documents for integration test
+        run: |
+          # one evaluation of the datacenter package for all three exports
+          cue export ./examples/datacenter/ --out json \
+            -e '{openapi: openapi_spec, hydra: datacenter_hydra, resources: datacenter_hydra_resources}' \
+            > /tmp/quicue-bundle.json
+          python3 -c "
+          import json
+          b = json.load(open('/tmp/quicue-bundle.json'))
+          json.dump(b['openapi'], open('/tmp/quicue-openapi.json', 'w'))
+          json.dump(b['hydra'], open('/tmp/quicue-hydra.jsonld', 'w'))
+          json.dump(b['resources'], open('/tmp/quicue-hydra-resources.json', 'w'))
+          "
 
       - name: Start server and smoke test all routes
         run: |
@@ -293,6 +304,28 @@ jobs:
 
           kill $SERVER_PID
           echo "All routes passed"
+
+      - name: Walk the Hydra API like a generic client
+        run: |
+          # No token: everything stays in mock mode. The walk uses only what
+          # the API says about itself: entry point, Link rel=apiDocumentation,
+          # collection, each resource, each action link and its operation.
+          QUICUE_SPEC_PATH=/tmp/quicue-openapi.json \
+          QUICUE_HYDRA_PATH=/tmp/quicue-hydra.jsonld \
+          QUICUE_HYDRA_RESOURCES_PATH=/tmp/quicue-hydra-resources.json \
+          QUICUE_DEPLOY_LOG_PATH=/tmp/deploy-walk.jsonl \
+          QUICUE_DEPLOY_LOCK_PATH=/tmp/deploy-walk.lock.json \
+            uvicorn app.main:app --host 127.0.0.1 --port 8001 --app-dir server &
+          WALK_PID=$!
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8001/api/v1/healthz > /dev/null 2>&1 && break
+            sleep 1
+          done
+          rc=0
+          python3 .github/hydra-walk.py http://127.0.0.1:8001/api/v1/ > /tmp/walk.txt || rc=$?
+          head -1 /tmp/walk.txt; tail -3 /tmp/walk.txt
+          kill $WALK_PID
+          exit $rc
 
   deploy-demo:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'

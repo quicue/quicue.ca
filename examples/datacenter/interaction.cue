@@ -53,12 +53,17 @@ readonly_session: ou.#InteractionCtx & {
 // Hydra Export
 // ============================================================================
 
-datacenter_hydra: (ou.#ApiDocumentation & {ctx: {
+_datacenter_hydra_api: ou.#ApiDocumentation & {ctx: {
 	view:            ops_session.view
 	role_name:       ops_session.summary.role_name
 	total_resources: ops_session.summary.total_resources
 	total_actions:   ops_session.summary.total_actions
-}}).doc
+}}
+
+datacenter_hydra: _datacenter_hydra_api.doc
+
+// One JSON-LD representation per resource, with its action links.
+datacenter_hydra_resources: _datacenter_hydra_api.representations
 
 datacenter_hydra_entrypoint: (ou.#HydraEntryPoint & {ctx: {
 	total_resources: ops_session.summary.total_resources

@@ -24,6 +24,7 @@ _bulk: {
 	ops_tasks:        execution.ops
 	graph_jsonld:     jsonld
 	hydra:            datacenter_hydra
+	hydra_resources:  datacenter_hydra_resources
 	hydra_entrypoint: datacenter_hydra_entrypoint
 	hydra_collection: datacenter_hydra_collection
 	skos_types:       datacenter_skos_types
