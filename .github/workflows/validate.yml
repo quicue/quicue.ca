@@ -78,6 +78,11 @@ jobs:
             cue vet "./$d/..." -c
           done
 
+      - name: Validate knowledge base (.kb)
+        run: |
+          make kb
+          (cd .kb/tasks && cue vet .)
+
       - name: No hardcoded absolute paths in markdown
         run: |
           FOUND=0
